@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov  1 18:24:22 2018
-
-@author: John
-"""
-from sympy import symbols
+import numpy as np
+from sympy import symbols, Matrix
 from sympy.physics.mechanics import *
 
 # Reference frames and Points
@@ -12,7 +7,7 @@ from sympy.physics.mechanics import *
 N = ReferenceFrame('N')  # Inertial Frame
 B = ReferenceFrame('B')  # Drone after X (roll) rotation (Final rotation)
 C = ReferenceFrame('C')  # Drone after Y (pitch) rotation
-D = ReferenceFrame('D')  # Drone after Z (yaw) rotation (First rotation)
+D = ReferenceFrame('D')  # Drone after Z (yaw) rotation
 
 No = Point('No')
 Bcm = Point('Bcm')  # Drone's center of mass
@@ -24,15 +19,15 @@ M4 = Point('M4')
 # Variables
 # ---------------------------
 # x, y and z are the drone's coordinates in the inertial frame, expressed with the inertial frame
-# u, v and w are the drone's speeds in the inertial frame, expressed with the body frame
+# xdot, ydot and zdot are the drone's speeds in the inertial frame, expressed with the inertial frame
 # phi, theta and phi represents the drone's attitude in the inertial frame, expressed with a ZYX Body rotation
 # p, q and r are the drone's angular velocities in the inertial frame, expressed with the body frame
 
-x, y, z, u, v, w = dynamicsymbols('x y z u v w')
-phi, theta, psi, p, q, r = dynamicsymbols('phi theta psi p q r')
+x, y, z, xdot, ydot, zdot = dynamicsymbols('x y z xdot ydot zdot')
+q0, q1, q2, q3, p, q, r = dynamicsymbols('q0 q1 q2 q3 p q r')
 
-xd, yd, zd, ud, vd, wd = dynamicsymbols('x y z u v w', 1)
-phid, thetad, psid, pd, qd, rd = dynamicsymbols('phi theta psi p q r', 1)
+xd, yd, zd, xdotd, ydotd, zdotd = dynamicsymbols('x y z xdot ydot zdot', 1)
+q0d, q1d, q2d, q3d, pd, qd, rd = dynamicsymbols('q0 q1 q2 q3 p q r', 1)
 
 # Constants
 # ---------------------------
@@ -41,9 +36,7 @@ ThrM1, ThrM2, ThrM3, ThrM4, TorM1, TorM2, TorM3, TorM4 = symbols('ThrM1 ThrM2 Th
 
 # Rotation ZYX Body
 # ---------------------------
-D.orient(N, 'Axis', [psi, N.z])
-C.orient(D, 'Axis', [theta, D.y])
-B.orient(C, 'Axis', [phi, C.x])
+B.orient(N, 'Quaternion', [q0, q1, q2, q3])
 
 # Origin
 # ---------------------------
@@ -52,7 +45,7 @@ No.set_vel(N, 0)
 # Translation
 # ---------------------------
 Bcm.set_pos(No, x*N.x + y*N.y + z*N.z)
-Bcm.set_vel(N, u*B.x + v*B.y + w*B.z) 
+Bcm.set_vel(N, Bcm.pos_from(No).dt(N)) 
 
 M1.set_pos(Bcm,  dxm*B.x + dym*B.y + dzm*B.z)
 M2.set_pos(Bcm,  dxm*B.x - dym*B.y + dzm*B.z)
@@ -86,13 +79,30 @@ TM3 = (B,  TorM3*B.z)
 TM4 = (B, -TorM4*B.z)
 ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4]
 
+Equat = Matrix([[-q1,  q0, -q3,  q2],
+                [-q2,  q3,  q0, -q1],
+                [-q3, -q2,  q1,  q0]])
+
+Gquat = Matrix([[-q1,  q0,  q3, -q2],
+                [-q2, -q3,  q0,  q1],
+                [-q3,  q2, -q1,  q0]])
+
+rotVel = Matrix([[p],[q],[r]])
+
+mprint(Gquat)
+mprint(rotVel)
+
+quat_dot = Gquat.T*rotVel/2
+mprint(quat_dot)
+
 # Kinematic Differential Equations
 # ---------------------------
-kd = [xd - dot(Bcm.vel(N), N.x), yd - dot(Bcm.vel(N), N.y), zd - dot(Bcm.vel(N), N.z), p - dot(B.ang_vel_in(N), B.x), q - dot(B.ang_vel_in(N), B.y), r - dot(B.ang_vel_in(N), B.z)]
+kd = [xdot - xd, ydot - yd, zdot - zd, q0d - quat_dot[0], q1d - quat_dot[1], q2d - quat_dot[2], q3d - quat_dot[3]]
+mprint(kd)
 
 # Kane's Method
 # ---------------------------
-KM = KanesMethod(N, q_ind=[x, y, z, phi, theta, psi], u_ind=[u, v, w, p, q, r], kd_eqs=kd)
+KM = KanesMethod(N, q_ind=[x, y, z, q0, q1, q2, q3], u_ind=[xdot, ydot, zdot, p, q, r], kd_eqs=kd)
 (fr, frstar) = KM.kanes_equations(BodyList, ForceList)
 
 # Equations of Motion
@@ -100,18 +110,26 @@ KM = KanesMethod(N, q_ind=[x, y, z, phi, theta, psi], u_ind=[u, v, w, p, q, r], 
 MM = KM.mass_matrix_full
 kdd = KM.kindiffdict()
 rhs = KM.forcing_full
+MM = MM.subs(kdd)
 rhs = rhs.subs(kdd)
 
+
 MM.simplify()
-rhs.simplify()
+MM = MM.subs(q0**2 + q1**2 + q2**2 + q3**2, 1)
 print('Mass Matrix')
 print('-----------')
 mprint(MM)
+
+rhs.simplify()
 print()
 print('Right Hand Side')
 print('---------------')
 mprint(rhs)
 print()
+
+
+rhs = rhs.subs(q0**2 + q1**2 + q2**2 + q3**2, 1)
+mprint(rhs)
 
 # So, MM*x = rhs, where x is the State Derivatives
 # Solve for x

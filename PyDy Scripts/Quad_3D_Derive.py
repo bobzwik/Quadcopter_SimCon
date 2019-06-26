@@ -84,6 +84,7 @@ ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4]
 # Kinematic Differential Equations
 # ---------------------------
 kd = [xdot - xd, ydot - yd, zdot - zd, p - dot(B.ang_vel_in(N), B.x), q - dot(B.ang_vel_in(N), B.y), r - dot(B.ang_vel_in(N), B.z)]
+mprint(kd)
 
 # Kane's Method
 # ---------------------------
@@ -109,12 +110,11 @@ mprint(rhs)
 print()
 
 # So, MM*x = rhs, where x is the State Derivatives
-# However, it is possible to calculate the Right Hand Side if MM was in fact
-# the identity matrix I, so I*x = rhsIfI, or even x = rhsIfI
-rhsIfI = MM.inv()*rhs
-print('Right Hand Side, if Identity Matrix')
+# Solve for x
+stateDot = MM.inv()*rhs
+print('State Derivatives')
 print('-----------------------------------')
-mprint(rhsIfI)
+mprint(stateDot)
 print()
 
 # POST-PROCESSING
