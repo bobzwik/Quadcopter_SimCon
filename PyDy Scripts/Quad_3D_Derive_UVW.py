@@ -4,7 +4,7 @@ Created on Thu Nov  1 18:24:22 2018
 
 @author: John
 """
-from sympy import *
+from sympy import symbols
 from sympy.physics.mechanics import *
 
 # Reference frames and Points
@@ -24,7 +24,7 @@ M4 = Point('M4')
 # Variables
 # ---------------------------
 # x, y and z are the drone's coordinates in the inertial frame, expressed with the inertial frame
-# u, v and w are the drone's speeds in the inertial frame, expressed with the inertial frame
+# u, v and w are the drone's speeds in the inertial frame, expressed with the body frame
 # phi, theta and phi represents the drone's attitude in the inertial frame, expressed with a ZYX Body rotation
 # p, q and r are the drone's angular velocities in the inertial frame, expressed with the body frame
 
