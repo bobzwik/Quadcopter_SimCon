@@ -156,7 +156,7 @@ print()
 # p, q, r are the drone's angular velocities in the inertial frame, expressed in the drone's frame.
 # These calculations are not relevant to the ODE, but might be used for control.
 quat_dot_2 = Matrix([[q0d],[q1d],[q2d],[q3d]])
-angVel_2 = 2*Gquat*quat_dot_2
+angVel_2 = 2.0*Gquat*quat_dot_2
 print('P, Q, R (Angular velocities in drone frame)')
 print('-------------------------------------------')
 mprint(angVel_2[0])
