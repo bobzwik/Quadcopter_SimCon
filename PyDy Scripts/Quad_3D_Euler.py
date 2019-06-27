@@ -1,3 +1,25 @@
+"""
+Using PyDy and Sympy, this script generates the equations for the state derivatives 
+of a quadcopter in a 3-dimensional space. The states in this particular script are:
+
+x, y, z           : Position of the drone's center of mass in the inertial frame, 
+                    expressed in the inertial frame
+xdot, ydot, zdot  : Velocity of the drone's center of mass in the inertial frame, 
+                    expressed in the inertial frame
+phi, theta, psi   : Orientation (roll, pitch, yaw angles) of the drone in the 
+                    inertial frame, following the order ZYX (yaw, pitch, roll)
+p, q, r           : Angular velocity of the drone in the inertial frame,
+                    expressed in the drone's frame
+
+Important note    : This script uses a flu body orientation (front-left-up) and 
+                    a ENU world orientation (East-North-Up).
+
+Other note        : In the resulting state derivatives, there are still simplifications
+                    that can be made that SymPy cannot simplify (factoring).
+
+author: John Bass
+email: 
+"""
 
 from sympy import symbols
 from sympy.physics.mechanics import *
@@ -7,7 +29,7 @@ from sympy.physics.mechanics import *
 N = ReferenceFrame('N')  # Inertial Frame
 B = ReferenceFrame('B')  # Drone after X (roll) rotation (Final rotation)
 C = ReferenceFrame('C')  # Drone after Y (pitch) rotation
-D = ReferenceFrame('D')  # Drone after Z (yaw) rotation
+D = ReferenceFrame('D')  # Drone after Z (yaw) rotation (First rotation)
 
 No = Point('No')
 Bcm = Point('Bcm')  # Drone's center of mass
@@ -19,13 +41,14 @@ M4 = Point('M4')
 # Variables
 # ---------------------------
 # x, y and z are the drone's coordinates in the inertial frame, expressed with the inertial frame
-# xdot, ydot and zdot are the drone's speeds in the inertial frame, expressed with the inertial frame
-# phi, theta and phi represents the drone's attitude in the inertial frame, expressed with a ZYX Body rotation
-# p, q and r are the drone's angular velocities in the inertial frame, expressed with the body frame
+# xdot, ydot and zdot are the drone's velocities in the inertial frame, expressed with the inertial frame
+# phi, theta and psi represents the drone's orientation in the inertial frame, expressed with a ZYX Body rotation
+# p, q and r are the drone's angular velocities in the inertial frame, expressed with the drone's frame
 
 x, y, z, xdot, ydot, zdot = dynamicsymbols('x y z xdot ydot zdot')
 phi, theta, psi, p, q, r = dynamicsymbols('phi theta psi p q r')
 
+# First derivatives of the variables
 xd, yd, zd, xdotd, ydotd, zdotd = dynamicsymbols('x y z xdot ydot zdot', 1)
 phid, thetad, psid, pd, qd, rd = dynamicsymbols('phi theta psi p q r', 1)
 
@@ -121,8 +144,8 @@ print()
 
 # Useful Numbers
 # ---------------------------
-# p, q, r are the drone's angular velocities in its own frame.
-# These calculations are not relevant to the ODE, but might be used for control
+# p, q, r are the drone's angular velocities in the inertial frame, expressed in the drone's frame.
+# These calculations are not relevant to the ODE, but might be used for control.
 print('P, Q, R (Angular velocities in drone frame)')
 print('-------------------------------------------')
 mprint(dot(B.ang_vel_in(N), B.x))
@@ -132,8 +155,8 @@ print()
 mprint(dot(B.ang_vel_in(N), B.z))
 print()
 
-# u, v, w are the drone's speed in its own frame.
-# These calculations are not relevant to the ODE, but might be used for control
+# u, v, w are the drone's velocities in the inertial frame, expressed in the drone's frame.
+# These calculations are not relevant to the ODE, but might be used for control.
 u = dot(Bcm.vel(N).subs(kdd), B.x)
 v = dot(Bcm.vel(N).subs(kdd), B.y)
 w = dot(Bcm.vel(N).subs(kdd), B.z)
@@ -146,8 +169,9 @@ print()
 mprint(w)
 print()
 
-# uFlat, vFlat, wFlat are the drone's speed in its frame, only after the YAW rotation. 
-# These calculations are not relevant to the ODE, but might be used for control
+# uFlat, vFlat, wFlat are the drone's velocities in the inertial frame, expressed in a frame
+# parallel to the ground, but with the drone's heading (so only after the YAW rotation). 
+# These calculations are not relevant to the ODE, but might be used for control.
 uFlat = dot(Bcm.vel(N).subs(kdd), D.x)
 vFlat = dot(Bcm.vel(N).subs(kdd), D.y)
 wFlat = dot(Bcm.vel(N).subs(kdd), D.z)
@@ -159,6 +183,3 @@ mprint(vFlat)
 print()
 mprint(wFlat)
 print()
-
-
-

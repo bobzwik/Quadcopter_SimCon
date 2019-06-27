@@ -1,9 +1,26 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Nov  1 18:24:22 2018
+Using PyDy and Sympy, this script generates the equations for the state derivatives 
+of a quadcopter in a 3-dimensional space. The states in this particular script are:
 
-@author: John
+x, y, z           : Position of the drone's center of mass in the inertial frame, 
+                    expressed in the inertial frame
+u, v, w           : Velocity of the drone's center of mass in the inertial frame, 
+                    expressed in the drone's frame
+phi, theta, psi   : Orientation (roll, pitch, yaw angles) of the drone in the 
+                    inertial frame, following the order ZYX (yaw, pitch, roll)
+p, q, r           : Angular velocity of the drone in the inertial frame,
+                    expressed in the drone's frame
+
+Important note    : This script uses a flu body orientation (front-left-up) and 
+                    a ENU world orientation (East-North-Up)
+
+Other note        : In the resulting state derivatives, there are still simplifications
+                    that can be made that SymPy cannot simplify (factoring).
+
+author: John Bass
+email: 
 """
+
 from sympy import symbols
 from sympy.physics.mechanics import *
 
@@ -24,13 +41,14 @@ M4 = Point('M4')
 # Variables
 # ---------------------------
 # x, y and z are the drone's coordinates in the inertial frame, expressed with the inertial frame
-# u, v and w are the drone's speeds in the inertial frame, expressed with the body frame
-# phi, theta and phi represents the drone's attitude in the inertial frame, expressed with a ZYX Body rotation
-# p, q and r are the drone's angular velocities in the inertial frame, expressed with the body frame
+# u, v and w are the drone's velocities in the inertial frame, expressed with the drone's frame
+# phi, theta and psi represents the drone's orientation in the inertial frame, expressed with a ZYX Body rotation
+# p, q and r are the drone's angular velocities in the inertial frame, expressed with the drone's frame
 
 x, y, z, u, v, w = dynamicsymbols('x y z u v w')
 phi, theta, psi, p, q, r = dynamicsymbols('phi theta psi p q r')
 
+# First derivatives of the variables
 xd, yd, zd, ud, vd, wd = dynamicsymbols('x y z u v w', 1)
 phid, thetad, psid, pd, qd, rd = dynamicsymbols('phi theta psi p q r', 1)
 
@@ -126,8 +144,8 @@ print()
 
 # Useful Numbers
 # ---------------------------
-# p, q, r are the drone's angular velocities in its own frame.
-# These calculations are not relevant to the ODE, but might be used for control
+# p, q, r are the drone's angular velocities in the inertial frame, expressed in the drone's frame.
+# These calculations are not relevant to the ODE, but might be used for control.
 print('P, Q, R (Angular velocities in drone frame)')
 print('-------------------------------------------')
 mprint(dot(B.ang_vel_in(N), B.x))
@@ -137,22 +155,23 @@ print()
 mprint(dot(B.ang_vel_in(N), B.z))
 print()
 
-# u, v, w are the drone's speed in its own frame.
+# xdot, ydot, zdot are the drone's velocities in the inertial frame, expressed in the inertial frame.
 # These calculations are not relevant to the ODE, but might be used for control
-u = dot(Bcm.vel(N).subs(kdd), B.x)
-v = dot(Bcm.vel(N).subs(kdd), B.y)
-w = dot(Bcm.vel(N).subs(kdd), B.z)
-print('u, v, w (Velocities in drone frame)')
+xdot = dot(Bcm.vel(N).subs(kdd), N.x)
+ydot = dot(Bcm.vel(N).subs(kdd), N.y)
+zdot = dot(Bcm.vel(N).subs(kdd), N.z)
+print('xdot, ydot, zdot (Velocities in inertial frame)')
 print('-----------------------------------')
-mprint(u)
+mprint(xdot)
 print()
-mprint(v)
+mprint(ydot)
 print()
-mprint(w)
+mprint(zdot)
 print()
 
-# uFlat, vFlat, wFlat are the drone's speed in its frame, only after the YAW rotation. 
-# These calculations are not relevant to the ODE, but might be used for control
+# uFlat, vFlat, wFlat are the drone's velocities in the inertial frame, expressed in a frame
+# parallel to the ground, but with the drone's heading (so only after the YAW rotation). 
+# These calculations are not relevant to the ODE, but might be used for control.
 uFlat = dot(Bcm.vel(N).subs(kdd), D.x)
 vFlat = dot(Bcm.vel(N).subs(kdd), D.y)
 wFlat = dot(Bcm.vel(N).subs(kdd), D.z)
@@ -164,6 +183,3 @@ mprint(vFlat)
 print()
 mprint(wFlat)
 print()
-
-
-

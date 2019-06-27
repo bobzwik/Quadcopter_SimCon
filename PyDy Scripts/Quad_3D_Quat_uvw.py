@@ -4,8 +4,8 @@ of a quadcopter in a 3-dimensional space. The states in this particular script a
 
 x, y, z           : Position of the drone's center of mass in the inertial frame, 
                     expressed in the inertial frame
-xdot, ydot, zdot  : Velocity of the drone's center of mass in the inertial frame, 
-                    expressed in the inertial frame
+u, v, w           : Velocity of the drone's center of mass in the inertial frame, 
+                    expressed in the drone's frame
 q0, q1, q2, q3    : Orientation of the drone in the inertial frame using quaternions
 p, q, r           : Angular velocity of the drone in the inertial frame,
                     expressed in the drone's frame
@@ -20,7 +20,7 @@ author: John Bass
 email: 
 """
 
-from sympy import symbols, Matrix, factor
+from sympy import symbols, Matrix
 from sympy.physics.mechanics import *
 
 # Reference frames and Points
@@ -38,15 +38,15 @@ M4 = Point('M4')
 # Variables
 # ---------------------------
 # x, y and z are the drone's coordinates in the inertial frame, expressed with the inertial frame
-# xdot, ydot and zdot are the drone's speeds in the inertial frame, expressed with the inertial frame
+# u, v and w are the drone's velocities in the inertial frame, expressed with the drone's frame
 # q0, q1, q2, q3 represents the drone's orientation in the inertial frame, using quaternions
 # p, q and r are the drone's angular velocities in the inertial frame, expressed with the drone's frame
 
-x, y, z, xdot, ydot, zdot = dynamicsymbols('x y z xdot ydot zdot')
+x, y, z, u, v, w = dynamicsymbols('x y z u v w')
 q0, q1, q2, q3, p, q, r = dynamicsymbols('q0 q1 q2 q3 p q r')
 
 # First derivatives of the variables
-xd, yd, zd, xdotd, ydotd, zdotd = dynamicsymbols('x y z xdot ydot zdot', 1)
+xd, yd, zd, ud, vd, wd = dynamicsymbols('x y z u v w', 1)
 q0d, q1d, q2d, q3d, pd, qd, rd = dynamicsymbols('q0 q1 q2 q3 p q r', 1)
 
 # Constants
@@ -66,7 +66,7 @@ No.set_vel(N, 0)
 # Translation
 # ---------------------------
 Bcm.set_pos(No, x*N.x + y*N.y + z*N.z)
-Bcm.set_vel(N, Bcm.pos_from(No).dt(N)) 
+Bcm.set_vel(N, u*B.x + v*B.y + w*B.z) 
 
 M1.set_pos(Bcm,  dxm*B.x + dym*B.y + dzm*B.z)
 M2.set_pos(Bcm,  dxm*B.x - dym*B.y + dzm*B.z)
@@ -111,11 +111,11 @@ quat_dot = 1.0/2*Gquat.T*angVel
 
 # Kinematic Differential Equations
 # ---------------------------
-kd = [xdot - xd, ydot - yd, zdot - zd, q0d - quat_dot[0], q1d - quat_dot[1], q2d - quat_dot[2], q3d - quat_dot[3]]
+kd = [xd - dot(Bcm.vel(N), N.x), yd - dot(Bcm.vel(N), N.y), zd - dot(Bcm.vel(N), N.z), q0d - quat_dot[0], q1d - quat_dot[1], q2d - quat_dot[2], q3d - quat_dot[3]]
 
 # Kane's Method
 # ---------------------------
-KM = KanesMethod(N, q_ind=[x, y, z, q0, q1, q2, q3], u_ind=[xdot, ydot, zdot, p, q, r], kd_eqs=kd)
+KM = KanesMethod(N, q_ind=[x, y, z, q0, q1, q2, q3], u_ind=[u, v, w, p, q, r], kd_eqs=kd)
 (fr, frstar) = KM.kanes_equations(BodyList, ForceList)
 
 # Equations of Motion
@@ -166,26 +166,26 @@ print()
 mprint(angVel_2[2])
 print()
 
-# u, v, w are the drone's velocities in the inertial frame, expressed in the drone's frame.
-# These calculations are not relevant to the ODE, but might be used for control.
-u = dot(Bcm.vel(N).subs(kdd), B.x)
-v = dot(Bcm.vel(N).subs(kdd), B.y)
-w = dot(Bcm.vel(N).subs(kdd), B.z)
-print('u, v, w (Velocities in drone frame)')
+# xdot, ydot, zdot are the drone's velocities in the inertial frame, expressed in the inertial frame.
+# These calculations are not relevant to the ODE, but might be used for control
+xdot = dot(Bcm.vel(N).subs(kdd), N.x)
+ydot = dot(Bcm.vel(N).subs(kdd), N.y)
+zdot = dot(Bcm.vel(N).subs(kdd), N.z)
+print('xdot, ydot, zdot (Velocities in inertial frame)')
 print('-----------------------------------')
-mprint(u)
+mprint(xdot)
 print()
-mprint(v)
+mprint(ydot)
 print()
-mprint(w)
+mprint(zdot)
 print()
 
 # uFlat, vFlat, wFlat are the drone's velocities in the inertial frame, expressed in a frame
 # parallel to the ground, but with the drone's heading.
 # These calculations are not relevant to the ODE, but might be used for control.
-uFlat = dot(Bcm.vel(N).subs(kdd),  cross(B.y, N.z))
-vFlat = dot(Bcm.vel(N).subs(kdd), -cross(B.x, N.z))
-wFlat = dot(Bcm.vel(N).subs(kdd), N.z)
+uFlat = dot(Bcm.vel(N).subs(kdd),  cross(B.y, N.z)).simplify()
+vFlat = dot(Bcm.vel(N).subs(kdd), -cross(B.x, N.z)).simplify()
+wFlat = dot(Bcm.vel(N).subs(kdd), N.z).simplify()
 print('uFlat, vFlat, wFlat (Velocities in drone frame (after Yaw))')
 print('-----------------------------------------------------------')
 mprint(uFlat)
