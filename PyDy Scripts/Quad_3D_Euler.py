@@ -84,7 +84,6 @@ ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4]
 # Kinematic Differential Equations
 # ---------------------------
 kd = [xdot - xd, ydot - yd, zdot - zd, p - dot(B.ang_vel_in(N), B.x), q - dot(B.ang_vel_in(N), B.y), r - dot(B.ang_vel_in(N), B.z)]
-mprint(kd)
 
 # Kane's Method
 # ---------------------------

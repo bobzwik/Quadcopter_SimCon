@@ -1,4 +1,3 @@
-import numpy as np
 from sympy import symbols, Matrix
 from sympy.physics.mechanics import *
 
@@ -20,7 +19,7 @@ M4 = Point('M4')
 # ---------------------------
 # x, y and z are the drone's coordinates in the inertial frame, expressed with the inertial frame
 # xdot, ydot and zdot are the drone's speeds in the inertial frame, expressed with the inertial frame
-# phi, theta and phi represents the drone's attitude in the inertial frame, expressed with a ZYX Body rotation
+# q0, q1, q2, q3 represents the drone's rotation in the inertial frame, using quaternions
 # p, q and r are the drone's angular velocities in the inertial frame, expressed with the body frame
 
 x, y, z, xdot, ydot, zdot = dynamicsymbols('x y z xdot ydot zdot')
@@ -34,9 +33,10 @@ q0d, q1d, q2d, q3d, pd, qd, rd = dynamicsymbols('q0 q1 q2 q3 p q r', 1)
 mB, g, dxm, dym, dzm, IBxx, IByy, IBzz = symbols('mB g dxm dym dzm IBxx IByy IBzz')
 ThrM1, ThrM2, ThrM3, ThrM4, TorM1, TorM2, TorM3, TorM4 = symbols('ThrM1 ThrM2 ThrM3 ThrM4 TorM1 TorM2 TorM3 TorM4')
 
-# Rotation ZYX Body
+# Rotation
 # ---------------------------
 B.orient(N, 'Quaternion', [q0, q1, q2, q3])
+B.set_ang_vel(N, p*B.x + q*B.y + r*B.z)
 
 # Origin
 # ---------------------------
@@ -79,26 +79,18 @@ TM3 = (B,  TorM3*B.z)
 TM4 = (B, -TorM4*B.z)
 ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4]
 
-Equat = Matrix([[-q1,  q0, -q3,  q2],
-                [-q2,  q3,  q0, -q1],
-                [-q3, -q2,  q1,  q0]])
-
+# Calculate Quaternion Derivative
+# ---------------------------
 Gquat = Matrix([[-q1,  q0,  q3, -q2],
                 [-q2, -q3,  q0,  q1],
                 [-q3,  q2, -q1,  q0]])
 
-rotVel = Matrix([[p],[q],[r]])
-
-mprint(Gquat)
-mprint(rotVel)
-
-quat_dot = Gquat.T*rotVel/2
-mprint(quat_dot)
+angVel = Matrix([[dot(B.ang_vel_in(N), B.x)],[dot(B.ang_vel_in(N), B.y)],[dot(B.ang_vel_in(N), B.z)]]) # Basically the same as: angVel = Matrix([[p],[q],[r]])
+quat_dot = 1.0/2*Gquat.T*angVel
 
 # Kinematic Differential Equations
 # ---------------------------
 kd = [xdot - xd, ydot - yd, zdot - zd, q0d - quat_dot[0], q1d - quat_dot[1], q2d - quat_dot[2], q3d - quat_dot[3]]
-mprint(kd)
 
 # Kane's Method
 # ---------------------------
@@ -116,20 +108,17 @@ rhs = rhs.subs(kdd)
 
 MM.simplify()
 MM = MM.subs(q0**2 + q1**2 + q2**2 + q3**2, 1)
+print()
 print('Mass Matrix')
 print('-----------')
 mprint(MM)
 
 rhs.simplify()
-print()
+rhs = rhs.subs(q0**2 + q1**2 + q2**2 + q3**2, 1)
 print('Right Hand Side')
 print('---------------')
 mprint(rhs)
 print()
-
-
-rhs = rhs.subs(q0**2 + q1**2 + q2**2 + q3**2, 1)
-mprint(rhs)
 
 # So, MM*x = rhs, where x is the State Derivatives
 # Solve for x
@@ -146,13 +135,15 @@ print()
 # ---------------------------
 # p, q, r are the drone's angular velocities in its own frame.
 # These calculations are not relevant to the ODE, but might be used for control
+quat_dot_2 = Matrix([[q0d],[q1d],[q2d],[q3d]])
+angVel_2 = 2*Gquat*quat_dot_2
 print('P, Q, R (Angular velocities in drone frame)')
 print('-------------------------------------------')
-mprint(dot(B.ang_vel_in(N), B.x))
+mprint(angVel_2[0])
 print()
-mprint(dot(B.ang_vel_in(N), B.y))
+mprint(angVel_2[1])
 print()
-mprint(dot(B.ang_vel_in(N), B.z))
+mprint(angVel_2[2])
 print()
 
 # u, v, w are the drone's speed in its own frame.
