@@ -20,7 +20,7 @@ author: John Bass
 email: 
 """
 
-from sympy import symbols, Matrix, factor
+from sympy import symbols, Matrix
 from sympy.physics.mechanics import *
 
 # Reference frames and Points
