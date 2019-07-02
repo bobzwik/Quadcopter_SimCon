@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from numpy import (sin, cos, tan)
+from numpy import sin, cos, tan
 from scipy.linalg import solve
-from .initQuad import (sys_params, init_cmd, init_state)
+from scipy.integrate import odeint
+from quadFiles.initQuad import sys_params, init_cmd, init_state
 import utils
 
 class Quadcopter:
@@ -28,7 +29,7 @@ class Quadcopter:
 
     # def extended_state(self)
 
-    def state_dot(self, t, cmd):
+    def state_dot(self, state, t, cmd):
 
         # Import Params
         # ---------------------------    
@@ -52,36 +53,36 @@ class Quadcopter:
     
         # Import State Vector
         # ---------------------------  
-        x          = self.state[0]
-        y          = self.state[1]
-        z          = self.state[2]
-        phi        = self.state[3]
-        theta      = self.state[4]
-        psi        = self.state[5]
-        xdot       = self.state[6]
-        ydot       = self.state[7]
-        zdot       = self.state[8]
-        p          = self.state[9]
-        q          = self.state[10]
-        r          = self.state[11]
-        wMotor1    = self.state[12]
-        wdotMotor1 = self.state[13]
-        wMotor2    = self.state[14]
-        wdotMotor2 = self.state[15]
-        wMotor3    = self.state[16]
-        wdotMotor3 = self.state[17]
-        wMotor4    = self.state[18]
-        wdotMotor4 = self.state[19]
+        x          = state[0]
+        y          = state[1]
+        z          = state[2]
+        phi        = state[3]
+        theta      = state[4]
+        psi        = state[5]
+        xdot       = state[6]
+        ydot       = state[7]
+        zdot       = state[8]
+        p          = state[9]
+        q          = state[10]
+        r          = state[11]
+        wMotor1    = state[12]
+        wdotMotor1 = state[13]
+        wMotor2    = state[14]
+        wdotMotor2 = state[15]
+        wMotor3    = state[16]
+        wdotMotor3 = state[17]
+        wMotor4    = state[18]
+        wdotMotor4 = state[19]
 
         # Motor Dynamics and Rotor forces (Second Order System: https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)
         # ---------------------------
         uMotor = cmd*c1 + c0    # Motor speed in relation to cmd
         uMotor[cmd < db] = 0    # Apply motor deadband
 
-        wddotMotor1 = (-2*damp*tau*wdotMotor1 - wMotor1 + Kp*uMotor[0])/(tau**2)
-        wddotMotor2 = (-2*damp*tau*wdotMotor2 - wMotor2 + Kp*uMotor[1])/(tau**2)
-        wddotMotor3 = (-2*damp*tau*wdotMotor3 - wMotor3 + Kp*uMotor[2])/(tau**2)
-        wddotMotor4 = (-2*damp*tau*wdotMotor4 - wMotor4 + Kp*uMotor[3])/(tau**2)
+        wddotMotor1 = (-2.0*damp*tau*wdotMotor1 - wMotor1 + Kp*uMotor[0])/(tau**2)
+        wddotMotor2 = (-2.0*damp*tau*wdotMotor2 - wMotor2 + Kp*uMotor[1])/(tau**2)
+        wddotMotor3 = (-2.0*damp*tau*wdotMotor3 - wMotor3 + Kp*uMotor[2])/(tau**2)
+        wddotMotor4 = (-2.0*damp*tau*wdotMotor4 - wMotor4 + Kp*uMotor[3])/(tau**2)
     
         wMotor = np.array([wMotor1, wMotor2, wMotor3, wMotor4])
         thrust = kTh*wMotor*wMotor
@@ -138,3 +139,6 @@ class Quadcopter:
         sdot[19] = wddotMotor4
 
         return sdot
+
+    def update(self, t, Ts, cmd):
+        self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd,))[1]

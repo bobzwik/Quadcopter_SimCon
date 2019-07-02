@@ -34,8 +34,8 @@ def sys_params():
     params["motorc0"] = motorc0
     params["motordeadband"] = motordeadband
     params["tau"] = 0.015
-    params["Kp"] = 1
-    params["damp"] = 1
+    params["Kp"] = 1.0
+    params["damp"] = 1.0
     params["maxCmd"] = 100
     params["minCmd"] = 1
     

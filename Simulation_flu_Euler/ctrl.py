@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from numpy import pi
+from numpy import sin, cos, tan
 # import angleFunctions as af
-from numpy import (sin, cos, tan)
 # from mixer import mixer
 import utils
 
-Px = 1
-Pu = 2
+rad2deg = 180.0/pi
+deg2rad = pi/180.0
+
+Px = 1.0
+Pu = 2.0
 Du = 0.01
 
-Py = 1
-Pv = 2
+Py = 1.0
+Pv = 2.0
 Dv = 0.01
 
-Pz = 10
-Pw = 6
+Pz = 10.0
+Pw = 6.0
 Dw = 0.4
 
 phiMax = 0.6
@@ -23,17 +27,21 @@ phiMin = -phiMax
 thetaMax = 0.6
 thetaMin = -thetaMax
 
-Pphi = 8
-Pp = 4
+Pphi = 8.0
+Pp = 4.0
 Dp = 0.1
 
 Ptheta = Pphi
 Pq = Pp
 Dq = Dp 
 
-Ppsi = 6
-Pr = 8
+Ppsi = 6.0
+Pr = 8.0
 Dr = 0.2
+
+pmax = 200*deg2rad
+qmax = 200*deg2rad
+rmax = 200*deg2rad
 
 
 class Control:
@@ -123,7 +131,8 @@ class Control:
         # phidotDes, thetadotDes, psidotDes conversion to pDes, qDes, rDes
         # ---------------------------
         pqrDes = utils.phiThetaPsiDotToPQR(phi, theta, psi, phidotDes, thetadotDes, psidotDes)
-        
+        pqrDes = np.clip(pqrDes.T, np.array([-pmax, -qmax, -rmax]), np.array([pmax, qmax, rmax])).T
+
         pDes = pqrDes[0]
         pError = pDes-p
         pCmd = Pp*pError + Pp*Dp*(pError-pPrevE)/Ts

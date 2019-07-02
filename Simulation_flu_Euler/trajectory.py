@@ -10,6 +10,8 @@ def desiredState(t, trajType, trajSelect):
             sDes = testZControl(t)
         elif trajSelect == 3:
             sDes = TestYawControl(t)
+        elif trajSelect == 4:
+            sDes = TestRollThenPitchControl(t)
 
     return sDes
         
@@ -24,6 +26,7 @@ def hover(t):
     sDes = makesDes(desPos, desVel, desEul, desPQR)
     
     return sDes  
+
 
 def testZControl(t):
     desPos = np.array([0, 0, 0])

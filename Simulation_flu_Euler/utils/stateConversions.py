@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from numpy import (sin, cos, tan)
+from numpy import sin, cos, tan
 
 def phiThetaPsiDotToPQR(phi, theta, psi, phidot, thetadot, psidot):
     
