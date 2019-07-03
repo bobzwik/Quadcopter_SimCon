@@ -35,10 +35,10 @@ def main():
     quad = Quadcopter()
     ctrl = Control(quad)
 
-    t_result = Ti
-    s_result = quad.state.T
-    sDesVector = np.zeros([1, 12])
-    cmdVect = ctrl.cmd.T
+    t_all = Ti
+    s_all = quad.state.T
+    sDes_all = np.zeros([1, 12])
+    cmd_all = ctrl.cmd.T
     
 
     # Run Simulation
@@ -46,29 +46,30 @@ def main():
     t = Ti
     i = 0
     while round(t,3) < Tf:
+        
         # Quadcopter Control
         # ---------------------------
         quad_control(quad, ctrl, t, Ts, trajType, trajSelect)
-        cmdVect = np.vstack((cmdVect, ctrl.cmd.T))
-        sDesVector = np.vstack((sDesVector,ctrl.sDesCalc.T))
-        
+                
         # Dynamics
         # ---------------------------
         quad.update(t, Ts, ctrl.cmd)
         t += Ts
 
         print("{:.3f}".format(t))
-        s_result = np.vstack((s_result, quad.state.T))
-        t_result = np.vstack((t_result, t))
+        t_all    = np.vstack((t_all, t))
+        s_all    = np.vstack((s_all, quad.state.T))
+        sDes_all = np.vstack((sDes_all, ctrl.sDesCalc.T))
+        cmd_all  = np.vstack((cmd_all, ctrl.cmd.T))
         i += 1
     
-    # utils.fullprint(s_result)
-    # utils.fullprint(sDesVector)
-    # utils.fullprint(cmdVect)
+    # utils.fullprint(s_all)
+    # utils.fullprint(sDes_all)
+    # utils.fullprint(cmd_all)
 
     # View Results
     # ---------------------------
-    utils.makeFigures(quad.params, t_result, s_result, sDesVector, cmdVect)
+    utils.makeFigures(quad.params, t_all, s_all, sDes_all, cmd_all)
 
 if __name__ == "__main__":
     main()
@@ -76,4 +77,4 @@ if __name__ == "__main__":
 
 
 
-# ani = sameAxisAnimation(s_result, Ts, params)
+# ani = sameAxisAnimation(s_all, Ts, params)
