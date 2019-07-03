@@ -111,8 +111,8 @@ class Control:
         # Z Position Control
         # --------------------------- 
         zError = self.zDes-qd.z
-        zdotDes = Pz*zError
-        zdotError = zdotDes-qd.zdot
+        self.zdotDes = Pz*zError
+        zdotError = self.zdotDes-qd.zdot
         self.zCmd = Pw*zdotError + Pw*Dw*(zdotError-self.zdotPrevE)/Ts + qd.params["FF"]/(cos(qd.phi)*cos(qd.theta))
         
         self.zPrevE = zError
