@@ -14,7 +14,6 @@ def desiredState(t, trajType, trajSelect):
             sDes = TestRollThenPitchControl(t)
 
     return sDes
-        
 
 
 def hover(t):

@@ -24,6 +24,18 @@ class Quadcopter:
         # Initial State
         # ---------------------------
         self.state = init_state(self.params)
+        self.x     = self.state[0]
+        self.y     = self.state[1]
+        self.z     = self.state[2]
+        self.phi   = self.state[3]
+        self.theta = self.state[4]
+        self.psi   = self.state[5]
+        self.xdot  = self.state[6]
+        self.ydot  = self.state[7]
+        self.zdot  = self.state[8]
+        self.p     = self.state[9]
+        self.q     = self.state[10]
+        self.r     = self.state[11]
 
     # def point_position(self):
 
@@ -142,3 +154,15 @@ class Quadcopter:
 
     def update(self, t, Ts, cmd):
         self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd,))[1]
+        self.x     = self.state[0]
+        self.y     = self.state[1]
+        self.z     = self.state[2]
+        self.phi   = self.state[3]
+        self.theta = self.state[4]
+        self.psi   = self.state[5]
+        self.xdot  = self.state[6]
+        self.ydot  = self.state[7]
+        self.zdot  = self.state[8]
+        self.p     = self.state[9]
+        self.q     = self.state[10]
+        self.r     = self.state[11]
