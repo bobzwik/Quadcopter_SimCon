@@ -28,7 +28,9 @@ def main():
     Tf = 6
     maxIter = Tf/Ts
     trajType = "altitude"
-    trajSelect = 4
+    # trajType = "velocity"
+    trajType = "grid_velocity"
+    trajSelect = 1
 
     # Initialize Quadcopter, Controller, Results Matrix
     # ---------------------------
@@ -37,7 +39,7 @@ def main():
 
     t_all = Ti
     s_all = quad.state.T
-    sDes_all = np.zeros([1, 12])
+    sDes_all = np.zeros([1, 15])
     cmd_all = ctrl.cmd.T
     
 
