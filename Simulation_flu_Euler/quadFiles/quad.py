@@ -37,9 +37,16 @@ class Quadcopter:
         self.q     = self.state[10]
         self.r     = self.state[11]
 
+        self.extended_state()
+
     # def point_position(self):
 
-    # def extended_state(self)
+    def extended_state(self):
+        velFlat = utils.xyzDotToUVW_Flat(self.phi, self.theta, self.psi, self.xdot, self.ydot, self.zdot)
+        self.uFlat = velFlat[0]
+        self.vFlat = velFlat[1]
+        self.wFlat = velFlat[2]
+
 
     def state_dot(self, state, t, cmd):
 
@@ -166,3 +173,5 @@ class Quadcopter:
         self.p     = self.state[9]
         self.q     = self.state[10]
         self.r     = self.state[11]
+
+        self.extended_state()

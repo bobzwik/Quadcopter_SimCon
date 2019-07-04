@@ -24,7 +24,7 @@ def xyzDotToUVW(phi, theta, psi, xdot, ydot, zdot):
     return np.array([u, v, w])
 
 
-def xyzDotToUVWflat(phi, theta, psi, xdot, ydot, zdot):
+def xyzDotToUVW_Flat(phi, theta, psi, xdot, ydot, zdot):
     uFlat = xdot * cos(psi) + ydot * sin(psi)
 
     vFlat = -xdot * sin(psi) + ydot * cos(psi)
