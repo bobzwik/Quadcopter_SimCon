@@ -15,11 +15,13 @@ class Quadcopter:
         # ---------------------------
         self.params = sys_params()
         
-        # Command for stable hover
+        # Command for initial stable hover
         # ---------------------------
-        hover_cmd = init_cmd(self.params)
-        self.params["FF"] = hover_cmd[0]         # Feed-Forward Command for Hover
-        self.params["w_hover"] = hover_cmd[1]    # Motor Speed for Hover
+        ini_hover = init_cmd(self.params)
+        self.params["FF"] = ini_hover[0]         # Feed-Forward Command for Hover
+        self.params["w_hover"] = ini_hover[1]    # Motor Speed for Hover
+        self.thr = np.ones([4,1])*ini_hover[2]
+        self.tor = np.ones([4,1])*ini_hover[3]
 
         # Initial State
         # ---------------------------
@@ -107,6 +109,15 @@ class Quadcopter:
         thrust = kTh*wMotor*wMotor
         torque = kTo*wMotor*wMotor
     
+        self.thr[0] = ThrM1 = thrust[0]
+        self.thr[1] = ThrM2 = thrust[1]
+        self.thr[2] = ThrM3 = thrust[2]
+        self.thr[3] = ThrM4 = thrust[3]
+        self.tor[0] = TorM1 = torque[0]
+        self.tor[1] = TorM2 = torque[1]
+        self.tor[2] = TorM3 = torque[2]
+        self.tor[3] = TorM4 = torque[3]
+
         ThrM1 = thrust[0]
         ThrM2 = thrust[1]
         ThrM3 = thrust[2]

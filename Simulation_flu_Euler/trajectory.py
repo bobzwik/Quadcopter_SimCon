@@ -23,6 +23,10 @@ def desiredState(t, trajType, trajSelect):
     if trajType == "grid_velocity":
         if   trajSelect == 1:
             sDes = testGridVelocityControl(t)   
+    
+    if trajType == "position":
+        if   trajSelect == 1:
+            sDes = testXYZposition(t)
 
     return sDes
 
@@ -129,24 +133,24 @@ def testGridVelocityControl(t):
     if t >= 1 and t < 3:
         desVelGrid = np.array([0, 0, 0])
     elif t >= 3:
-        desVelGrid = np.array([1, 0, 0])
+        desVelGrid = np.array([4, 0, 0])
      
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
     return sDes
 
 
-def XYZposition(t):
+def testXYZposition(t):
     desPos     = np.array([0, 0, 0])
     desVelGrid = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
+    desEul     = np.array([0, 0, pi/6])
     desPQR     = np.array([0, 0, 0])
     
     if t >= 1 and t < 3:
-        desPos = np.array([2, 2, 2])
+        desPos = np.array([2, 0, 0])
     elif t >= 3:
-        desPos = np.array([2, 3, 2])
+        desPos = np.array([-2, 2, 1])
     
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
