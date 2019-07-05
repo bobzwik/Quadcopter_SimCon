@@ -77,13 +77,13 @@ def TestRollThenPitchControl(t):
     desPos     = np.array([0, 0, 0])
     desVelGrid = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
+    desEul     = np.array([0, 0, pi/4])
     desPQR     = np.array([0, 0, 0])
     
     if t >= 1 and t < 3:
-        desEul = np.array([-0.3, 0, 0])
+        desEul = np.array([0, 0, pi/4])
     elif t >= 3:
-        desEul = np.array([0.3, -0.3, 0])
+        desEul = np.array([0.3, 0.3, pi/4])
      
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
@@ -127,13 +127,13 @@ def testGridVelocityControl(t):
     desPos     = np.array([0, 0, 0])
     desVelGrid = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, pi/6])
+    desEul     = np.array([0, 0, pi/4])
     desPQR     = np.array([0, 0, 0])
 
     if t >= 1 and t < 3:
         desVelGrid = np.array([0, 0, 0])
     elif t >= 3:
-        desVelGrid = np.array([4, 0, 0])
+        desVelGrid = np.array([0, 3, 0])
      
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
