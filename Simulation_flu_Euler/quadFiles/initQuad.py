@@ -2,7 +2,7 @@
 
 import numpy as np
 from numpy.linalg import inv
-# from mixer import (expoCmdInv)
+import utils
 
 def sys_params():
     mB = 1.2 # mass (kg)
@@ -36,17 +36,14 @@ def sys_params():
     params["tau"] = 0.015
     params["Kp"] = 1.0
     params["damp"] = 1.0
-    params["maxCmd"] = 100
-    params["minCmd"] = 1
+    params["ifexpo"] = bool(False)
     
-    # params["ifexpo"] = bool(True)
-    
-    # if params["ifexpo"]:
-    #     params["maxCmd"] = 100
-    #     params["minCmd"] = 0.01
-    # else:
-    #     params["maxCmd"] = 100
-    #     params["minCmd"] = 1
+    if params["ifexpo"]:
+        params["maxCmd"] = 100
+        params["minCmd"] = 0.01
+    else:
+        params["maxCmd"] = 100
+        params["minCmd"] = 1
     
     return params
 
@@ -54,15 +51,17 @@ def init_cmd(params):
     mB = params["mB"]
     g = params["g"]
     kTh = params["kTh"]
+    kTo = params["kTo"]
     c1 = params["motorc1"]
     c0 = params["motorc0"]
     
-    # w = cmd*c1 + c0   and   m*g = 4*kTh*w^2
-    w_des = np.sqrt(mB*g/(4*kTh))
-    cmd = (w_des-c0)/c1
-    # cmd = expoCmdInv(params, cmd)
-    
-    return [cmd, w_des]
+    # w = cmd*c1 + c0   and   m*g/4 = kTh*w^2   and   torque = kTo*w^2
+    thr_hover = mB*g/4.0
+    w_hover   = np.sqrt(thr_hover/kTh)
+    tor_hover = kTo*w_hover*w_hover
+    cmd_hover = (w_hover-c0)/c1
+    cmd_hover = utils.expoCmdInv(params, cmd_hover)
+    return [cmd_hover, w_hover, thr_hover, tor_hover]
 
 def init_state(params):
     

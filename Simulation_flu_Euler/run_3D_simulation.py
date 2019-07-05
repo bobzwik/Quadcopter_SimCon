@@ -9,6 +9,8 @@ import utils
 # import angleFunctions as af 
 # from SimulationAnimation import sameAxisAnimation
 
+trajOptions = ["position", "grid_velocity", "velocity", "altitude"]
+
 def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     
     # Trajectory for Desired States
@@ -25,11 +27,8 @@ def main():
     # --------------------------- 
     Ti = 0
     Ts = 0.005
-    Tf = 6
-    maxIter = Tf/Ts
-    trajType = "altitude"
-    # trajType = "velocity"
-    trajType = "grid_velocity"
+    Tf = 8
+    trajType = trajOptions[1]
     trajSelect = 1
 
     # Initialize Quadcopter, Controller, Results Matrix
@@ -41,6 +40,7 @@ def main():
     s_all = quad.state.T
     sDes_all = np.zeros([1, 15])
     cmd_all = ctrl.cmd.T
+    thr_all = quad.thr.T
     
 
     # Run Simulation
@@ -63,6 +63,7 @@ def main():
         s_all    = np.vstack((s_all, quad.state.T))
         sDes_all = np.vstack((sDes_all, ctrl.sDesCalc.T))
         cmd_all  = np.vstack((cmd_all, ctrl.cmd.T))
+        thr_all  = np.vstack((thr_all, quad.thr.T))
         i += 1
     
     # utils.fullprint(s_all)
@@ -71,7 +72,7 @@ def main():
 
     # View Results
     # ---------------------------
-    utils.makeFigures(quad.params, t_all, s_all, sDes_all, cmd_all)
+    utils.makeFigures(quad.params, t_all, s_all, sDes_all, cmd_all, thr_all)
 
 if __name__ == "__main__":
     main()

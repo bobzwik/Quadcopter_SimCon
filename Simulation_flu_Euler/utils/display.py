@@ -3,6 +3,7 @@
 import numpy as np
 from numpy import pi
 import matplotlib.pyplot as plt
+import utils
 
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
@@ -13,7 +14,7 @@ def fullprint(*args, **kwargs):
     print(*args, **kwargs)
     np.set_printoptions(opt)
 
-def makeFigures(params, time, states, desiredStates, commands):
+def makeFigures(params, time, states, desiredStates, commands, thrust):
     x =     states[:,0]
     y =     states[:,1]
     z =     states[:,2]
@@ -45,7 +46,7 @@ def makeFigures(params, time, states, desiredStates, commands):
     rDes =     desiredStates[:,11] *rad2deg
 
     
-    #cmdVect_expo = expoCmd(params, cmdVect)
+    # commands = utils.expoCmd(params, commands)
     uMotor = commands*params["motorc1"] + params["motorc0"]    # Motor speed in relation to cmd
     uMotor[commands < params["motordeadband"]] = 0              # Apply motor deadband
 
@@ -56,6 +57,7 @@ def makeFigures(params, time, states, desiredStates, commands):
 
     plt.figure()
     plt.plot(time, xdot, time, ydot, time, zdot)
+    plt.plot(time, xdotDes, '--', time, ydotDes, '--', time, zdotDes, '--')
     plt.grid(True)
     plt.legend(['Vx','Vy','Vz'])
     
@@ -76,6 +78,11 @@ def makeFigures(params, time, states, desiredStates, commands):
     plt.plot(time, uMotor[:,0], '--', time, uMotor[:,1], '--', time, uMotor[:,2], '--', time, uMotor[:,3], '--')
     plt.grid(True)
     plt.legend(['w1','w2','w3','w4'])
+
+    plt.figure()
+    plt.plot(time, thrust[:,0], time, thrust[:,1], time, thrust[:,2], time, thrust[:,3])
+    plt.grid(True)
+    plt.legend(['thr1','thr2','thr3','thr4'])
     
     plt.show()
     

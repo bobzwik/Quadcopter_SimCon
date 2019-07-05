@@ -4,26 +4,22 @@ import numpy as np
 from numpy import pi
 from numpy import sin, cos, tan
 # import angleFunctions as af
-# from mixer import mixer
 import utils
 
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
 
-Px = 1.0
+Px = 2.2
 Pu = 1.0
 Du = 0.1
 
-Py = 1.0
+Py = 2.2
 Pv = 1.0
 Dv = 0.1
 
 Pz = 10.0
-Pw = 6.0
-Dw = 0.4
-
-phiMax = 35*deg2rad
-thetaMax = 35*deg2rad
+Pw = 15.0
+Dw = 0.1
 
 Pphi = 8.0
 Pp = 4.0
@@ -36,6 +32,13 @@ Dq = Dp
 Ppsi = 6.0
 Pr = 15.0
 Dr = 0.4
+
+uMax = 3
+vMax = 3
+wMax = 3.5
+
+phiMax = 35*deg2rad
+thetaMax = 35*deg2rad
 
 pMax = 200*deg2rad
 qMax = 200*deg2rad
@@ -114,6 +117,10 @@ class Control:
         # --------------------------- 
         self.cmd = utils.mixer(self.zCmd, self.pCmd, self.qCmd, self.rCmd, qd)
 
+        # Add Exponential to command
+        # ---------------------------
+        self.cmd = utils.expoCmd(qd.params, self.cmd)
+
         # Add calculated Desired States
         # ---------------------------         
         self.sDesCalc[0] = self.xDes
@@ -133,24 +140,34 @@ class Control:
         self.sDesCalc[13] = self.vFlatDes
         self.sDesCalc[14] = self.wFlatDes
 
+    
     def position(self, qd, Ts):
 
-        # X position Control
+        # X Position Control
         # --------------------------- 
-        print(qd)
+        xError = self.xDes-qd.x
+        self.xdotDes = Px*xError
+    
+        # Y Position Control
+        # --------------------------- 
+        yError = self.yDes-qd.y
+        self.ydotDes = Py*yError
 
-        # Y position Control
-        # --------------------------- 
+        # Replace Previous Error
+        # ---------------------------
+        self.xPrevE = xError
+        self.yPrevE = yError
 
 
     def horiz_vel_grid(self, qd, Ts):
 
-        # ydotDes, xdotDes, zdotDes conversion to uFlatDes, vFlatDes, wFlatDes
+        # ydotDes, xdotDes conversion to uFlatDes, vFlatDes
         # ---------------------------
         uvwFlatDes = utils.xyzDotToUVW_Flat(qd.phi, qd.theta, qd.psi, self.xdotDes, self.ydotDes, self.zdotDes)
+        uvwFlatDes = np.clip(uvwFlatDes[0:2].T, np.array([-uMax, -vMax]), np.array([uMax, vMax])).T
+
         self.uFlatDes = uvwFlatDes[0]
         self.vFlatDes = uvwFlatDes[1]
-        self.wFlatDes = uvwFlatDes[2]
 
 
     def horiz_vel(self, qd, Ts):
@@ -177,7 +194,11 @@ class Control:
         # Z Position Control
         # --------------------------- 
         zError = self.zDes-qd.z
-        self.zdotDes = Pz*zError
+        zdotDes = Pz*zError
+        self.zdotDes = np.clip(zdotDes, -wMax, wMax)
+        
+        # Z Velocity Control
+        # ---------------------------
         zdotError = self.zdotDes-qd.zdot
         self.zCmd = Pw*zdotError + Pw*Dw*(zdotError-self.zdotPrevE)/Ts + qd.params["FF"]/(cos(qd.phi)*cos(qd.theta))
         
