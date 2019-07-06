@@ -49,6 +49,11 @@ class Quadcopter:
         self.vFlat = velFlat[1]
         self.wFlat = velFlat[2]
 
+        self.ext_state = np.zeros([3,1])
+        self.ext_state[0] = self.uFlat
+        self.ext_state[1] = self.vFlat
+        self.ext_state[2] = self.wFlat
+
 
     def state_dot(self, state, t, cmd):
 

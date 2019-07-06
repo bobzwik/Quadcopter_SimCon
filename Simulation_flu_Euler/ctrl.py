@@ -37,8 +37,8 @@ uMax = 3
 vMax = 3
 wMax = 3.5
 
-phiMax = 35*deg2rad
-thetaMax = 35*deg2rad
+phiMax = 20*deg2rad
+thetaMax = 20*deg2rad
 
 pMax = 200*deg2rad
 qMax = 200*deg2rad
@@ -90,8 +90,12 @@ class Control:
 
         # Select Controller
         # ---------------------------
+        if trajType == "attitude":
+            self.zCmd = qd.params["FF"]
+            self.attitude(qd, Ts)
+            self.rate(qd, Ts)
         if trajType == "altitude":
-            self.altitude(qd, Ts)
+            # self.altitude(qd, Ts)
             self.attitude(qd, Ts)
             self.rate(qd, Ts)
         if trajType == "velocity":
@@ -225,6 +229,11 @@ class Control:
         psiError = self.psiDes-qd.psi
         self.psidotDes = Ppsi*psiError
         
+        # print(qd.psi)
+        # print(self.psiDes)
+        # print(psiError)
+        # print(self.psidotDes)
+
         # Replace Previous Error
         # --------------------------- 
         self.phiPrevE = phiError
@@ -256,6 +265,10 @@ class Control:
         # ---------------------------   
         rError = self.rDes-qd.r
         self.rCmd = Pr*rError + Pr*Dr*(rError-self.rPrevE)/Ts
+        
+        # print(qd.r)
+        # print(rError)
+        # print(self.rDes)
 
         # Replace Previous Error
         # --------------------------- 
