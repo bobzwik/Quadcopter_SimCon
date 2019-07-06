@@ -4,17 +4,27 @@ import numpy as np
 from numpy import pi
 
 def desiredState(t, trajType, trajSelect):
+    if trajType == "attitude":
+        if   trajSelect == 1:
+            sDes = hover(t)
+        elif trajSelect == 2:
+            sDes = TestYawControl(t)
+        elif trajSelect == 3:
+            sDes = TestRollThenPitchControl(t)
+        elif trajSelect == 4:
+            sDes = TestPitchThenYawControl(t)
+
     if trajType == "altitude":
         if   trajSelect == 1:
             sDes = hover(t)
         elif trajSelect == 2:
-            sDes = testZControl(t)
-        elif trajSelect == 3:
             sDes = TestYawControl(t)
-        elif trajSelect == 4:
+        elif trajSelect == 3:
             sDes = TestRollThenPitchControl(t)
-        elif trajSelect == 5:
+        elif trajSelect == 4:
             sDes = TestPitchThenYawControl(t)
+        elif trajSelect == 5:
+            sDes = testZControl(t)
         
     if trajType == "velocity":
         if   trajSelect == 1:
@@ -77,13 +87,13 @@ def TestRollThenPitchControl(t):
     desPos     = np.array([0, 0, 0])
     desVelGrid = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, pi/4])
+    desEul     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     
     if t >= 1 and t < 3:
-        desEul = np.array([0, 0, pi/4])
+        desEul = np.array([0.3, -0.3, 0])
     elif t >= 3:
-        desEul = np.array([0.3, 0.3, pi/4])
+        desEul = np.array([0.3, -0.3, 0])
      
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
@@ -115,9 +125,9 @@ def testUVW_FlatControl(t):
     desPQR     = np.array([0, 0, 0])
 
     if t >= 1 and t < 3:
-        desVel = np.array([0, 0, 0])
+        desVel = np.array([3, 3, 0])
     elif t >= 3:
-        desVel = np.array([1, 0, 0])
+        desVel = np.array([3, 3, 0])
      
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
@@ -144,12 +154,12 @@ def testXYZposition(t):
     desPos     = np.array([0, 0, 0])
     desVelGrid = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, pi/6])
+    desEul     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     
-    if t >= 1 and t < 3:
+    if t >= 1 and t < 5:
         desPos = np.array([2, 0, 0])
-    elif t >= 3:
+    elif t >= 5:
         desPos = np.array([-2, 2, 1])
     
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)

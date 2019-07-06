@@ -36,7 +36,7 @@ def sys_params():
     params["tau"] = 0.015
     params["Kp"] = 1.0
     params["damp"] = 1.0
-    params["ifexpo"] = bool(False)
+    params["ifexpo"] = bool(True)
     
     if params["ifexpo"]:
         params["maxCmd"] = 100
@@ -70,7 +70,7 @@ def init_state(params):
     z0 = 0      # m
     phi0 = 0    # rad
     theta0 = 0  # rad
-    psi0 = 0    # rad
+    psi0 = 0 #np.pi/4    # rad
 
     s = np.zeros([20])
     s[0] = x0       # x

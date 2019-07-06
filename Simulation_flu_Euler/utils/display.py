@@ -14,7 +14,7 @@ def fullprint(*args, **kwargs):
     print(*args, **kwargs)
     np.set_printoptions(opt)
 
-def makeFigures(params, time, states, desiredStates, commands, thrust):
+def makeFigures(params, time, states, extended_states, desiredStates, commands, thrust, torque):
     x =     states[:,0]
     y =     states[:,1]
     z =     states[:,2]
@@ -32,6 +32,10 @@ def makeFigures(params, time, states, desiredStates, commands, thrust):
     w3 =    states[:,16]
     w4 =    states[:,18]
 
+    uFlat = extended_states[:,0]
+    vFlat = extended_states[:,1]
+    wFlat = extended_states[:,2]
+
     xDes =     desiredStates[:,0]
     yDes =     desiredStates[:,1]
     zDes =     desiredStates[:,2]
@@ -43,7 +47,11 @@ def makeFigures(params, time, states, desiredStates, commands, thrust):
     zdotDes =  desiredStates[:,8]
     pDes =     desiredStates[:,9]*rad2deg
     qDes =     desiredStates[:,10]*rad2deg
-    rDes =     desiredStates[:,11] *rad2deg
+    rDes =     desiredStates[:,11]*rad2deg
+
+    uFlatDes = desiredStates[:,12]
+    vFlatDes = desiredStates[:,13]
+    wFlatDes = desiredStates[:,14]
 
     
     # commands = utils.expoCmd(params, commands)
@@ -60,6 +68,12 @@ def makeFigures(params, time, states, desiredStates, commands, thrust):
     plt.plot(time, xdotDes, '--', time, ydotDes, '--', time, zdotDes, '--')
     plt.grid(True)
     plt.legend(['Vx','Vy','Vz'])
+
+    plt.figure()
+    plt.plot(time, uFlat, time, vFlat, time, wFlat)
+    plt.plot(time, uFlatDes, '--', time, vFlatDes, '--', time, wFlatDes, '--')
+    plt.grid(True)
+    plt.legend(['uFlat','vFlat','wFlat'])
     
     plt.figure()
     plt.plot(time, phi, time, theta, time, psi)
@@ -83,6 +97,16 @@ def makeFigures(params, time, states, desiredStates, commands, thrust):
     plt.plot(time, thrust[:,0], time, thrust[:,1], time, thrust[:,2], time, thrust[:,3])
     plt.grid(True)
     plt.legend(['thr1','thr2','thr3','thr4'])
+
+    plt.figure()
+    plt.plot(time, torque[:,0], time, torque[:,1], time, torque[:,2], time, torque[:,3])
+    plt.grid(True)
+    plt.legend(['tor1','tor2','tor3','tor4'])
+
+    plt.figure()
+    plt.plot(time, torque[:,0]+torque[:,2]-2*torque[0,0], time, -torque[:,1]-torque[:,3]+2*torque[0,0])
+    plt.grid(True)
+    plt.legend(['tor1+3 (difference from hover)','tor2+4 (difference from hover)'])
     
     plt.show()
     
