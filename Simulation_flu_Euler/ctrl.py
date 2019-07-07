@@ -4,28 +4,22 @@ import numpy as np
 from numpy import pi
 from numpy import sin, cos, tan
 # import angleFunctions as af
-# from mixer import mixer
 import utils
 
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
 
-Px = 1.0
-Pu = 2.0
-Du = 0.01
+Px = 1.6
+Pu = 1.1
+Du = 0.15
 
-Py = 1.0
-Pv = 2.0
-Dv = 0.01
+Py = 1.6
+Pv = 1.1
+Dv = 0.15
 
-Pz = 10.0
-Pw = 6.0
-Dw = 0.4
-
-phiMax = 0.6
-phiMin = -phiMax
-thetaMax = 0.6
-thetaMin = -thetaMax
+Pz = 8.0
+Pw = 15.0
+Dw = 0.15
 
 Pphi = 8.0
 Pp = 4.0
@@ -36,144 +30,253 @@ Pq = Pp
 Dq = Dp 
 
 Ppsi = 6.0
-Pr = 8.0
-Dr = 0.2
+Pr = 15.0
+Dr = 0.4
 
-pmax = 200*deg2rad
-qmax = 200*deg2rad
-rmax = 200*deg2rad
+uMax = 3
+vMax = 3
+wMax = 3
+
+phiMax = 20*deg2rad
+thetaMax = 20*deg2rad
+
+pMax = 200*deg2rad
+qMax = 200*deg2rad
+rMax = 200*deg2rad
 
 
 class Control:
     
-    def __init__(self, quad):
-        self.error = np.zeros([12, 1])
-        self.sDesCalc = np.zeros([12, 1])
-        self.cmd = np.ones([4,1])*quad.params["FF"]   # Motor 1 is front left, then clockwise numbering
+    def __init__(self, qd):
+        self.sDesCalc = np.zeros([15, 1])
+        self.cmd = np.ones([4,1])*qd.params["FF"]   # Motor 1 is front left, then clockwise numbering
+        self.xPrevE     = 0
+        self.yPrevE     = 0
+        self.zPrevE     = 0
+        self.phiPrevE   = 0
+        self.thetaPrevE = 0
+        self.psiPrevE   = 0
+        self.xdotPrevE  = 0
+        self.ydotPrevE  = 0
+        self.zdotPrevE  = 0
+        self.pPrevE     = 0
+        self.qPrevE     = 0
+        self.rPrevE     = 0
+
+        self.uFlatPrevE = 0
+        self.vFlatPrevE = 0
+
     
-    def controller(self, quad, sDes, Ts, trajType, trajSelect):
-        if trajType == "altitude":
-            self.altitude(quad, sDes, Ts)
-
-    def altitude(self, quad, sDes, Ts):
-        # Import Params
-        # ---------------------------
-        FF     = quad.params["FF"]
-
-        # Current State
-        # ---------------------------
-        x     = quad.state[0]
-        y     = quad.state[1]
-        z     = quad.state[2]
-        phi   = quad.state[3]
-        theta = quad.state[4]
-        psi   = quad.state[5]
-        xdot  = quad.state[6]
-        ydot  = quad.state[7]
-        zdot  = quad.state[8]
-        p     = quad.state[9]
-        q     = quad.state[10]
-        r     = quad.state[11]
-
+    def controller(self, qd, sDes, Ts, trajType, trajSelect):
+        
         # Desired State
         # ---------------------------
-        xDes     = sDes[0]
-        yDes     = sDes[1]
-        zDes     = sDes[2]
-        phiDes   = sDes[3]
-        thetaDes = sDes[4]
-        psiDes   = sDes[5]
-        xdotDes  = sDes[6]
-        ydotDes  = sDes[7]
-        zdotDes  = sDes[8]
-        pDes     = sDes[9]
-        qDes     = sDes[10]
-        rDes     = sDes[11]
+        self.xDes     = sDes[0]
+        self.yDes     = sDes[1]
+        self.zDes     = sDes[2]
+        self.phiDes   = sDes[3]
+        self.thetaDes = sDes[4]
+        self.psiDes   = sDes[5]
+        self.xdotDes  = sDes[6]
+        self.ydotDes  = sDes[7]
+        self.zdotDes  = sDes[8]
+        self.pDes     = sDes[9]
+        self.qDes     = sDes[10]
+        self.rDes     = sDes[11]
 
-        # Previous Error
-        # ---------------------------
-        xPrevE     = self.error[0]
-        yPrevE     = self.error[1]
-        zPrevE     = self.error[2]
-        phiPrevE   = self.error[3]
-        thetaPrevE = self.error[4]
-        psiPrevE   = self.error[5]
-        xdotPrevE  = self.error[6]
-        ydotPrevE  = self.error[7]
-        zdotPrevE  = self.error[8]
-        pPrevE     = self.error[9]
-        qPrevE     = self.error[10]
-        rPrevE     = self.error[11]
-        
-        # Z Position Control
-        # --------------------------- 
-        zError = zDes-z
-        zdotDes = Pz*zError
-        zdotError = zdotDes-zdot
-        zCmd = Pw*zdotError + Pw*Dw*(zdotError-zdotPrevE)/Ts + FF/(cos(phi)*cos(theta))
-        #zCmd = FF
-        
-        # Roll Control
-        # --------------------------- 
-        phiError = phiDes-phi
-        phidotDes = Pphi*phiError
-            
-        # Pitch Control
-        # --------------------------- 
-        thetaError = thetaDes-theta
-        thetadotDes = Ptheta*thetaError
-        
-        # Yaw Control
-        # --------------------------- 
-        psiError = psiDes-psi
-        psidotDes = Ppsi*psiError
-        
-        # phidotDes, thetadotDes, psidotDes conversion to pDes, qDes, rDes
-        # ---------------------------
-        pqrDes = utils.phiThetaPsiDotToPQR(phi, theta, psi, phidotDes, thetadotDes, psidotDes)
-        pqrDes = np.clip(pqrDes.T, np.array([-pmax, -qmax, -rmax]), np.array([pmax, qmax, rmax])).T
+        self.uFlatDes = sDes[12]
+        self.vFlatDes = sDes[13]
+        self.wFlatDes = sDes[14]
 
-        pDes = pqrDes[0]
-        pError = pDes-p
-        pCmd = Pp*pError + Pp*Dp*(pError-pPrevE)/Ts
-        
-        qDes = pqrDes[1]
-        qError = qDes-q
-        qCmd = Pq*qError + Pq*Dq*(qError-qPrevE)/Ts
-        
-        rDes = pqrDes[2]  
-        rError = rDes-r
-        rCmd = Pr*rError + Pr*Dr*(rError-rPrevE)/Ts
-            
+        # Select Controller
+        # ---------------------------
+        if trajType == "attitude":
+            self.zCmd = qd.params["FF"]
+            self.attitude(qd, Ts)
+            self.rate(qd, Ts)
+        if trajType == "altitude":
+            # self.altitude(qd, Ts)
+            self.attitude(qd, Ts)
+            self.rate(qd, Ts)
+        if trajType == "velocity":
+            self.horiz_vel(qd, Ts)
+            self.altitude(qd, Ts)
+            self.attitude(qd, Ts)
+            self.rate(qd, Ts)
+        if trajType == "grid_velocity":
+            self.horiz_vel_grid(qd, Ts)    
+            self.horiz_vel(qd, Ts)
+            self.altitude(qd, Ts)
+            self.attitude(qd, Ts)
+            self.rate(qd, Ts)
+        if trajType == "position":
+            self.position(qd, Ts)
+            self.horiz_vel_grid(qd, Ts)    
+            self.horiz_vel(qd, Ts)
+            self.altitude(qd, Ts)
+            self.attitude(qd, Ts)
+            self.rate(qd, Ts)
+
         # Mixer
         # --------------------------- 
-        self.cmd = utils.mixer(zCmd, pCmd, qCmd, rCmd, quad)
-        
+        self.cmd = utils.mixer(self.zCmd, self.pCmd, self.qCmd, self.rCmd, qd)
+
+        # Add Exponential to command
+        # ---------------------------
+        self.cmd = utils.expoCmd(qd.params, self.cmd)
+
         # Add calculated Desired States
         # ---------------------------         
-        self.sDesCalc[0] = xDes
-        self.sDesCalc[1] = yDes
-        self.sDesCalc[2] = zDes
-        self.sDesCalc[3] = phiDes
-        self.sDesCalc[4] = thetaDes
-        self.sDesCalc[5] = psiDes
-        self.sDesCalc[6] = xdotDes
-        self.sDesCalc[7] = ydotDes
-        self.sDesCalc[8] = zdotDes
-        self.sDesCalc[9] = pDes
-        self.sDesCalc[10] = qDes
-        self.sDesCalc[11] = rDes
-        
-        # Error Vector
+        self.sDesCalc[0] = self.xDes
+        self.sDesCalc[1] = self.yDes
+        self.sDesCalc[2] = self.zDes
+        self.sDesCalc[3] = self.phiDes
+        self.sDesCalc[4] = self.thetaDes
+        self.sDesCalc[5] = self.psiDes
+        self.sDesCalc[6] = self.xdotDes
+        self.sDesCalc[7] = self.ydotDes
+        self.sDesCalc[8] = self.zdotDes
+        self.sDesCalc[9] = self.pDes
+        self.sDesCalc[10] = self.qDes
+        self.sDesCalc[11] = self.rDes
+
+        self.sDesCalc[12] = self.uFlatDes
+        self.sDesCalc[13] = self.vFlatDes
+        self.sDesCalc[14] = self.wFlatDes
+
+    
+    def position(self, qd, Ts):
+
+        # X Position Control
         # --------------------------- 
-        self.error[2] = zError
-        self.error[3] = phiError
-        self.error[4] = thetaError
-        self.error[5] = psiError
-        self.error[8] = zdotError
-        self.error[9] = pError
-        self.error[10] = qError
-        self.error[11] = rError
+        xError = self.xDes-qd.x
+        self.xdotDes = Px*xError
+    
+        # Y Position Control
+        # --------------------------- 
+        yError = self.yDes-qd.y
+        self.ydotDes = Py*yError
+
+        # Replace Previous Error
+        # ---------------------------
+        self.xPrevE = xError
+        self.yPrevE = yError
+
+
+    def horiz_vel_grid(self, qd, Ts):
+
+        # ydotDes, xdotDes conversion to uFlatDes, vFlatDes
+        # ---------------------------
+        uvwFlatDes = utils.xyzDotToUVW_Flat(qd.phi, qd.theta, qd.psi, self.xdotDes, self.ydotDes, self.zdotDes)
+        uvwFlatDes = np.clip(uvwFlatDes[0:2].T, np.array([-uMax, -vMax]), np.array([uMax, vMax])).T
+
+        self.uFlatDes = uvwFlatDes[0]
+        self.vFlatDes = uvwFlatDes[1]
+
+
+    def horiz_vel(self, qd, Ts):
+
+        # uFlat Control
+        # --------------------------- 
+        uFlatError = self.uFlatDes-qd.uFlat
+        thetaDes = Pu*uFlatError + Pu*Du*(uFlatError-self.uFlatPrevE)/Ts
+        self.thetaDes = np.clip(thetaDes, -thetaMax, thetaMax)
+
+        # vFlat Control
+        # --------------------------- 
+        vFlatError = self.vFlatDes-qd.vFlat
+        phiDes = -(Pv*vFlatError + Pv*Dv*(vFlatError-self.vFlatPrevE)/Ts)
+        self.phiDes = np.clip(phiDes, -phiMax, phiMax)
+
+        # Replace Previous Error
+        # ---------------------------
+        self.uFlatPrevE = uFlatError
+        self.vFlatPrevE = vFlatError
+    
+    def altitude(self, qd, Ts):
+       
+        # Z Position Control
+        # --------------------------- 
+        zError = self.zDes-qd.z
+        zdotDes = Pz*zError
+        self.zdotDes = np.clip(zdotDes, -wMax, wMax)
+        
+        # Z Velocity Control
+        # ---------------------------
+        zdotError = self.zdotDes-qd.zdot
+        self.zCmd = Pw*zdotError + Pw*Dw*(zdotError-self.zdotPrevE)/Ts + qd.params["FF"]/(cos(qd.phi)*cos(qd.theta))
+        
+        # Replace Previous Error
+        # ---------------------------
+        self.zPrevE = zError
+        self.zdotPrevE = zdotError
+
+
+    def attitude(self, qd, Ts):
+       
+        # Roll Angle Control
+        # --------------------------- 
+        phiError = self.phiDes-qd.phi
+        self.phidotDes = Pphi*phiError
+            
+        # Pitch Angle Control
+        # --------------------------- 
+        thetaError = self.thetaDes-qd.theta
+        self.thetadotDes = Ptheta*thetaError
+        
+        # Yaw Angle Control
+        # --------------------------- 
+        psiError = self.psiDes-qd.psi
+        self.psidotDes = Ppsi*psiError
+        
+        # print(qd.psi)
+        # print(self.psiDes)
+        # print(psiError)
+        # print(self.psidotDes)
+
+        # Replace Previous Error
+        # --------------------------- 
+        self.phiPrevE = phiError
+        self.thetaPrevE = thetaError
+        self.psiPrevE = psiError
+
+        # phidotDes, thetadotDes, psidotDes conversion to pDes, qDes, rDes
+        # ---------------------------
+        pqrDes = utils.phiThetaPsiDotToPQR(qd.phi, qd.theta, qd.psi, self.phidotDes, self.thetadotDes, self.psidotDes)
+        pqrDes = np.clip(pqrDes.T, np.array([-pMax, -qMax, -rMax]), np.array([pMax, qMax, rMax])).T
+        self.pDes = pqrDes[0]
+        self.qDes = pqrDes[1]
+        self.rDes = pqrDes[2]
+
+
+    def rate(self, qd, Ts):
+        
+        # Roll Rate Control
+        # ---------------------------       
+        pError = self.pDes-qd.p
+        self.pCmd = Pp*pError + Pp*Dp*(pError-self.pPrevE)/Ts
+        
+        # Pitch Rate Control
+        # --------------------------- 
+        qError = self.qDes-qd.q
+        self.qCmd = Pq*qError + Pq*Dq*(qError-self.qPrevE)/Ts
+        
+        # Yaw Rate Control
+        # ---------------------------   
+        rError = self.rDes-qd.r
+        self.rCmd = Pr*rError + Pr*Dr*(rError-self.rPrevE)/Ts
+        
+        # print(qd.r)
+        # print(rError)
+        # print(self.rDes)
+
+        # Replace Previous Error
+        # --------------------------- 
+        self.pPrevE = pError
+        self.qPrevE = qError
+        self.rPrevE = rError
+
+
 
 
 

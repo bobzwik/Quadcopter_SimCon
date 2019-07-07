@@ -15,19 +15,45 @@ class Quadcopter:
         # ---------------------------
         self.params = sys_params()
         
-        # Command for stable hover
+        # Command for initial stable hover
         # ---------------------------
-        hover_cmd = init_cmd(self.params)
-        self.params["FF"] = hover_cmd[0]         # Feed-Forward Command for Hover
-        self.params["w_hover"] = hover_cmd[1]    # Motor Speed for Hover
+        ini_hover = init_cmd(self.params)
+        self.params["FF"] = ini_hover[0]         # Feed-Forward Command for Hover
+        self.params["w_hover"] = ini_hover[1]    # Motor Speed for Hover
+        self.thr = np.ones([4,1])*ini_hover[2]
+        self.tor = np.ones([4,1])*ini_hover[3]
 
         # Initial State
         # ---------------------------
         self.state = init_state(self.params)
+        self.x     = self.state[0]
+        self.y     = self.state[1]
+        self.z     = self.state[2]
+        self.phi   = self.state[3]
+        self.theta = self.state[4]
+        self.psi   = self.state[5]
+        self.xdot  = self.state[6]
+        self.ydot  = self.state[7]
+        self.zdot  = self.state[8]
+        self.p     = self.state[9]
+        self.q     = self.state[10]
+        self.r     = self.state[11]
+
+        self.extended_state()
 
     # def point_position(self):
 
-    # def extended_state(self)
+    def extended_state(self):
+        velFlat = utils.xyzDotToUVW_Flat(self.phi, self.theta, self.psi, self.xdot, self.ydot, self.zdot)
+        self.uFlat = velFlat[0]
+        self.vFlat = velFlat[1]
+        self.wFlat = velFlat[2]
+
+        self.ext_state = np.zeros([3,1])
+        self.ext_state[0] = self.uFlat
+        self.ext_state[1] = self.vFlat
+        self.ext_state[2] = self.wFlat
+
 
     def state_dot(self, state, t, cmd):
 
@@ -88,10 +114,23 @@ class Quadcopter:
         thrust = kTh*wMotor*wMotor
         torque = kTo*wMotor*wMotor
     
+        self.thr[0] = ThrM1 = thrust[0]
+        self.thr[1] = ThrM2 = thrust[1]
+        self.thr[2] = ThrM3 = thrust[2]
+        self.thr[3] = ThrM4 = thrust[3]
+        self.tor[0] = TorM1 = torque[0]
+        self.tor[1] = TorM2 = torque[1]
+        self.tor[2] = TorM3 = torque[2]
+        self.tor[3] = TorM4 = torque[3]
+
         ThrM1 = thrust[0]
         ThrM2 = thrust[1]
         ThrM3 = thrust[2]
         ThrM4 = thrust[3]
+        # TorM1 = 0.05
+        # TorM2 = 0.05
+        # TorM3 = 0.05
+        # TorM4 = 0.05
         TorM1 = torque[0]
         TorM2 = torque[1]
         TorM3 = torque[2]
@@ -142,3 +181,17 @@ class Quadcopter:
 
     def update(self, t, Ts, cmd):
         self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd,))[1]
+        self.x     = self.state[0]
+        self.y     = self.state[1]
+        self.z     = self.state[2]
+        self.phi   = self.state[3]
+        self.theta = self.state[4]
+        self.psi   = self.state[5]
+        self.xdot  = self.state[6]
+        self.ydot  = self.state[7]
+        self.zdot  = self.state[8]
+        self.p     = self.state[9]
+        self.q     = self.state[10]
+        self.r     = self.state[11]
+
+        self.extended_state()
