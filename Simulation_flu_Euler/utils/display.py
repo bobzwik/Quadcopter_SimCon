@@ -108,5 +108,5 @@ def makeFigures(params, time, states, extended_states, desiredStates, commands, 
     plt.grid(True)
     plt.legend(['tor1+3 (difference from hover)','tor2+4 (difference from hover)'])
     
-    plt.show()
+    # plt.show()
     

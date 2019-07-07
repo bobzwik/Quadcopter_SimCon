@@ -127,6 +127,10 @@ class Quadcopter:
         ThrM2 = thrust[1]
         ThrM3 = thrust[2]
         ThrM4 = thrust[3]
+        # TorM1 = 0.05
+        # TorM2 = 0.05
+        # TorM3 = 0.05
+        # TorM4 = 0.05
         TorM1 = torque[0]
         TorM2 = torque[1]
         TorM3 = torque[2]

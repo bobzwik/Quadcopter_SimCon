@@ -6,6 +6,8 @@ def mixer(throttle, pCmd, qCmd, rCmd, quad):
     maxCmd = quad.params["maxCmd"]
     minCmd = quad.params["minCmd"]
 
+    # rCmd = 0
+
     cmd = np.zeros([4, 1])
     cmd[0] = throttle + pCmd - qCmd + rCmd
     cmd[1] = throttle - pCmd - qCmd - rCmd

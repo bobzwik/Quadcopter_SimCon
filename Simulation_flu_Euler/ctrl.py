@@ -9,17 +9,17 @@ import utils
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
 
-Px = 2.2
-Pu = 1.0
-Du = 0.1
+Px = 1.6
+Pu = 1.1
+Du = 0.15
 
-Py = 2.2
-Pv = 1.0
-Dv = 0.1
+Py = 1.6
+Pv = 1.1
+Dv = 0.15
 
-Pz = 10.0
+Pz = 8.0
 Pw = 15.0
-Dw = 0.1
+Dw = 0.15
 
 Pphi = 8.0
 Pp = 4.0
@@ -35,7 +35,7 @@ Dr = 0.4
 
 uMax = 3
 vMax = 3
-wMax = 3.5
+wMax = 3
 
 phiMax = 20*deg2rad
 thetaMax = 20*deg2rad
