@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 
+# The issue with this Euler angle controller is that for a given xdot=ydot command, the pitch and roll command are equal. 
+# However, according to rotation converters (https://www.andre-gaschler.com/rotationconverter/), the axis of rotation for an
+# equal pitch and roll command in the order ZYX (yaw-pitch-roll) is not in the plane x-y, but also has a z component.
+    # A pure pitch command would have its axis of rotation along x, and a pure roll command would have its axis of rotation along y.
+    # For a equal xdot and ydot command, one would imagine the axis of rotation of the drone to be only in the x-y plane.
+# But for a equal pitch and roll command, this is not the case.
+
 import numpy as np
-# from mixer import expoCmd
+import matplotlib.pyplot as plt
 import trajectory as tr
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 import utils
 # import angleFunctions as af 
-# from SimulationAnimation import sameAxisAnimation
+
 
 trajOptions = ["position", "grid_velocity", "velocity", "altitude", "attitude"]
 
@@ -15,7 +22,7 @@ def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     
     # Trajectory for Desired States
     # ---------------------------
-    sDes = tr.desiredState(t, trajType, trajSelect)
+    sDes = tr.desiredState(t, trajType, trajSelect, quad)
     
     # Generate Commands
     # ---------------------------
@@ -28,7 +35,7 @@ def main():
     Ti = 0
     Ts = 0.005
     Tf = 9
-    trajType = trajOptions[2]
+    trajType = trajOptions[0]
     trajSelect = 1
 
     # Initialize Quadcopter, Controller, Results Matrix
@@ -77,11 +84,10 @@ def main():
     # View Results
     # ---------------------------
     utils.makeFigures(quad.params, t_all, s_all, ext_s_all, sDes_all, cmd_all, thr_all, tor_all)
+    ani = utils.sameAxisAnimation(s_all, Ts, quad.params)
+    plt.show()
 
 if __name__ == "__main__":
     main()
 
 
-
-
-# ani = sameAxisAnimation(s_all, Ts, params)

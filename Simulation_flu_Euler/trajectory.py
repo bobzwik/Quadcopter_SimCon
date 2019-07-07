@@ -3,7 +3,7 @@
 import numpy as np
 from numpy import pi
 
-def desiredState(t, trajType, trajSelect):
+def desiredState(t, trajType, trajSelect, quad):
     if trajType == "attitude":
         if   trajSelect == 1:
             sDes = hover(t)
@@ -37,6 +37,10 @@ def desiredState(t, trajType, trajSelect):
     if trajType == "position":
         if   trajSelect == 1:
             sDes = testXYZposition(t)
+    
+    # if trajType == "waypoint":
+    #     if   trajSelect == 1:
+    #         sDes = waypointTrajectory(t, quad)
 
     return sDes
 
@@ -158,9 +162,9 @@ def testXYZposition(t):
     desPQR     = np.array([0, 0, 0])
     
     if t >= 1 and t < 5:
-        desPos = np.array([2, 0, 0])
+        desPos = np.array([2, 2, 0])
     elif t >= 5:
-        desPos = np.array([-2, 2, 1])
+        desPos = np.array([-2, 2, 2])
     
     sDes = makesDes(desPos, desVelGrid, desVel, desEul, desPQR)
     
