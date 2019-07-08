@@ -82,25 +82,27 @@ def RotToQuat(R):
     return q
 
 def QuatToRPY_ZYX(q):
+    # [q0 q1 q2 q3] = [w x y z]
+    q0 = q[0]
+    q1 = q[1]
+    q2 = q[2]
+    q3 = q[3]
     
-    e0 = q[0]
-    e1 = q[1]
-    e2 = q[2]
-    e3 = q[3]
-    
-    t0 = 2 * (e0*e1 + e2*e3)
-    t1 = e0**2 + e3**2 - e1**2 - e2**2
-    t2 = 2 * (e0*e2 - e1*e3)
-    t3 = 2 * (e0*e3 + e1*e2)
-    t4 = e0**2 + e1**2 - e2**2 - e3**2
+    YPR = threeaxisrot( 2.0*(q1*q2 + q0*q3), \
+                        q0**2 + q1**2 - q2**2 - q3**2, \
+                        -2.0*(q1*q3 - q0*q2), \
+                        2.0*(q2*q3 + q0*q1), \
+                        q0**2 - q1**2 - q2**2 + q3**2)
 
-    roll = np.arctan2(t0, t1)
-    pitch = np.arcsin(t2)
-    yaw = np.arctan2(t3, t4)
-    
-    RPY = np.array([roll, pitch, yaw])
-    
-    return RPY
+    # YPR = [Yaw, pitch, roll] = [psi, theta, phi]
+    return YPR
+
+def threeaxisrot(r11, r12, r21, r31, r32):
+    r1 = np.arctan2(r11, r12)
+    r2 = np.arcsin(r21)
+    r3 = np.arctan2(r31, r32)
+
+    return np.array([r1, r2, r3])
 
 def RPYToQuat(RPY):
     phi = RPY[0]

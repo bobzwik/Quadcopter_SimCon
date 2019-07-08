@@ -17,9 +17,6 @@ Py = 1.6
 Pv = 1.1
 Dv = 0.15
 
-Puv = 0.9
-Duv = 0.0001
-
 Pz = 8.0
 Pw = 15.0
 Dw = 0.15
@@ -42,7 +39,7 @@ wMax = 3
 
 phiMax = 20*deg2rad
 thetaMax = 20*deg2rad
-angleMax = 22*deg2rad
+angleMax = 30*deg2rad
 
 pMax = 200*deg2rad
 qMax = 200*deg2rad
@@ -69,7 +66,6 @@ class Control:
 
         self.uFlatPrevE = 0
         self.vFlatPrevE = 0
-        self.velFlatPrevE = 0
 
     
     def controller(self, qd, sDes, Ts, trajType, trajSelect):
@@ -179,60 +175,23 @@ class Control:
         self.vFlatDes = uvwFlatDes[1]
 
     def horiz_vel(self, qd, Ts):
-        if qd.params["ifYawFix"]:
-            # uFlatError
-            # --------------------------- 
-            uFlatError = self.uFlatDes-qd.uFlat
 
-            # vFlatError
-            # --------------------------- 
-            vFlatError = self.vFlatDes-qd.vFlat
-        
-            # velFlat Control
-            # --------------------------- 
-            velFlatError = sqrt(self.uFlatDes**2 + self.vFlatDes**2) - sqrt(qd.uFlat**2 + qd.vFlat**2)
-            angleDes = Puv*velFlatError + Puv*Duv*(velFlatError-self.velFlatPrevE)/Ts
-            angleDes = np.clip(angleDes, -angleMax, angleMax)
-            
-            # Determine phiDes, thetaDes, psiDes
-            # --------------------------- 
-            # quaternion = [cos(angleDes/2), -vError/a, uError/a, 0], 
-            # where "a" is a coefficient that divides vError and uError in order to have a normalized quaternion
-            if (angleDes==0):
-                a = 1
-            else:
-                a = sqrt((uFlatError**2 + vFlatError**2)/(1-(cos(angleDes/2))**2))
-        
-            desQuat = np.array([cos(angleDes/2), -vFlatError/a, uFlatError/a, 0])
+        # uFlat Control
+        # --------------------------- 
+        uFlatError = self.uFlatDes-qd.uFlat
+        thetaDes = Pu*uFlatError + Pu*Du*(uFlatError-self.uFlatPrevE)/Ts
+        self.thetaDes = np.clip(thetaDes, -thetaMax, thetaMax)
 
-            YPR = utils.QuatToRPY_ZYX(desQuat)
-            self.phiDes   = YPR[2]
-            self.thetaDes = YPR[1]
-            self.psiDes   = self.psiDes+YPR[0]
-            
-            # Replace Previous Error
-            # ---------------------------
-            self.uFlatPrevE = uFlatError
-            self.vFlatPrevE = vFlatError
-            self.velFlatPrevE = velFlatError
-        
-        else:
-            # uFlat Control
-            # --------------------------- 
-            uFlatError = self.uFlatDes-qd.uFlat
-            thetaDes = Pu*uFlatError + Pu*Du*(uFlatError-self.uFlatPrevE)/Ts
-            self.thetaDes = np.clip(thetaDes, -thetaMax, thetaMax)
+        # vFlat Control
+        # --------------------------- 
+        vFlatError = self.vFlatDes-qd.vFlat
+        phiDes = -(Pv*vFlatError + Pv*Dv*(vFlatError-self.vFlatPrevE)/Ts)
+        self.phiDes = np.clip(phiDes, -phiMax, phiMax)
 
-            # vFlat Control
-            # --------------------------- 
-            vFlatError = self.vFlatDes-qd.vFlat
-            phiDes = -(Pv*vFlatError + Pv*Dv*(vFlatError-self.vFlatPrevE)/Ts)
-            self.phiDes = np.clip(phiDes, -phiMax, phiMax)
-
-            # Replace Previous Error
-            # ---------------------------
-            self.uFlatPrevE = uFlatError
-            self.vFlatPrevE = vFlatError
+        # Replace Previous Error
+        # ---------------------------
+        self.uFlatPrevE = uFlatError
+        self.vFlatPrevE = vFlatError
     
     def altitude(self, qd, Ts):
        

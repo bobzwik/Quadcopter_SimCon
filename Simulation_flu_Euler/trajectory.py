@@ -162,7 +162,8 @@ def testXYZposition(t):
     desPQR     = np.array([0, 0, 0])
     
     if t >= 1 and t < 5:
-        desPos = np.array([2, 2, 0])
+        desPos = np.array([-2, -2, 0])
+        desEul = np.array([0, 0, 0])
     elif t >= 5:
         desPos = np.array([-2, 2, 2])
     
