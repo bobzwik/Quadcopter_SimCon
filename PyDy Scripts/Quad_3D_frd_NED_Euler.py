@@ -72,10 +72,14 @@ No.set_vel(N, 0)
 Bcm.set_pos(No, x*N.x + y*N.y + z*N.z)
 Bcm.set_vel(N, Bcm.pos_from(No).dt(N)) 
 
-M1.set_pos(Bcm,  dxm*B.x + dym*B.y + dzm*B.z)
-M2.set_pos(Bcm,  dxm*B.x - dym*B.y + dzm*B.z)
-M3.set_pos(Bcm, -dxm*B.x - dym*B.y + dzm*B.z)
-M4.set_pos(Bcm, -dxm*B.x + dym*B.y + dzm*B.z)
+# Motor placement
+# M1 is front left, then clockwise numbering
+# dzm is positive for motors above center of mass
+# ---------------------------
+M1.set_pos(Bcm,  dxm*B.x - dym*B.y - dzm*B.z)
+M2.set_pos(Bcm,  dxm*B.x + dym*B.y - dzm*B.z)
+M3.set_pos(Bcm, -dxm*B.x + dym*B.y - dzm*B.z)
+M4.set_pos(Bcm, -dxm*B.x - dym*B.y - dzm*B.z)
 M1.v2pt_theory(Bcm, N, B)
 M2.v2pt_theory(Bcm, N, B)
 M3.v2pt_theory(Bcm, N, B)
