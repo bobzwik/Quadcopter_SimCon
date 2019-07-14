@@ -41,22 +41,22 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     # vFlat = extended_states[:,1]
     # wFlat = extended_states[:,2]
 
-    xDes =     desiredStates[:,0]
-    yDes =     desiredStates[:,1]
-    zDes =     desiredStates[:,2]
-    phiDes =   desiredStates[:,3]*rad2deg
+    x_sp     = desiredStates[:,0]
+    y_sp     = desiredStates[:,1]
+    z_sp     = desiredStates[:,2]
+    phiDes   = desiredStates[:,3]*rad2deg
     thetaDes = desiredStates[:,4]*rad2deg
-    psiDes =   desiredStates[:,5]*rad2deg
-    xdotDes =  desiredStates[:,6]
-    ydotDes =  desiredStates[:,7]
-    zdotDes =  desiredStates[:,8]
-    pDes =     desiredStates[:,9]*rad2deg
-    qDes =     desiredStates[:,10]*rad2deg
-    rDes =     desiredStates[:,11]*rad2deg
+    psiDes   = desiredStates[:,5]*rad2deg
+    Vx_sp    = desiredStates[:,6]
+    Vy_sp    = desiredStates[:,7]
+    Vz_sp    = desiredStates[:,8]
+    pDes     = desiredStates[:,9]*rad2deg
+    qDes     = desiredStates[:,10]*rad2deg
+    rDes     = desiredStates[:,11]*rad2deg
 
-    uFlatDes = desiredStates[:,12]
-    vFlatDes = desiredStates[:,13]
-    wFlatDes = desiredStates[:,14]
+    x_thr_sp = desiredStates[:,12]
+    y_thr_sp = desiredStates[:,13]
+    z_thr_sp = desiredStates[:,14]
 
     
     # commands = utils.expoCmd(params, commands)
@@ -65,20 +65,21 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
 
     plt.figure()
     plt.plot(time, x, time, y, time, z)
+    plt.plot(time, x_sp, '--', time, y_sp, '--', time, z_sp, '--')
+
     plt.grid(True)
     plt.legend(['x','y','z'])
 
     plt.figure()
     plt.plot(time, xdot, time, ydot, time, zdot)
-    plt.plot(time, xdotDes, '--', time, ydotDes, '--', time, zdotDes, '--')
+    plt.plot(time, Vx_sp, '--', time, Vy_sp, '--', time, Vz_sp, '--')
     plt.grid(True)
-    plt.legend(['Vx','Vy','Vz'])
+    plt.legend(['Vx','Vy','Vz','Vx_sp','Vy_sp','Vz_sp'])
 
-    # plt.figure()
-    # plt.plot(time, uFlat, time, vFlat, time, wFlat)
-    # plt.plot(time, uFlatDes, '--', time, vFlatDes, '--', time, wFlatDes, '--')
-    # plt.grid(True)
-    # plt.legend(['uFlat','vFlat','wFlat'])
+    plt.figure()
+    plt.plot(time, x_thr_sp, time, y_thr_sp, time, z_thr_sp)
+    plt.grid(True)
+    plt.legend(['x_thr_sp','y_thr_sp','z_thr_sp'])
     
     plt.figure()
     plt.plot(time, phi, time, theta, time, psi)

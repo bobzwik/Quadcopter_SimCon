@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# The issue with this Euler angle controller is that for a given xdot=ydot command, the pitch and roll command are equal. 
-# However, according to rotation converters (https://www.andre-gaschler.com/rotationconverter/), the axis of rotation for an
-# equal pitch and roll command in the order ZYX (yaw-pitch-roll) is not in the plane x-y, but also has a z component.
-    # A pure pitch command would have its axis of rotation along x, and a pure roll command would have its axis of rotation along y.
-    # For a equal xdot and ydot command, one would imagine the axis of rotation of the drone to be only in the x-y plane.
-# But for a equal pitch and roll command, this is not the case.
-
 import numpy as np
 import matplotlib.pyplot as plt
 import trajectory as tr
@@ -16,7 +9,7 @@ import utils
 # import angleFunctions as af 
 
 
-trajOptions = ["position", "grid_velocity", "velocity", "altitude", "attitude"]
+trajOptions = ["position", "velocity", "altitude", "attitude"]
 
 def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     
@@ -35,8 +28,8 @@ def main():
     Ti = 0
     Ts = 0.005
     Tf = 6
-    trajType = trajOptions[4]
-    trajSelect = 3
+    trajType = trajOptions[0]
+    trajSelect = 1
 
     # Initialize Quadcopter, Controller, Results Matrix
     # ---------------------------

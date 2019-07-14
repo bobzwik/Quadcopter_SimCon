@@ -21,8 +21,8 @@ class Quadcopter:
         self.params["FF"] = ini_hover[0]         # Feed-Forward Command for Hover
         self.params["w_hover"] = ini_hover[1]    # Motor Speed for Hover
         self.params["thr_hover"] = ini_hover[2]
-        self.thr = np.ones([4,1])*ini_hover[2]
-        self.tor = np.ones([4,1])*ini_hover[3]
+        self.thr = np.ones(4)*ini_hover[2]
+        self.tor = np.ones(4)*ini_hover[3]
 
         # Initial State
         # ---------------------------
@@ -50,9 +50,8 @@ class Quadcopter:
         self.quat  = self.state[3:7]
         self.vel   = self.state[7:10]
         self.omega = self.state[10:13]
-        self.wMotor = np.array([[self.w1], [self.w2], [self.w3], [self.w4]])
-
-        self.vel_dot = np.array([[0],[0],[0],[0]])
+        self.wMotor = np.array([self.w1, self.w2, self.w3, self.w4])
+        self.vel_dot = np.array([0,0,0])
 
         self.extended_state()
         self.forces()
@@ -60,19 +59,17 @@ class Quadcopter:
 
     def extended_state(self):
         YPR = utils.QuatToYPR_ZYX(self.quat)
-        # print(YPR)
-        # print(YPR[::-1])
         self.euler = YPR[::-1] # flip YPR so that euler state = phi, theta, psi
         self.psi   = YPR[0]
         self.theta = YPR[1]
         self.phi   = YPR[2]
 
-        # Redo this with the 
-        velFlat = utils.xyzDotToUVW_Flat_quat(self.quat, self.xdot, self.ydot, self.zdot)
-        self.velFlat = velFlat
-        self.uFlat = velFlat[0]
-        self.vFlat = velFlat[1]
-        self.wFlat = velFlat[2]
+    #     # Redo this with the 
+    #     velFlat = utils.xyzDotToUVW_Flat_quat(self.quat, self.xdot, self.ydot, self.zdot)
+    #     self.velFlat = velFlat
+    #     self.uFlat = velFlat[0]
+    #     self.vFlat = velFlat[1]
+    #     self.wFlat = velFlat[2]
 
 
     def forces(self):
@@ -201,7 +198,6 @@ class Quadcopter:
     def update(self, t, Ts, cmd):
 
         prev_vel = self.vel    
-
         self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd,))[1]
         self.x     = self.state[0]
         self.y     = self.state[1]
@@ -226,7 +222,7 @@ class Quadcopter:
         self.quat  = self.state[3:7]
         self.vel   = self.state[7:10]
         self.omega = self.state[10:13]
-        self.wMotor = np.array([[self.w1], [self.w2], [self.w3], [self.w4]])
+        self.wMotor = np.array([self.w1, self.w2, self.w3, self.w4])
 
         self.vel_dot = (self.vel - prev_vel)/Ts
 
