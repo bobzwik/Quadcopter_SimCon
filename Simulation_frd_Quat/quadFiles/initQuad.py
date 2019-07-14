@@ -68,29 +68,29 @@ def init_cmd(params):
 
 def init_state(params):
     
-    x0 = 0      # m
-    y0 = 0      # m
-    z0 = 0      # m
-    phi0 = 0    # rad
+    x0     = 0  # m
+    y0     = 0  # m
+    z0     = 0  # m
+    phi0   = 0  # rad
     theta0 = 0  # rad
-    psi0 = 0    # rad
+    psi0   = 0  # rad
 
     quat = utils.YPRToQuat(psi0, theta0, phi0)
     
-    s = np.zeros([21])
-    s[0] = x0       # x
-    s[1] = y0       # y
-    s[2] = z0       # z
-    s[3] = quat[0]  # q0
-    s[4] = quat[1]  # q1
-    s[5] = quat[2]  # q2
-    s[6] = quat[3]  # q3
-    s[7] = 0        # xdot
-    s[8] = 0        # ydot
-    s[9] = 0        # zdot
+    s = np.zeros(21)
+    s[0]  = x0       # x
+    s[1]  = y0       # y
+    s[2]  = z0       # z
+    s[3]  = quat[0]  # q0
+    s[4]  = quat[1]  # q1
+    s[5]  = quat[2]  # q2
+    s[6]  = quat[3]  # q3
+    s[7]  = 0        # xdot
+    s[8]  = 0        # ydot
+    s[9]  = 0        # zdot
     s[10] = 0        # p
-    s[11] = 0       # q
-    s[12] = 0       # r
+    s[11] = 0        # q
+    s[12] = 0        # r
 
     w_hover = params["w_hover"] # Hovering motor speed
     wdot_hover = 0              # Hovering motor acc

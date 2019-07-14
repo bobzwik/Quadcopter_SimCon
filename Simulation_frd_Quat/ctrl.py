@@ -17,20 +17,24 @@ deg2rad = pi/180.0
 # Pv = 1.1
 # Dv = 0.15
 
+# Pz = 8.0
+# Pw = 15.0
+# Dw = 0.15
+
 # Puv = 0.9
 # Duv = 0.0001
 
-Py    = 1.6
-Pxdot = 1.1
-Dxdot = 0.15
+Py    = 1.0
+Pxdot = 1.0
+Dxdot = 0.1
 
-Px = 1.6
-Pydot = 1.1
-Dydot = 0.15 
+Px    = 1.0
+Pydot = 1.0
+Dydot = 0.1
 
-Pz    = 8.0
-Pzdot = 15.0
-Dzdot = 0.15
+Pz    = 1.0
+Pzdot = 1.0
+Dzdot = 0.1
 
 pos_P_gain = np.array([Px, Py, Pz])
 vel_P_gain = np.array([Pxdot, Pydot, Pzdot])
@@ -56,7 +60,7 @@ velMax = np.array([uMax, vMax, wMax])
 
 phiMax = 20*deg2rad
 thetaMax = 20*deg2rad
-angleMax = 22*deg2rad
+tiltMax = 22*deg2rad
 
 pMax = 200*deg2rad
 qMax = 200*deg2rad
@@ -66,8 +70,8 @@ rMax = 200*deg2rad
 class Control:
     
     def __init__(self, qd):
-        self.sDesCalc = np.zeros([15, 1])
-        self.cmd = np.ones([4,1])*qd.params["FF"]   # Motor 1 is front left, then clockwise numbering
+        self.sDesCalc = np.zeros(15)
+        self.cmd = np.ones(4)*qd.params["FF"]   # Motor 1 is front left, then clockwise numbering
         self.xPrevE     = 0
         self.yPrevE     = 0
         self.zPrevE     = 0
@@ -81,12 +85,12 @@ class Control:
         self.qPrevE     = 0
         self.rPrevE     = 0
 
-        self.pos_PrevE  = np.zeros([3,1])
-        self.vel_PrevE  = np.zeros([3,1])
+        self.pos_PrevE  = np.zeros(3)
+        self.vel_PrevE  = np.zeros(3)
 
-        self.uFlatPrevE = 0
-        self.vFlatPrevE = 0
-        self.velFlatPrevE = 0
+        # self.uFlatPrevE = 0
+        # self.vFlatPrevE = 0
+        # self.velFlatPrevE = 0
 
     
     def controller(self, qd, sDes, Ts, trajType, trajSelect):
@@ -108,39 +112,37 @@ class Control:
 
         self.pos_sp = sDes[0:3]
         self.vel_sp = sDes[6:9]
+        self.thrust_sp = sDes[12:15]
 
-        self.uFlatDes = sDes[12]
-        self.vFlatDes = sDes[13]
-        self.wFlatDes = sDes[14]
 
         # Select Controller
         # ---------------------------
-        if trajType == "attitude":
-            self.zCmd = qd.params["FF"]
-            self.attitude(qd, Ts)
-            self.rate(qd, Ts)
+        self.zCmd = qd.params["FF"]
+        self.pCmd = 0
+        self.qCmd = 0
+        self.rCmd = 0
+
+        # if trajType == "attitude":
+            # self.attitude(qd, Ts)
+            # self.rate(qd, Ts)
         if trajType == "altitude":
-            self.altitude(qd, Ts)
-            self.attitude(qd, Ts)
-            self.rate(qd, Ts)
+            self.z_pos_control(qd, Ts)
+            self.z_vel_control(qd, Ts)
+            # self.attitude(qd, Ts)
+            # self.rate(qd, Ts)
         if trajType == "velocity":
-            self.horiz_vel(qd, Ts)
-            self.altitude(qd, Ts)
-            self.attitude(qd, Ts)
-            self.rate(qd, Ts)
-        if trajType == "grid_velocity":
-            self.horiz_vel_grid(qd, Ts)    
-            self.horiz_vel(qd, Ts)
-            self.altitude(qd, Ts)
-            self.attitude(qd, Ts)
-            self.rate(qd, Ts)
+            self.z_pos_control(qd, Ts)
+            self.z_vel_control(qd, Ts)
+            self.xy_vel_control(qd, Ts)
+            # self.attitude(qd, Ts)
+            # self.rate(qd, Ts)
         if trajType == "position":
-            self.position(qd, Ts)
-            self.horiz_vel_grid(qd, Ts)    
-            self.horiz_vel(qd, Ts)
-            self.altitude(qd, Ts)
-            self.attitude(qd, Ts)
-            self.rate(qd, Ts)
+            self.z_pos_control(qd, Ts)
+            self.xy_pos_control(qd, Ts)    
+            self.z_vel_control(qd, Ts)
+            self.xy_vel_control(qd, Ts)
+            # self.attitude(qd, Ts)
+            # self.rate(qd, Ts)
 
         # Mixer
         # --------------------------- 
@@ -152,22 +154,25 @@ class Control:
 
         # Add calculated Desired States
         # ---------------------------         
-        self.sDesCalc[0] = self.xDes
-        self.sDesCalc[1] = self.yDes
-        self.sDesCalc[2] = self.zDes
+        # self.sDesCalc[0] = self.xDes
+        # self.sDesCalc[1] = self.yDes
+        # self.sDesCalc[2] = self.zDes
         self.sDesCalc[3] = self.phiDes
         self.sDesCalc[4] = self.thetaDes
         self.sDesCalc[5] = self.psiDes
-        self.sDesCalc[6] = self.xdotDes
-        self.sDesCalc[7] = self.ydotDes
-        self.sDesCalc[8] = self.zdotDes
+        # self.sDesCalc[6] = self.xdotDes
+        # self.sDesCalc[7] = self.ydotDes
+        # self.sDesCalc[8] = self.zdotDes
         self.sDesCalc[9] = self.pDes
         self.sDesCalc[10] = self.qDes
         self.sDesCalc[11] = self.rDes
 
-        self.sDesCalc[12] = self.uFlatDes
-        self.sDesCalc[13] = self.vFlatDes
-        self.sDesCalc[14] = self.wFlatDes
+        self.sDesCalc[0:3] = self.pos_sp
+        self.sDesCalc[6:9] = self.vel_sp
+
+        self.sDesCalc[12] = self.thrust_sp[0]
+        self.sDesCalc[13] = self.thrust_sp[1]
+        self.sDesCalc[14] = self.thrust_sp[2]
 
 
     def z_pos_control(self, qd, Ts):
@@ -179,7 +184,6 @@ class Control:
         self.vel_sp[2] = np.clip(self.vel_sp[2], -velMax[2], velMax[2])
 
         # Replace Previous Error
-        # ---------------------------
         self.pos_PrevE[2] = pos_z_error
 
     
@@ -192,93 +196,48 @@ class Control:
         self.vel_sp[0:2] = np.clip(self.vel_sp[0:2], -velMax[0:2], velMax[0:2])
 
         # Replace Previous Error
-        # ---------------------------
         self.pos_PrevE[0:2] = pos_xy_error
         
 
     def z_vel_control(self, qd, Ts):
         
-        # Z Velocity Control
+        # Z Velocity Control (Thrust in D-direction)
         # ---------------------------
         vel_z_error = self.vel_sp[2] - qd.vel[2]
-        thrust_z_sp = vel_P_gain[2]*vel_z_error + vel_D_gain[2]*qd.vel_dot - qd.params["thr_hover"]
+        thrust_z_sp = vel_P_gain[2]*vel_z_error + vel_D_gain[2]*qd.vel_dot[2] - qd.params["thr_hover"]
         
-        
-        self.thrust_sp[2] = np.clip.(thrust_z_sp,)
+        # The Thrust limits are negated and swapped due to NED-frame
+        uMax = -qd.params["minThr"]
+        uMin = -qd.params["maxThr"]
+
+        # Saturate thrust setpoint in D-direction
+        self.thrust_sp[2] = np.clip(thrust_z_sp, uMin, uMax)
+
+        # Replace Previous Error
         self.vel_PrevE[2] = vel_z_error
 
     
     def xy_vel_control(self, qd, Ts):
-        vel_xy_error = self.vel_sp[0:2] - qd.vel[0:2]
-
-
-    
-
-    def horiz_vel_grid(self, qd, Ts):
-
-        # ydotDes, xdotDes conversion to uFlatDes, vFlatDes
+        
+        # XY Velocity Control (Thrust in NE-direction)
         # ---------------------------
-        uvwFlatDes = utils.xyzDotToUVW_Flat_euler(qd.phi, qd.theta, qd.psi, self.xdotDes, self.ydotDes, self.zdotDes)
-        uvwFlatDes = np.clip(uvwFlatDes[0:2].T, np.array([-uMax, -vMax]), np.array([uMax, vMax])).T
+        vel_xy_error = self.vel_sp[0:2] - qd.vel[0:2]
+        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error + vel_D_gain[0:2]*qd.vel_dot[0:2]
 
-        self.uFlatDes = uvwFlatDes[0]
-        self.vFlatDes = uvwFlatDes[1]
+        # Max allowed thrust in NE based on tilt and excess thrust
+        thrust_max_xy_tilt = abs(self.thrust_sp[2])*np.tan(tiltMax)
+        thrust_max_xy = sqrt(qd.params["maxThr"]**2 - self.thrust_sp[2]**2)
+        thrust_max_xy = min(thrust_max_xy, thrust_max_xy_tilt)
 
-    def horiz_vel(self, qd, Ts):
-        if qd.params["ifYawFix"]:
-            # uFlatError
-            # --------------------------- 
-            uFlatError = self.uFlatDes-qd.uFlat
+        # Saturate thrust in NE-direction
+        self.thrust_sp[0:2] = thrust_xy_sp
+        if (np.dot(self.thrust_sp[0:2].T, self.thrust_sp[0:2]) > thrust_max_xy**2):
+            mag = np.linalg.norm(self.thrust_sp[0:2])
+            self.thrust_sp[0:2] = thrust_xy_sp/mag*thrust_max_xy
 
-            # vFlatError
-            # --------------------------- 
-            vFlatError = self.vFlatDes-qd.vFlat
+        # Replace Previous Error
+        self.vel_PrevE[0:2] = vel_xy_error
         
-            # velFlat Control
-            # --------------------------- 
-            velFlatError = sqrt(self.uFlatDes**2 + self.vFlatDes**2) - sqrt(qd.uFlat**2 + qd.vFlat**2)
-            angleDes = Puv*velFlatError + Puv*Duv*(velFlatError-self.velFlatPrevE)/Ts
-            angleDes = np.clip(angleDes, -angleMax, angleMax)
-            
-            # Determine phiDes, thetaDes, psiDes
-            # --------------------------- 
-            # quaternion = [cos(angleDes/2), -vError/a, uError/a, 0], 
-            # where "a" is a coefficient that divides vError and uError in order to have a normalized quaternion
-            if (angleDes==0):
-                a = 1
-            else:
-                a = sqrt((uFlatError**2 + vFlatError**2)/(1-(cos(angleDes/2))**2))
-        
-            desQuat = np.array([cos(angleDes/2), vFlatError/a, -uFlatError/a, 0])
-
-            YPR = utils.QuatToYPR_ZYX(desQuat)
-            self.phiDes   = YPR[2]
-            self.thetaDes = YPR[1]
-            self.psiDes   = self.psiDes+YPR[0]
-            
-            # Replace Previous Error
-            # ---------------------------
-            self.uFlatPrevE = uFlatError
-            self.vFlatPrevE = vFlatError
-            self.velFlatPrevE = velFlatError
-        
-        else:
-            # uFlat Control
-            # --------------------------- 
-            uFlatError = self.uFlatDes-qd.uFlat
-            thetaDes = -(Pu*uFlatError + Pu*Du*(uFlatError-self.uFlatPrevE)/Ts)
-            self.thetaDes = np.clip(thetaDes, -thetaMax, thetaMax)
-
-            # vFlat Control
-            # --------------------------- 
-            vFlatError = self.vFlatDes-qd.vFlat
-            phiDes = (Pv*vFlatError + Pv*Dv*(vFlatError-self.vFlatPrevE)/Ts)
-            self.phiDes = np.clip(phiDes, -phiMax, phiMax)
-
-            # Replace Previous Error
-            # ---------------------------
-            self.uFlatPrevE = uFlatError
-            self.vFlatPrevE = vFlatError
 
 
     def attitude(self, qd, Ts):
