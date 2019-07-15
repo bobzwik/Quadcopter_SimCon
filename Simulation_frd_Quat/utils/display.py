@@ -15,23 +15,23 @@ def fullprint(*args, **kwargs):
     np.set_printoptions(opt)
 
 def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, commands, wMotor_all, thrust, torque, desiredStates):
-    x =     pos_all[:,0]
-    y =     pos_all[:,1]
-    z =     pos_all[:,2]
-    q0 =    quat_all[:,0]
-    q1 =    quat_all[:,1]
-    q2 =    quat_all[:,2]
-    q3 =    quat_all[:,3]
-    xdot =  vel_all[:,0]
-    ydot =  vel_all[:,1]
-    zdot =  vel_all[:,2]
-    p =     omega_all[:,0]*rad2deg
-    q =     omega_all[:,1]*rad2deg
-    r =     omega_all[:,2]*rad2deg
-    w1 =    wMotor_all[:,0]
-    w2 =    wMotor_all[:,1]
-    w3 =    wMotor_all[:,2]
-    w4 =    wMotor_all[:,3]
+    x    = pos_all[:,0]
+    y    = pos_all[:,1]
+    z    = pos_all[:,2]
+    q0   = quat_all[:,0]
+    q1   = quat_all[:,1]
+    q2   = quat_all[:,2]
+    q3   = quat_all[:,3]
+    xdot = vel_all[:,0]
+    ydot = vel_all[:,1]
+    zdot = vel_all[:,2]
+    p    = omega_all[:,0]*rad2deg
+    q    = omega_all[:,1]*rad2deg
+    r    = omega_all[:,2]*rad2deg
+    w1   = wMotor_all[:,0]
+    w2   = wMotor_all[:,1]
+    w3   = wMotor_all[:,2]
+    w4   = wMotor_all[:,3]
 
     phi   = euler_all[:,0]*rad2deg
     theta = euler_all[:,1]*rad2deg
