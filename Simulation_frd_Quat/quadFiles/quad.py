@@ -58,11 +58,13 @@ class Quadcopter:
 
 
     def extended_state(self):
-        YPR = utils.QuatToYPR_ZYX(self.quat)
+        YPR = utils.quatToYPR_ZYX(self.quat)
         self.euler = YPR[::-1] # flip YPR so that euler state = phi, theta, psi
         self.psi   = YPR[0]
         self.theta = YPR[1]
         self.phi   = YPR[2]
+
+        self.dcm = utils.quat2Dcm(self.quat)
 
     #     # Redo this with the 
     #     velFlat = utils.xyzDotToUVW_Flat_quat(self.quat, self.xdot, self.ydot, self.zdot)
