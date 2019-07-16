@@ -112,6 +112,7 @@ class Control:
         self.rDes     = sDes[11]
 
         self.pos_sp = sDes[0:3]
+        self.eul_sp = sDes[3:6]
         self.vel_sp = sDes[6:9]
         self.thrust_sp = sDes[12:15]
 
@@ -142,6 +143,7 @@ class Control:
             self.xy_pos_control(quad, Ts)    
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
+            self.thrustToAttitude(quad, Ts)
             self.attitude(quad, Ts)
             # self.rate(quad, Ts)
 
@@ -238,6 +240,26 @@ class Control:
 
         # Replace Previous Error
         self.vel_PrevE[0:2] = vel_xy_error
+
+    def thrustToAttitude(self, quad, Ts):
+
+        yaw_sp = self.eul_sp[2]
+
+        # Desired body_z axis
+        body_z = -self.thrust_sp/norm(self.thrust_sp)
+        print(body_z)
+        # Vector of desired Yaw direction in XY plane, rotated by pi/2 (fake body_y axis)
+        y_C = np.array([-sin(yaw_sp), cos(yaw_sp), 0.0])
+        print(y_C)
+        body_x = np.cross(y_C, body_z)
+        body_x = body_x/norm(body_x)
+
+        body_y = np.cross(body_z, body_x)
+
+        # Desired rotation matrix
+        R_sp = np.array([body_x, body_y, body_z]).T
+        print(R_sp)
+
         
     def attitude(self, quad, Ts):
 
@@ -249,18 +271,24 @@ class Control:
         # Angle alpha and quaternion error between thrust orientations
         # alpha = np.arccos(np.dot(e_z, e_z_d))
         # print(np.cross(e_z, e_z_d))
-        # xyz_qe_red = np.sin(alpha/2)*np.cross(e_z, e_z_d)/norm(np.cross(e_z, e_z_d))
+        # xyz_qe_red = np.sin(alpha/2) * np.cross(e_z, e_z_d)/norm(np.cross(e_z, e_z_d))
         # qe_red = np.array([np.cos(alpha/2), xyz_qe_red[0], xyz_qe_red[1], xyz_qe_red[2]])
         # print(qe_red)
 
         qe_red = np.zeros(4)
-        qe_red[0] = np.dot(e_z, e_z_d) + sqrt(norm(e_z)**2 + norm(e_z_d)**2)
+        qe_red[0] = np.dot(e_z, e_z_d) + sqrt(norm(e_z)**2 * norm(e_z_d)**2)
         qe_red[1:4] = np.cross(e_z, e_z_d)
         qe_red = utils.quatNormalize(qe_red)
         print(qe_red)
 
         qd_red = utils.quatMultiply(quad.quat, qe_red)
         print(qd_red)
+
+        # qd_ful = 
+
+        # q_mix = utils.quatMultiply(utils.inverse(qd_red), qd_ful)
+
+
     # def attitude(self, quad, Ts):
        
     #     # Roll Angle Control

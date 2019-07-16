@@ -37,7 +37,7 @@ def sys_params():
     params["Kp"] = 1.0
     params["damp"] = 1.0
     params["ifexpo"] = bool(True)
-    params["ifYawFix"] = bool(False)
+    params["ifYawFix"] = bool(True)
     
     if params["ifexpo"]:
         params["maxCmd"] = 100

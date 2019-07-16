@@ -12,3 +12,7 @@ def quatMultiply(q, p):
                   [q[2],  q[3],  q[0], -q[1]],
                   [q[3], -q[2],  q[1],  q[0]]])
     return Q@p
+
+def inverse(q):
+    qinv = np.array([q[0], -q[1], -q[2], -q[3]])/norm(q)
+    return qinv
