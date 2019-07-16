@@ -49,49 +49,52 @@ Ptheta = Pphi
 Pq = Pp
 Dq = Dp 
 
-Ppsi = 6.0
+Ppsi = 2.0
 Pr = 15.0
 Dr = 0.4
 
-uMax = 3
-vMax = 3
-wMax = 3
+att_P_gain = np.array([Pphi, Ptheta, Ppsi])
+rate_P_gain = np.array([Pp, Pq, Pr])
+rate_D_gain = np.array([Dp, Dq, Dr])
+
+uMax = 3.0
+vMax = 3.0
+wMax = 3.0
 
 velMax = np.array([uMax, vMax, wMax])
 
-phiMax = 20*deg2rad
-thetaMax = 20*deg2rad
-tiltMax = 22*deg2rad
+# phiMax = 20*deg2rad
+# thetaMax = 20*deg2rad
+tiltMax = 22.0*deg2rad
 
-pMax = 200*deg2rad
-qMax = 200*deg2rad
-rMax = 200*deg2rad
+pMax = 200.0*deg2rad
+qMax = 200.0*deg2rad
+rMax = 100.0*deg2rad
 
+rateMax = np.array([pMax, qMax, rMax])
 
 class Control:
     
     def __init__(self, quad):
         self.sDesCalc = np.zeros(15)
         self.cmd = np.ones(4)*quad.params["FF"]   # Motor 1 is front left, then clockwise numbering
-        self.xPrevE     = 0
-        self.yPrevE     = 0
-        self.zPrevE     = 0
-        self.phiPrevE   = 0
-        self.thetaPrevE = 0
-        self.psiPrevE   = 0
-        self.xdotPrevE  = 0
-        self.ydotPrevE  = 0
-        self.zdotPrevE  = 0
-        self.pPrevE     = 0
-        self.qPrevE     = 0
-        self.rPrevE     = 0
+        # self.xPrevE     = 0
+        # self.yPrevE     = 0
+        # self.zPrevE     = 0
+        # self.phiPrevE   = 0
+        # self.thetaPrevE = 0
+        # self.psiPrevE   = 0
+        # self.xdotPrevE  = 0
+        # self.ydotPrevE  = 0
+        # self.zdotPrevE  = 0
+        # self.pPrevE     = 0
+        # self.qPrevE     = 0
+        # self.rPrevE     = 0
 
-        self.pos_PrevE  = np.zeros(3)
-        self.vel_PrevE  = np.zeros(3)
+        # self.pos_PrevE  = np.zeros(3)
+        # self.vel_PrevE  = np.zeros(3)
 
-        # self.uFlatPrevE = 0
-        # self.vFlatPrevE = 0
-        # self.velFlatPrevE = 0
+        self.setYawWeight()
 
     
     def controller(self, quad, sDes, Ts, trajType, trajSelect):
@@ -144,8 +147,8 @@ class Control:
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
-            self.attitude(quad, Ts)
-            # self.rate(quad, Ts)
+            self.attitude_control(quad, Ts)
+            self.rate_control(quad, Ts)
 
         # Mixer
         # --------------------------- 
@@ -166,12 +169,13 @@ class Control:
         # self.sDesCalc[6] = self.xdotDes
         # self.sDesCalc[7] = self.ydotDes
         # self.sDesCalc[8] = self.zdotDes
-        self.sDesCalc[9] = self.pDes
-        self.sDesCalc[10] = self.qDes
-        self.sDesCalc[11] = self.rDes
+        # self.sDesCalc[9] = self.pDes
+        # self.sDesCalc[10] = self.qDes
+        # self.sDesCalc[11] = self.rDes
 
         self.sDesCalc[0:3] = self.pos_sp
         self.sDesCalc[6:9] = self.vel_sp
+        self.sDesCalc[9:12] = self.rate_sp
 
         self.sDesCalc[12] = self.thrust_sp[0]
         self.sDesCalc[13] = self.thrust_sp[1]
@@ -183,11 +187,11 @@ class Control:
         # Z Position Control
         # --------------------------- 
         pos_z_error = self.pos_sp[2] - quad.pos[2]
-        self.vel_sp[2] = pos_P_gain[2]*pos_z_error + self.vel_sp[2]         # Be careful to reset vel_sp for next iteration
+        self.vel_sp[2] = pos_P_gain[2]*pos_z_error + self.vel_sp[2]
         self.vel_sp[2] = np.clip(self.vel_sp[2], -velMax[2], velMax[2])
 
         # Replace Previous Error
-        self.pos_PrevE[2] = pos_z_error
+        # self.pos_PrevE[2] = pos_z_error
 
     
     def xy_pos_control(self, quad, Ts):
@@ -195,11 +199,11 @@ class Control:
         # XY Position Control
         # --------------------------- 
         pos_xy_error = (self.pos_sp[0:2] - quad.pos[0:2])
-        self.vel_sp[0:2] = pos_P_gain[0:2]*pos_xy_error + self.vel_sp[0:2]  # Be careful to reset vel_sp for next iteration
+        self.vel_sp[0:2] = pos_P_gain[0:2]*pos_xy_error + self.vel_sp[0:2]
         self.vel_sp[0:2] = np.clip(self.vel_sp[0:2], -velMax[0:2], velMax[0:2])
 
         # Replace Previous Error
-        self.pos_PrevE[0:2] = pos_xy_error
+        # self.pos_PrevE[0:2] = pos_xy_error
         
 
     def z_vel_control(self, quad, Ts):
@@ -217,7 +221,7 @@ class Control:
         self.thrust_sp[2] = np.clip(thrust_z_sp, uMin, uMax)
 
         # Replace Previous Error
-        self.vel_PrevE[2] = vel_z_error
+        # self.vel_PrevE[2] = vel_z_error
 
     
     def xy_vel_control(self, quad, Ts):
@@ -225,7 +229,7 @@ class Control:
         # XY Velocity Control (Thrust in NE-direction)
         # ---------------------------
         vel_xy_error = self.vel_sp[0:2] - quad.vel[0:2]
-        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error + vel_D_gain[0:2]*quad.vel_dot[0:2]
+        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error + vel_D_gain[0:2]*quad.vel_dot[0:2] # Be sure it is right sign for the D part
 
         # Max allowed thrust in NE based on tilt and excess thrust
         thrust_max_xy_tilt = abs(self.thrust_sp[2])*np.tan(tiltMax)
@@ -239,131 +243,82 @@ class Control:
             self.thrust_sp[0:2] = thrust_xy_sp/mag*thrust_max_xy
 
         # Replace Previous Error
-        self.vel_PrevE[0:2] = vel_xy_error
+        # self.vel_PrevE[0:2] = vel_xy_error
 
+    
     def thrustToAttitude(self, quad, Ts):
 
         yaw_sp = self.eul_sp[2]
 
         # Desired body_z axis
         body_z = -self.thrust_sp/norm(self.thrust_sp)
-        print(body_z)
+        
         # Vector of desired Yaw direction in XY plane, rotated by pi/2 (fake body_y axis)
         y_C = np.array([-sin(yaw_sp), cos(yaw_sp), 0.0])
-        print(y_C)
+        
+        # Desired body_x axis
         body_x = np.cross(y_C, body_z)
         body_x = body_x/norm(body_x)
-
+        
+        # Desired body_y axis
         body_y = np.cross(body_z, body_x)
 
         # Desired rotation matrix
         R_sp = np.array([body_x, body_y, body_z]).T
-        print(R_sp)
-
+        # print(R_sp)
+        self.qd_full = utils.RotToQuat(R_sp)
         
-    def attitude(self, quad, Ts):
+        
+    def attitude_control(self, quad, Ts):
 
         # Current thrust orientation e_z and desired thrust orientation e_z_d
         e_z = quad.dcm[:,2]
         e_z_d = -self.thrust_sp/norm(self.thrust_sp)
-        print(e_z)
-        print(e_z_d)
-        # Angle alpha and quaternion error between thrust orientations
-        # alpha = np.arccos(np.dot(e_z, e_z_d))
-        # print(np.cross(e_z, e_z_d))
-        # xyz_qe_red = np.sin(alpha/2) * np.cross(e_z, e_z_d)/norm(np.cross(e_z, e_z_d))
-        # qe_red = np.array([np.cos(alpha/2), xyz_qe_red[0], xyz_qe_red[1], xyz_qe_red[2]])
-        # print(qe_red)
+        # print(e_z)
+        # print(e_z_d)
 
         qe_red = np.zeros(4)
         qe_red[0] = np.dot(e_z, e_z_d) + sqrt(norm(e_z)**2 * norm(e_z_d)**2)
         qe_red[1:4] = np.cross(e_z, e_z_d)
         qe_red = utils.quatNormalize(qe_red)
-        print(qe_red)
-
-        qd_red = utils.quatMultiply(quad.quat, qe_red)
-        print(qd_red)
-
-        # qd_ful = 
-
-        # q_mix = utils.quatMultiply(utils.inverse(qd_red), qd_ful)
-
-
-    # def attitude(self, quad, Ts):
-       
-    #     # Roll Angle Control
-    #     # --------------------------- 
-    #     phiError = self.phiDes-quad.phi
-    #     self.phidotDes = Pphi*phiError
-    #     print(quad.phi)
-    #     print(phiError)    
-    #     # Pitch Angle Control
-    #     # --------------------------- 
-    #     thetaError = self.thetaDes-quad.theta
-    #     self.thetadotDes = Ptheta*thetaError
+        # print(qe_red)
+        self.qd_red = utils.quatMultiply(quad.quat, qe_red)
         
-    #     # Yaw Angle Control
-    #     # --------------------------- 
-    #     psiError = self.psiDes-quad.psi
-    #     # print(quad.psi)
-    #     # print(psiError)
-    #     self.psidotDes = Ppsi*psiError
+        q_mix = utils.quatMultiply(utils.inverse(self.qd_red), self.qd_full)
+        q_mix = q_mix*np.sign(q_mix[0])
+        # print(self.qd_full)
+        # print(self.qd_red)
+        # print(q_mix)
+
+        # print(np.arccos(q_mix[0]))
+        # print(np.arcsin(q_mix[3]))
+        q_mix[0] = np.clip(q_mix[0], -1.0, 1.0)
+        q_mix[3] = np.clip(q_mix[3], -1.0, 1.0)
+        self.qd = utils.quatMultiply(self.qd_red, np.array([cos(self.yaw_w*np.arccos(q_mix[0])), 0, 0, sin(self.yaw_w*np.arcsin(q_mix[3]))]))
+        # print(self.yaw_w)
+        # print(att_P_gain)
+        self.qe = utils.quatMultiply(utils.inverse(quad.quat), self.qd)
+
+        self.rate_sp = (2.0*np.sign(self.qe[0])*self.qe[1:4])*att_P_gain
+        # print(self.rate_sp)
+        self.rate_sp = np.clip(self.rate_sp, -rateMax, rateMax)
+        # If needed to feed-forward Yaw rate setpoint, this is where i should. See AttitudeControl.cpp from PX4
+
+
+    def rate_control(self, quad, Ts):
         
-    #     # print(quad.psi)
-    #     # print(self.psiDes)
-    #     # print(psiError)
-    #     # print(self.psidotDes)
-
-    #     # Replace Previous Error
-    #     # --------------------------- 
-    #     self.phiPrevE = phiError
-    #     self.thetaPrevE = thetaError
-    #     self.psiPrevE = psiError
-
-    #     # phidotDes, thetadotDes, psidotDes conversion to pDes, qDes, rDes
-    #     # ---------------------------
-    #     pqrDes = utils.phiThetaPsiDotToPQR(quad.phi, quad.theta, quad.psi, self.phidotDes, self.thetadotDes, self.psidotDes)
-    #     pqrDes = np.clip(pqrDes.T, np.array([-pMax, -qMax, -rMax]), np.array([pMax, qMax, rMax])).T
-    #     self.pDes = pqrDes[0]
-    #     self.qDes = pqrDes[1]
-    #     self.rDes = pqrDes[2]
-    #     print(pqrDes)
+        # Rate Control
+        # ---------------------------
+        rate_error = self.rate_sp - quad.omega
+        self.actuatorCtrl = rate_P_gain*rate_error - rate_D_gain*quad.omega_dot     # Be sure it is right sign for the D part
+        print(self.actuatorCtrl)
 
 
-    def rate(self, quad, Ts):
-        
-        # Roll Rate Control
-        # ---------------------------       
-        pError = self.pDes-quad.p
-        self.pCmd = Pp*pError + Pp*Dp*(pError-self.pPrevE)/Ts
-        print(quad.p)
-        print(pError)
-        print(self.pCmd)
-        # Pitch Rate Control
-        # --------------------------- 
-        qError = self.qDes-quad.q
-        self.qCmd = Pq*qError + Pq*Dq*(qError-self.qPrevE)/Ts
-        
-        # Yaw Rate Control
-        # ---------------------------   
-        rError = self.rDes-quad.r
-        # print(quad.r)
-        # print(rError)
-        self.rCmd = Pr*rError + Pr*Dr*(rError-self.rPrevE)/Ts
-        # print(self.rCmd)
-        
-        # print(quad.r)
-        # print(rError)
-        # print(self.rDes)
+    def setYawWeight(self):
+        roll_pitch_gain = 0.5*(att_P_gain[0] + att_P_gain[1])
+        self.yaw_w = np.clip(att_P_gain[2]/roll_pitch_gain, 0.0, 1.0)
 
-        # Replace Previous Error
-        # --------------------------- 
-        self.pPrevE = pError
-        self.qPrevE = qError
-        self.rPrevE = rError
-
-
-
+        att_P_gain[2] = roll_pitch_gain
 
 
     

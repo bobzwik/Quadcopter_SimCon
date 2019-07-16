@@ -52,6 +52,7 @@ class Quadcopter:
         self.omega = self.state[10:13]
         self.wMotor = np.array([self.w1, self.w2, self.w3, self.w4])
         self.vel_dot = np.array([0,0,0])
+        self.omega_dot = np.array([0,0,0])
 
         self.extended_state()
         self.forces()
@@ -199,7 +200,8 @@ class Quadcopter:
 
     def update(self, t, Ts, cmd):
 
-        prev_vel = self.vel    
+        prev_vel   = self.vel
+        prev_omega = self.omega     
         self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd,))[1]
         self.x     = self.state[0]
         self.y     = self.state[1]
@@ -227,6 +229,7 @@ class Quadcopter:
         self.wMotor = np.array([self.w1, self.w2, self.w3, self.w4])
 
         self.vel_dot = (self.vel - prev_vel)/Ts
+        self.omega_dot = (self.omega - prev_omega)/Ts
 
         self.extended_state()
         self.forces()
