@@ -11,23 +11,26 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
 import math
+import utils
 
 numFrames = 20
 
 
-def updateLines(i, s_result, params, lines, ax):
+def updateLines(i, pos_all, quat_all, params, lines, ax):
     
-    s_result = s_result[i*numFrames]
-    x =     s_result[0]
-    y =     s_result[1]
-    z =     s_result[2]
+    pos = pos_all[i*numFrames]
+    x = pos[0]
+    y = pos[1]
+    z = -pos[2]
 
     dxm = params["dxm"]
     dym = params["dym"]
     dzm = params["dzm"]
     
-    R = rotationMatrix(s_result)
-    motorPoints = np.array([[dxm, dym, dzm], [0, 0, 0], [dxm, -dym, dzm], [-dxm, -dym, dzm], [0, 0, 0], [-dxm, dym, dzm]])
+    quat = quat_all[i*numFrames]
+    quat = np.array([-quat[0], quat[1], quat[2], quat[3]])
+    R = utils.quat2Dcm(quat)    
+    motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
     motorPoints = np.dot(R, np.transpose(motorPoints))
     motorPoints[0,:] += x 
     motorPoints[1,:] += y 
@@ -41,36 +44,37 @@ def updateLines(i, s_result, params, lines, ax):
     
     return lines
     
-def rotationMatrix(s_result):
+# def rotationMatrix(s_result):
     
-    phi =   s_result[3]
-    theta = s_result[4]
-    psi =   s_result[5]
-    cphi = math.cos(phi)
-    cthe = math.cos(theta)
-    cpsi = math.cos(psi)
-    sphi = math.sin(phi)
-    sthe = math.sin(theta)
-    spsi = math.sin(psi)
+#     phi =   s_result[3]
+#     theta = s_result[4]
+#     psi =   s_result[5]
+#     cphi = math.cos(phi)
+#     cthe = math.cos(theta)
+#     cpsi = math.cos(psi)
+#     sphi = math.sin(phi)
+#     sthe = math.sin(theta)
+#     spsi = math.sin(psi)
     
-    R = np.array([[cthe*cpsi, sphi*sthe*cpsi - cphi*spsi, cphi*sthe*cpsi + sphi*spsi],
-                  [cthe*spsi, sphi*sthe*spsi + cphi*cpsi, cphi*sthe*spsi - sphi*cpsi],
-                  [    -sthe,                  sphi*cthe,                  cphi*cthe]])
+#     R = np.array([[cthe*cpsi, sphi*sthe*cpsi - cphi*spsi, cphi*sthe*cpsi + sphi*spsi],
+#                   [cthe*spsi, sphi*sthe*spsi + cphi*cpsi, cphi*sthe*spsi - sphi*cpsi],
+#                   [    -sthe,                  sphi*cthe,                  cphi*cthe]])
     
-    return R
+#     return R
 
-def ini_plot(fig, ax, s_result, params):
+def ini_plot(fig, ax, pos, quat, params):
     
     dxm = params["dxm"]
     dym = params["dym"]
     dzm = params["dzm"]
     
-    x =     s_result[0]
-    y =     s_result[1]
-    z =     s_result[2]
+    x = pos[0]
+    y = pos[1]
+    z = -pos[2]
 
-    R = rotationMatrix(s_result)
-    motorPoints = np.array([[dxm, dym, dzm], [0, 0, 0], [dxm, -dym, dzm], [-dxm, -dym, dzm], [0, 0, 0], [-dxm, dym, dzm]])
+    quat = np.array([-quat[0], quat[1], quat[2], quat[3]])
+    R = utils.quat2Dcm(quat)
+    motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
     motorPoints = np.dot(R, np.transpose(motorPoints))
     motorPoints[0,:] += x 
     motorPoints[1,:] += y 
@@ -81,11 +85,11 @@ def ini_plot(fig, ax, s_result, params):
     
     return lines
 
-def sameAxisAnimation(s_result, Ts, params):
+def sameAxisAnimation(pos_all, quat_all, Ts, params):
     
-    x =     s_result[:,0]
-    y =     s_result[:,1]
-    z =     s_result[:,2]
+    x = pos_all[:,0]
+    y = pos_all[:,1]
+    z = -pos_all[:,2]
 
     fig = plt.figure()
     ax = p3.Axes3D(fig)
@@ -105,52 +109,12 @@ def sameAxisAnimation(s_result, Ts, params):
     ax.set_zlabel('Z')
     ax.set_title('3D Test')
     
-    lines = ini_plot(fig, ax, s_result[0], params)
+    lines = ini_plot(fig, ax, pos_all[0], quat_all[0], params)
     
     # Creating the Animation object
-    line_ani = animation.FuncAnimation(fig, updateLines, int(len(x)/numFrames), fargs=(s_result, params, lines, ax), interval=int(Ts*1000*numFrames), blit=False, repeat=True)
+    line_ani = animation.FuncAnimation(fig, updateLines, int(len(x)/numFrames), fargs=(pos_all, quat_all, params, lines, ax), interval=int(Ts*1000*numFrames), blit=False, repeat=True)
     
     plt.show()
     
     return line_ani
 
-##
-#x = np.linspace(0,0)
-#y = np.linspace(0,0)
-#z = np.linspace(0,0)
-#phi = np.linspace(0,0)
-#theta = np.linspace(0,0)
-#psi = np.linspace(0,pi)
-#
-#params = {}
-#params["dxm"] = 0.16 
-#params["dym"] = 0.16
-#params["dzm"] = 0.05
-#    
-#s_result = np.transpose(np.array([x,y,z,phi,theta,psi]))
-#
-#line_ani = sameAxisAnimation(s_result, 0.005, params)
-#
-#fig = plt.figure()
-#ax = p3.Axes3D(fig)
-#    
-## Setting the axes properties
-#extraEachSide = 1
-#maxRange = 0.5*np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() + extraEachSide
-#mid_x = 0.5*(x.max()+x.min())
-#mid_y = 0.5*(y.max()+y.min())
-#mid_z = 0.5*(z.max()+z.min())
-#    
-#ax.set_xlim3d([mid_x-maxRange, mid_x+maxRange])
-#ax.set_xlabel('X')
-#ax.set_ylim3d([mid_y-maxRange, mid_y+maxRange])
-#ax.set_ylabel('Y')
-#ax.set_zlim3d([mid_z-maxRange, mid_z+maxRange])
-#ax.set_zlabel('Z')
-#ax.set_title('3D Test')
-#    
-#lines = ini_plot(fig, ax, s_result[0], params)
-## Creating the Animation object
-#line_ani = animation.FuncAnimation(fig, updateLines, len(x), fargs=(s_result, params, lines), interval=50, blit=False, repeat=True)
-#    
-#plt.show()
