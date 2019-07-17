@@ -2,23 +2,32 @@
 
 import numpy as np
 
+def mixerFM(quad, thr, moment):
+    t = np.array([thr, moment[0], moment[1], moment[2]])
+    w_cmd = np.sqrt(np.clip(np.dot(quad.params["mixerFMinv"], t), quad.params["minWmotor"]**2, quad.params["maxWmotor"]**2))
+
+    return w_cmd
+
+
 def mixer(throttle, pCmd, qCmd, rCmd, quad):
     maxCmd = quad.params["maxCmd"]
     minCmd = quad.params["minCmd"]
-
-    # rCmd = 0
 
     cmd = np.zeros([4, 1])
     cmd[0] = throttle + pCmd + qCmd - rCmd
     cmd[1] = throttle - pCmd + qCmd + rCmd
     cmd[2] = throttle - pCmd - qCmd - rCmd
-    cmd[3] = throttle + pCmd - qCmd + rCmd # fixed rCmd, not pCmd and qCmd
+    cmd[3] = throttle + pCmd - qCmd + rCmd
     
     cmd[0] = min(max(cmd[0], minCmd), maxCmd)
     cmd[1] = min(max(cmd[1], minCmd), maxCmd)
     cmd[2] = min(max(cmd[2], minCmd), maxCmd)
     cmd[3] = min(max(cmd[3], minCmd), maxCmd)
     
+    # Add Exponential to command
+    # ---------------------------
+    cmd = expoCmd(quad.params, cmd)
+
     return cmd
 
 def expoCmd(params, cmd):
@@ -31,14 +40,4 @@ def expoCmdInv(params, cmd):
     if params["ifexpo"]:
         cmd = (cmd/10)**2
     
-    return cmd
-
-def mixerFM(quad, thr, moment):
-    print(quad.params["mixerFM"])
-    print(quad.params["mixerFMinv"])
-    t = np.array([thr, moment[0], moment[1], moment[2]])
-    cmd = np.sqrt(np.matmul(quad.params["mixerFMinv"], t))
-    print(t)
-    print(cmd)
-
     return cmd

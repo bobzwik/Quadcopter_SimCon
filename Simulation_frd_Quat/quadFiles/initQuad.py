@@ -38,8 +38,10 @@ def sys_params():
     params["tau"] = 0.015
     params["kp"] = 1.0
     params["damp"] = 1.0
-    params["minThr"] = 0.1*4
-    params["maxThr"] = 9.18*4
+    params["minThr"] = 0.1*4    # Minimum total thrust
+    params["maxThr"] = 9.18*4   # Maximum total thrust
+    params["minWmotor"] = 75    # Minimum motor rotation speed (rad/s)
+    params["maxWmotor"] = 925   # Maximum motor rotation speed (rad/s)
     params["ifexpo"] = bool(False)
     params["ifYawFix"] = bool(False)
     
@@ -58,8 +60,9 @@ def makeMixerFM(params):
     kTh = params["kTh"]
     kTo = params["kTo"] 
 
+    # Motor 1 is front left, then clockwise numbering
     mixerFM = np.array([[    kTh,      kTh,      kTh,      kTh],
-                        [dym*kTh, -dym*kTh,  dym*kTh, -dym*kTh],
+                        [dym*kTh, -dym*kTh,  -dym*kTh, dym*kTh],
                         [dxm*kTh,  dxm*kTh, -dxm*kTh, -dxm*kTh],
                         [   -kTo,      kTo,     -kTo,      kTo]])
     
