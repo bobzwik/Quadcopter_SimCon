@@ -98,7 +98,7 @@ class Quadcopter:
         c1   = self.params["motorc1"]
         c0   = self.params["motorc0"]
         tau  = self.params["tau"]
-        Kp   = self.params["Kp"]
+        kp   = self.params["kp"]
         damp = self.params["damp"]
         db   = self.params["motordeadband"]
     
@@ -131,10 +131,10 @@ class Quadcopter:
         uMotor = cmd*c1 + c0    # Motor speed in relation to cmd
         uMotor[cmd < db] = 0    # Apply motor deadband
 
-        wddotMotor1 = (-2.0*damp*tau*wdotMotor1 - wMotor1 + Kp*uMotor[0])/(tau**2)
-        wddotMotor2 = (-2.0*damp*tau*wdotMotor2 - wMotor2 + Kp*uMotor[1])/(tau**2)
-        wddotMotor3 = (-2.0*damp*tau*wdotMotor3 - wMotor3 + Kp*uMotor[2])/(tau**2)
-        wddotMotor4 = (-2.0*damp*tau*wdotMotor4 - wMotor4 + Kp*uMotor[3])/(tau**2)
+        wddotMotor1 = (-2.0*damp*tau*wdotMotor1 - wMotor1 + kp*uMotor[0])/(tau**2)
+        wddotMotor2 = (-2.0*damp*tau*wdotMotor2 - wMotor2 + kp*uMotor[1])/(tau**2)
+        wddotMotor3 = (-2.0*damp*tau*wdotMotor3 - wMotor3 + kp*uMotor[2])/(tau**2)
+        wddotMotor4 = (-2.0*damp*tau*wdotMotor4 - wMotor4 + kp*uMotor[3])/(tau**2)
     
         wMotor = np.array([wMotor1, wMotor2, wMotor3, wMotor4])
         thrust = kTh*wMotor*wMotor

@@ -32,3 +32,13 @@ def expoCmdInv(params, cmd):
         cmd = (cmd/10)**2
     
     return cmd
+
+def mixerFM(quad, thr, moment):
+    print(quad.params["mixerFM"])
+    print(quad.params["mixerFMinv"])
+    t = np.array([thr, moment[0], moment[1], moment[2]])
+    cmd = np.sqrt(np.matmul(quad.params["mixerFMinv"], t))
+    print(t)
+    print(cmd)
+
+    return cmd
