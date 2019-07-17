@@ -90,7 +90,7 @@ def main():
     # View Results
     # ---------------------------
     utils.makeFigures(quad.params, t_all, pos_all, vel_all, quat_all, omega_all, euler_all, w_cmd_all, wMotor_all, thr_all, tor_all, sDes_all)
-    # ani = utils.sameAxisAnimation(s_all, Ts, quad.params)
+    ani = utils.sameAxisAnimation(pos_all, quat_all, Ts, quad.params)
     plt.show()
 
 if __name__ == "__main__":
