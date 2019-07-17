@@ -59,20 +59,20 @@ class Quadcopter:
 
 
     def extended_state(self):
+        self.dcm = utils.quat2Dcm(self.quat)
+
         YPR = utils.quatToYPR_ZYX(self.quat)
         self.euler = YPR[::-1] # flip YPR so that euler state = phi, theta, psi
         self.psi   = YPR[0]
         self.theta = YPR[1]
         self.phi   = YPR[2]
 
-        self.dcm = utils.quat2Dcm(self.quat)
-
-    #     # Redo this with the 
-    #     velFlat = utils.xyzDotToUVW_Flat_quat(self.quat, self.xdot, self.ydot, self.zdot)
-    #     self.velFlat = velFlat
-    #     self.uFlat = velFlat[0]
-    #     self.vFlat = velFlat[1]
-    #     self.wFlat = velFlat[2]
+        # Redo this with the 
+        # velFlat = utils.xyzDotToUVW_Flat_quat(self.quat, self.xdot, self.ydot, self.zdot)
+        # self.velFlat = velFlat
+        # self.uFlat = velFlat[0]
+        # self.vFlat = velFlat[1]
+        # self.wFlat = velFlat[2]
 
 
     def forces(self):
@@ -128,9 +128,10 @@ class Quadcopter:
 
         # Motor Dynamics and Rotor forces (Second Order System: https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)
         # ---------------------------
-        uMotor = cmd*c1 + c0    # Motor speed in relation to cmd
-        uMotor[cmd < db] = 0    # Apply motor deadband
-
+        # uMotor = cmd*c1 + c0    # Motor speed in relation to cmd
+        # uMotor[cmd < db] = 0    # Apply motor deadband
+        
+        uMotor = cmd
         wddotMotor1 = (-2.0*damp*tau*wdotMotor1 - wMotor1 + kp*uMotor[0])/(tau**2)
         wddotMotor2 = (-2.0*damp*tau*wdotMotor2 - wMotor2 + kp*uMotor[1])/(tau**2)
         wddotMotor3 = (-2.0*damp*tau*wdotMotor3 - wMotor3 + kp*uMotor[2])/(tau**2)

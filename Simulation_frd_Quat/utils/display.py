@@ -44,24 +44,30 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     x_sp     = desiredStates[:,0]
     y_sp     = desiredStates[:,1]
     z_sp     = desiredStates[:,2]
-    phiDes   = desiredStates[:,3]*rad2deg
-    thetaDes = desiredStates[:,4]*rad2deg
-    psiDes   = desiredStates[:,5]*rad2deg
-    Vx_sp    = desiredStates[:,6]
-    Vy_sp    = desiredStates[:,7]
-    Vz_sp    = desiredStates[:,8]
-    pDes     = desiredStates[:,9]*rad2deg
-    qDes     = desiredStates[:,10]*rad2deg
-    rDes     = desiredStates[:,11]*rad2deg
+    q0Des    = desiredStates[:,3]
+    q1Des    = desiredStates[:,4]
+    q2Des    = desiredStates[:,5]
+    q3Des    = desiredStates[:,6]
+    Vx_sp    = desiredStates[:,7]
+    Vy_sp    = desiredStates[:,8]
+    Vz_sp    = desiredStates[:,9]
+    pDes     = desiredStates[:,10]*rad2deg
+    qDes     = desiredStates[:,11]*rad2deg
+    rDes     = desiredStates[:,12]*rad2deg
 
-    x_thr_sp = desiredStates[:,12]
-    y_thr_sp = desiredStates[:,13]
-    z_thr_sp = desiredStates[:,14]
+    x_thr_sp = desiredStates[:,13]
+    y_thr_sp = desiredStates[:,14]
+    z_thr_sp = desiredStates[:,15]
 
+    psiDes   = np.zeros(q0Des.shape[0])
+    thetaDes = np.zeros(q0Des.shape[0])
+    phiDes   = np.zeros(q0Des.shape[0])
+    for ii in range(q0Des.shape[0]):
+        YPR = utils.quatToYPR_ZYX(desiredStates[ii,3:7])
+        psiDes[ii]   = YPR[0]*rad2deg
+        thetaDes[ii] = YPR[1]*rad2deg
+        phiDes[ii]   = YPR[2]*rad2deg
     
-    # commands = utils.expoCmd(params, commands)
-    uMotor = commands*params["motorc1"] + params["motorc0"]    # Motor speed in relation to cmd
-    uMotor[commands < params["motordeadband"]] = 0              # Apply motor deadband
 
     plt.figure()
     plt.plot(time, x, time, y, time, z)
@@ -95,7 +101,7 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     
     plt.figure()
     plt.plot(time, w1, time, w2, time, w3, time, w4)
-    plt.plot(time, uMotor[:,0], '--', time, uMotor[:,1], '--', time, uMotor[:,2], '--', time, uMotor[:,3], '--')
+    plt.plot(time, commands[:,0], '--', time, commands[:,1], '--', time, commands[:,2], '--', time, commands[:,3], '--')
     plt.grid(True)
     plt.legend(['w1','w2','w3','w4'])
 
@@ -109,10 +115,10 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.grid(True)
     plt.legend(['tor1','tor2','tor3','tor4'])
 
-    plt.figure()
-    plt.plot(time, torque[:,0]+torque[:,2]-2*torque[0,0], time, -torque[:,1]-torque[:,3]+2*torque[0,0])
-    plt.grid(True)
-    plt.legend(['tor1+3 (difference from hover)','tor2+4 (difference from hover)'])
+    # plt.figure()
+    # plt.plot(time, torque[:,0]+torque[:,2]-2*torque[0,0], time, -torque[:,1]-torque[:,3]+2*torque[0,0])
+    # plt.grid(True)
+    # plt.legend(['tor1+3 (difference from hover)','tor2+4 (difference from hover)'])
     
     # plt.show()
     

@@ -27,7 +27,7 @@ def main():
     # --------------------------- 
     Ti = 0
     Ts = 0.005
-    Tf = 6
+    Tf = 10
     trajType = trajOptions[0]
     trajSelect = 1
 
@@ -44,7 +44,7 @@ def main():
     omega_all = quad.omega.T
     euler_all = quad.euler.T
     sDes_all  = ctrl.sDesCalc.T
-    cmd_all   = ctrl.cmd.T
+    w_cmd_all = ctrl.w_cmd.T
     wMotor_all= quad.wMotor.T
     thr_all   = quad.thr.T
     tor_all   = quad.tor.T
@@ -65,7 +65,7 @@ def main():
 
         # ctrl.cmd = np.array([52,51,52,51])
 
-        quad.update(t, Ts, ctrl.cmd)
+        quad.update(t, Ts, ctrl.w_cmd)
         t += Ts
 
         print("{:.3f}".format(t))
@@ -77,7 +77,7 @@ def main():
         omega_all = np.vstack((omega_all, quad.omega.T))
         euler_all = np.vstack((euler_all, quad.euler.T))
         sDes_all  = np.vstack((sDes_all, ctrl.sDesCalc.T))
-        cmd_all   = np.vstack((cmd_all, ctrl.cmd.T))
+        w_cmd_all = np.vstack((w_cmd_all, ctrl.w_cmd.T))
         wMotor_all= np.vstack((wMotor_all, quad.wMotor.T))
         thr_all   = np.vstack((thr_all, quad.thr.T))
         tor_all   = np.vstack((tor_all, quad.tor.T))
@@ -89,7 +89,7 @@ def main():
 
     # View Results
     # ---------------------------
-    utils.makeFigures(quad.params, t_all, pos_all, vel_all, quat_all, omega_all, euler_all, cmd_all, wMotor_all, thr_all, tor_all, sDes_all)
+    utils.makeFigures(quad.params, t_all, pos_all, vel_all, quat_all, omega_all, euler_all, w_cmd_all, wMotor_all, thr_all, tor_all, sDes_all)
     # ani = utils.sameAxisAnimation(s_all, Ts, quad.params)
     plt.show()
 

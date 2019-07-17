@@ -26,31 +26,31 @@ deg2rad = pi/180.0
 # Duv = 0.0001
 
 Py    = 1.0
-Pxdot = 1.0
-Dxdot = 0.1
+Pxdot = 5.0
+Dxdot = 0.01
 
-Px    = 1.0
-Pydot = 1.0
-Dydot = 0.1
+Px    = Py
+Pydot = Pxdot
+Dydot = Dxdot
 
-Pz    = 1.0
-Pzdot = 1.0
-Dzdot = 0.1
+Pz    = 2.0
+Pzdot = 6.0
+Dzdot = 0.8
 
 pos_P_gain = np.array([Px, Py, Pz])
 vel_P_gain = np.array([Pxdot, Pydot, Pzdot])
 vel_D_gain = np.array([Dxdot, Dydot, Dzdot])
 
 Pphi = 8.0
-Pp = 4.0
-Dp = 0.1
+Pp = 1.5
+Dp = 0.04
 
 Ptheta = Pphi
 Pq = Pp
 Dq = Dp 
 
-Ppsi = 0.0
-Pr = 4.0
+Ppsi = 0.8
+Pr = 1.0
 Dr = 0.1
 
 att_P_gain = np.array([Pphi, Ptheta, Ppsi])
@@ -65,7 +65,7 @@ velMax = np.array([uMax, vMax, wMax])
 
 # phiMax = 20*deg2rad
 # thetaMax = 20*deg2rad
-tiltMax = 22.0*deg2rad
+tiltMax = 25.0*deg2rad
 
 pMax = 200.0*deg2rad
 qMax = 200.0*deg2rad
@@ -76,24 +76,8 @@ rateMax = np.array([pMax, qMax, rMax])
 class Control:
     
     def __init__(self, quad):
-        self.sDesCalc = np.zeros(15)
-        self.cmd = np.ones(4)*quad.params["FF"]   # Motor 1 is front left, then clockwise numbering
-        # self.xPrevE     = 0
-        # self.yPrevE     = 0
-        # self.zPrevE     = 0
-        # self.phiPrevE   = 0
-        # self.thetaPrevE = 0
-        # self.psiPrevE   = 0
-        # self.xdotPrevE  = 0
-        # self.ydotPrevE  = 0
-        # self.zdotPrevE  = 0
-        # self.pPrevE     = 0
-        # self.qPrevE     = 0
-        # self.rPrevE     = 0
-
-        # self.pos_PrevE  = np.zeros(3)
-        # self.vel_PrevE  = np.zeros(3)
-
+        self.sDesCalc = np.zeros(16)
+        self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.setYawWeight()
 
     
@@ -152,35 +136,15 @@ class Control:
 
         # Mixer
         # --------------------------- 
-        self.cmd = utils.mixer(self.zCmd, self.pCmd, self.qCmd, self.rCmd, quad)
-        dwdw = utils.mixerFM(quad, norm(self.thrust_sp), self.rateCtrl)
-
-        # Add Exponential to command
-        # ---------------------------
-        self.cmd = utils.expoCmd(quad.params, self.cmd)
+        self.w_cmd = utils.mixerFM(quad, norm(self.thrust_sp), self.rateCtrl)
 
         # Add calculated Desired States
         # ---------------------------         
-        # self.sDesCalc[0] = self.xDes
-        # self.sDesCalc[1] = self.yDes
-        # self.sDesCalc[2] = self.zDes
-        self.sDesCalc[3] = self.phiDes
-        self.sDesCalc[4] = self.thetaDes
-        self.sDesCalc[5] = self.psiDes
-        # self.sDesCalc[6] = self.xdotDes
-        # self.sDesCalc[7] = self.ydotDes
-        # self.sDesCalc[8] = self.zdotDes
-        # self.sDesCalc[9] = self.pDes
-        # self.sDesCalc[10] = self.qDes
-        # self.sDesCalc[11] = self.rDes
-
         self.sDesCalc[0:3] = self.pos_sp
-        self.sDesCalc[6:9] = self.vel_sp
-        self.sDesCalc[9:12] = self.rate_sp
-
-        self.sDesCalc[12] = self.thrust_sp[0]
-        self.sDesCalc[13] = self.thrust_sp[1]
-        self.sDesCalc[14] = self.thrust_sp[2]
+        self.sDesCalc[3:7] = self.qd
+        self.sDesCalc[7:10] = self.vel_sp
+        self.sDesCalc[10:13] = self.rate_sp
+        self.sDesCalc[13:16] = self.thrust_sp
 
 
     def z_pos_control(self, quad, Ts):
@@ -191,9 +155,6 @@ class Control:
         self.vel_sp[2] = pos_P_gain[2]*pos_z_error + self.vel_sp[2]
         self.vel_sp[2] = np.clip(self.vel_sp[2], -velMax[2], velMax[2])
 
-        # Replace Previous Error
-        # self.pos_PrevE[2] = pos_z_error
-
     
     def xy_pos_control(self, quad, Ts):
 
@@ -202,9 +163,6 @@ class Control:
         pos_xy_error = (self.pos_sp[0:2] - quad.pos[0:2])
         self.vel_sp[0:2] = pos_P_gain[0:2]*pos_xy_error + self.vel_sp[0:2]
         self.vel_sp[0:2] = np.clip(self.vel_sp[0:2], -velMax[0:2], velMax[0:2])
-
-        # Replace Previous Error
-        # self.pos_PrevE[0:2] = pos_xy_error
         
 
     def z_vel_control(self, quad, Ts):
@@ -212,7 +170,7 @@ class Control:
         # Z Velocity Control (Thrust in D-direction)
         # ---------------------------
         vel_z_error = self.vel_sp[2] - quad.vel[2]
-        thrust_z_sp = vel_P_gain[2]*vel_z_error + vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"]
+        thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"]
         
         # The Thrust limits are negated and swapped due to NED-frame
         uMax = -quad.params["minThr"]
@@ -221,16 +179,13 @@ class Control:
         # Saturate thrust setpoint in D-direction
         self.thrust_sp[2] = np.clip(thrust_z_sp, uMin, uMax)
 
-        # Replace Previous Error
-        # self.vel_PrevE[2] = vel_z_error
-
     
     def xy_vel_control(self, quad, Ts):
         
         # XY Velocity Control (Thrust in NE-direction)
         # ---------------------------
         vel_xy_error = self.vel_sp[0:2] - quad.vel[0:2]
-        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error + vel_D_gain[0:2]*quad.vel_dot[0:2] # Be sure it is right sign for the D part
+        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2] # Be sure it is right sign for the D part
 
         # Max allowed thrust in NE based on tilt and excess thrust
         thrust_max_xy_tilt = abs(self.thrust_sp[2])*np.tan(tiltMax)
@@ -242,9 +197,6 @@ class Control:
         if (np.dot(self.thrust_sp[0:2].T, self.thrust_sp[0:2]) > thrust_max_xy**2):
             mag = norm(self.thrust_sp[0:2])
             self.thrust_sp[0:2] = thrust_xy_sp/mag*thrust_max_xy
-
-        # Replace Previous Error
-        # self.vel_PrevE[0:2] = vel_xy_error
 
     
     def thrustToAttitude(self, quad, Ts):
@@ -313,7 +265,7 @@ class Control:
         # ---------------------------
         rate_error = self.rate_sp - quad.omega
         self.rateCtrl = rate_P_gain*rate_error - rate_D_gain*quad.omega_dot     # Be sure it is right sign for the D part
-        print(self.rateCtrl)
+        # print(self.rateCtrl)
 
 
     def setYawWeight(self):
