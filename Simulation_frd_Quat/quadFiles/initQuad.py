@@ -30,14 +30,16 @@ def sys_params():
     params["invI"] = inv(IB)
     params["kTh"] = kTh
     params["kTo"] = kTo
+    params["mixerFM"] = makeMixerFM(params) # make mixer that calculated Thrust (F) and moments (M) as a function on motor speeds
+    params["mixerFMinv"] = inv(params["mixerFM"])
     params["motorc1"] = motorc1
     params["motorc0"] = motorc0
     params["motordeadband"] = motordeadband
     params["tau"] = 0.015
-    params["Kp"] = 1.0
+    params["kp"] = 1.0
     params["damp"] = 1.0
-    params["minThr"] = 0.1
-    params["maxThr"] = 9.18
+    params["minThr"] = 0.1*4
+    params["maxThr"] = 9.18*4
     params["ifexpo"] = bool(False)
     params["ifYawFix"] = bool(False)
     
@@ -49,6 +51,19 @@ def sys_params():
         params["minCmd"] = 1
     
     return params
+
+def makeMixerFM(params):
+    dxm = params["dxm"]
+    dym = params["dym"]
+    kTh = params["kTh"]
+    kTo = params["kTo"] 
+
+    mixerFM = np.array([[    kTh,      kTh,      kTh,      kTh],
+                        [dym*kTh, -dym*kTh,  dym*kTh, -dym*kTh],
+                        [dxm*kTh,  dxm*kTh, -dxm*kTh, -dxm*kTh],
+                        [   -kTo,      kTo,     -kTo,      kTo]])
+    
+    return mixerFM
 
 def init_cmd(params):
     mB = params["mB"]

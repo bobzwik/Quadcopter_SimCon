@@ -49,9 +49,9 @@ Ptheta = Pphi
 Pq = Pp
 Dq = Dp 
 
-Ppsi = 2.0
-Pr = 15.0
-Dr = 0.4
+Ppsi = 0.0
+Pr = 4.0
+Dr = 0.1
 
 att_P_gain = np.array([Pphi, Ptheta, Ppsi])
 rate_P_gain = np.array([Pp, Pq, Pr])
@@ -153,6 +153,7 @@ class Control:
         # Mixer
         # --------------------------- 
         self.cmd = utils.mixer(self.zCmd, self.pCmd, self.qCmd, self.rCmd, quad)
+        dwdw = utils.mixerFM(quad, norm(self.thrust_sp), self.rateCtrl)
 
         # Add Exponential to command
         # ---------------------------
@@ -211,7 +212,7 @@ class Control:
         # Z Velocity Control (Thrust in D-direction)
         # ---------------------------
         vel_z_error = self.vel_sp[2] - quad.vel[2]
-        thrust_z_sp = vel_P_gain[2]*vel_z_error + vel_D_gain[2]*quad.vel_dot[2] - quad.params["thr_hover"]
+        thrust_z_sp = vel_P_gain[2]*vel_z_error + vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"]
         
         # The Thrust limits are negated and swapped due to NED-frame
         uMax = -quad.params["minThr"]
@@ -295,6 +296,7 @@ class Control:
         q_mix[0] = np.clip(q_mix[0], -1.0, 1.0)
         q_mix[3] = np.clip(q_mix[3], -1.0, 1.0)
         self.qd = utils.quatMultiply(self.qd_red, np.array([cos(self.yaw_w*np.arccos(q_mix[0])), 0, 0, sin(self.yaw_w*np.arcsin(q_mix[3]))]))
+        # print(self.qd)
         # print(self.yaw_w)
         # print(att_P_gain)
         self.qe = utils.quatMultiply(utils.inverse(quad.quat), self.qd)
@@ -310,8 +312,8 @@ class Control:
         # Rate Control
         # ---------------------------
         rate_error = self.rate_sp - quad.omega
-        self.actuatorCtrl = rate_P_gain*rate_error - rate_D_gain*quad.omega_dot     # Be sure it is right sign for the D part
-        print(self.actuatorCtrl)
+        self.rateCtrl = rate_P_gain*rate_error - rate_D_gain*quad.omega_dot     # Be sure it is right sign for the D part
+        print(self.rateCtrl)
 
 
     def setYawWeight(self):
