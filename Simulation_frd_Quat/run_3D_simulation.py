@@ -6,7 +6,6 @@ import trajectory as tr
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 import utils
-# import angleFunctions as af 
 
 
 trajOptions = ["position", "velocity", "altitude", "attitude"]
@@ -21,6 +20,7 @@ def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     # ---------------------------
     ctrl.controller(quad, sDes, Ts, trajType, trajSelect)
 
+
 def main():
 
     # Setup
@@ -31,7 +31,7 @@ def main():
     trajType = trajOptions[0]
     trajSelect = 1
 
-    # Initialize Quadcopter, Controller, Results Matrix
+    # Initialize Quadcopter, Controller, Result Matrixes
     # ---------------------------
     quad = Quadcopter()
     ctrl = Control(quad)
@@ -62,9 +62,6 @@ def main():
                 
         # Dynamics
         # ---------------------------
-
-        # ctrl.cmd = np.array([52,51,52,51])
-
         quad.update(t, Ts, ctrl.w_cmd)
         t += Ts
 
@@ -82,15 +79,11 @@ def main():
         thr_all   = np.vstack((thr_all, quad.thr.T))
         tor_all   = np.vstack((tor_all, quad.tor.T))
         i += 1
-    
-    # utils.fullprint(s_all)
-    # utils.fullprint(sDes_all)
-    # utils.fullprint(cmd_all)
 
     # View Results
     # ---------------------------
     utils.makeFigures(quad.params, t_all, pos_all, vel_all, quat_all, omega_all, euler_all, w_cmd_all, wMotor_all, thr_all, tor_all, sDes_all)
-    ani = utils.sameAxisAnimation(pos_all, quat_all, Ts, quad.params)
+    ani = utils.sameAxisAnimation(t_all, pos_all, quat_all, Ts, quad.params)
     plt.show()
 
 if __name__ == "__main__":

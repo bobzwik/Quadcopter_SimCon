@@ -16,8 +16,9 @@ import utils
 numFrames = 20
 
 
-def updateLines(i, pos_all, quat_all, params, lines, ax):
+def updateLines(i, t_all, pos_all, quat_all, params, lines, ax):
     
+    time = t_all[i*numFrames]
     pos = pos_all[i*numFrames]
     x = pos[0]
     y = pos[1]
@@ -40,27 +41,10 @@ def updateLines(i, pos_all, quat_all, params, lines, ax):
     lines[0][0].set_3d_properties(motorPoints[2,0:3])
     lines[1][0].set_data(motorPoints[0,3:6], motorPoints[1,3:6])
     lines[1][0].set_3d_properties(motorPoints[2,3:6])
-    ax.set_title(u"Time = {}, Angle:".format(i))
+    ax.set_title(u"Time = {:.2f}".format(time[0]))
     
     return lines
     
-# def rotationMatrix(s_result):
-    
-#     phi =   s_result[3]
-#     theta = s_result[4]
-#     psi =   s_result[5]
-#     cphi = math.cos(phi)
-#     cthe = math.cos(theta)
-#     cpsi = math.cos(psi)
-#     sphi = math.sin(phi)
-#     sthe = math.sin(theta)
-#     spsi = math.sin(psi)
-    
-#     R = np.array([[cthe*cpsi, sphi*sthe*cpsi - cphi*spsi, cphi*sthe*cpsi + sphi*spsi],
-#                   [cthe*spsi, sphi*sthe*spsi + cphi*cpsi, cphi*sthe*spsi - sphi*cpsi],
-#                   [    -sthe,                  sphi*cthe,                  cphi*cthe]])
-    
-#     return R
 
 def ini_plot(fig, ax, pos, quat, params):
     
@@ -85,7 +69,7 @@ def ini_plot(fig, ax, pos, quat, params):
     
     return lines
 
-def sameAxisAnimation(pos_all, quat_all, Ts, params):
+def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
     
     x = pos_all[:,0]
     y = pos_all[:,1]
@@ -112,7 +96,7 @@ def sameAxisAnimation(pos_all, quat_all, Ts, params):
     lines = ini_plot(fig, ax, pos_all[0], quat_all[0], params)
     
     # Creating the Animation object
-    line_ani = animation.FuncAnimation(fig, updateLines, int(len(x)/numFrames), fargs=(pos_all, quat_all, params, lines, ax), interval=int(Ts*1000*numFrames), blit=False, repeat=True)
+    line_ani = animation.FuncAnimation(fig, updateLines, int(len(x)/numFrames), fargs=(t_all, pos_all, quat_all, params, lines, ax), interval=int(Ts*1000*numFrames), blit=False, repeat=True)
     
     plt.show()
     
