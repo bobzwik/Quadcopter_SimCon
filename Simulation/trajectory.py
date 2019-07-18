@@ -2,6 +2,8 @@
 
 import numpy as np
 from numpy import pi
+import config
+
 
 def desiredState(t, trajType, trajSelect, quad):
     if trajType == "attitude":
@@ -142,7 +144,7 @@ def testXYZposition(t):
     desThr     = np.array([0, 0, 0])
     
     if t >= 1 and t < 4:
-        desPos = np.array([5, 5, 0])
+        desPos = np.array([2, 2, 0])
     elif t >= 4:
         desPos = np.array([2, -2, -2])
         desEul = np.array([0, 0, pi/4])
@@ -152,6 +154,11 @@ def testXYZposition(t):
     return sDes
 
 def makesDes(desPos, desVel, desEul, desPQR, desThr):
+    
+    # if (config.orient == "ENU"):
+    #     desPos[1:2] = -desPos[1:2]
+    #     desVel[1:2] = -desVel[1:2]
+
     sDes = np.zeros(15)
     sDes[0]  = desPos[0]
     sDes[1]  = desPos[1]
