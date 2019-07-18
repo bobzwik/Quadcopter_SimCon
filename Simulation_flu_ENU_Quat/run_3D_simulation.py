@@ -8,7 +8,7 @@ from quadFiles.quad import Quadcopter
 import utils
 
 
-trajOptions = ["position", "velocity", "altitude", "attitude"]
+trajOptions = ["position", "velocity"] # "altitude", "attitude"]
 
 def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     
