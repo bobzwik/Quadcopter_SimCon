@@ -11,6 +11,7 @@ from numpy import pi
 from numpy import sin, cos, tan, sqrt
 from numpy.linalg import norm
 import utils
+import config
 
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
@@ -70,7 +71,7 @@ class Control:
 
     
     def controller(self, quad, sDes, Ts, trajType, trajSelect):
-        
+
         # Desired State
         # ---------------------------
         self.pos_sp = sDes[0:3]
@@ -145,14 +146,17 @@ class Control:
         # Z Velocity Control (Thrust in D-direction)
         # ---------------------------
         vel_z_error = self.vel_sp[2] - quad.vel[2]
-        thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*quad.params["g"] # Be sure it is right sign for the D part
+        if (config.orient == "NED"):
+            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"]
+        elif (config.orient == "ENU"):
+            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*quad.params["g"]
         
-        # The Thrust limits are negated and swapped due to NED-frame
-        uMax = quad.params["maxThr"]
-        uMin = quad.params["minThr"]
-
         # Saturate thrust setpoint in D-direction
-        self.thrust_sp[2] = np.clip(thrust_z_sp, uMin, uMax)
+        if (config.orient == "NED"):
+            # The Thrust limits are negated and swapped due to NED-frame
+            self.thrust_sp[2] = np.clip(thrust_z_sp, -quad.params["maxThr"], -quad.params["minThr"])
+        elif (config.orient == "ENU"):
+            self.thrust_sp[2] = np.clip(thrust_z_sp,  quad.params["minThr"],  quad.params["maxThr"])
 
     
     def xy_vel_control(self, quad, Ts):
@@ -160,7 +164,7 @@ class Control:
         # XY Velocity Control (Thrust in NE-direction)
         # ---------------------------
         vel_xy_error = self.vel_sp[0:2] - quad.vel[0:2]
-        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2] # Be sure it is right sign for the D part
+        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2]
 
         # Max allowed thrust in NE based on tilt and excess thrust
         thrust_max_xy_tilt = abs(self.thrust_sp[2])*np.tan(tiltMax)
@@ -178,11 +182,12 @@ class Control:
         
         # Create Full Desired Quaternion Based on Thrust Setpoint and Desired Yaw Angle
         # ---------------------------
-
         yaw_sp = self.eul_sp[2]
 
         # Desired body_z axis direction
-        body_z = utils.vectNormalize(self.thrust_sp)
+        body_z = -utils.vectNormalize(self.thrust_sp)
+        if (config.orient == "ENU"):
+            body_z = -body_z
         
         # Vector of desired Yaw direction in XY plane, rotated by pi/2 (fake body_y axis)
         y_C = np.array([-sin(yaw_sp), cos(yaw_sp), 0.0])
@@ -205,7 +210,9 @@ class Control:
 
         # Current thrust orientation e_z and desired thrust orientation e_z_d
         e_z = quad.dcm[:,2]
-        e_z_d = utils.vectNormalize(self.thrust_sp)
+        e_z_d = -utils.vectNormalize(self.thrust_sp)
+        if (config.orient == "ENU"):
+            e_z_d = -e_z_d
 
         # Quaternion error between the 2 vectors
         qe_red = np.zeros(4)

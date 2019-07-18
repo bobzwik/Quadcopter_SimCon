@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import config
+
 
 def mixerFM(quad, thr, moment):
     t = np.array([thr, moment[0], moment[1], moment[2]])
@@ -16,10 +18,10 @@ def mixer(throttle, pCmd, qCmd, rCmd, quad):
     minCmd = quad.params["minCmd"]
 
     cmd = np.zeros([4, 1])
-    cmd[0] = throttle + pCmd - qCmd + rCmd
-    cmd[1] = throttle - pCmd - qCmd - rCmd
-    cmd[2] = throttle - pCmd + qCmd + rCmd
-    cmd[3] = throttle + pCmd + qCmd - rCmd
+    cmd[0] = throttle + pCmd + qCmd - rCmd
+    cmd[1] = throttle - pCmd + qCmd + rCmd
+    cmd[2] = throttle - pCmd - qCmd - rCmd
+    cmd[3] = throttle + pCmd - qCmd + rCmd
     
     cmd[0] = min(max(cmd[0], minCmd), maxCmd)
     cmd[1] = min(max(cmd[1], minCmd), maxCmd)

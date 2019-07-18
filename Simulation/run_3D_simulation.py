@@ -6,7 +6,7 @@ import trajectory as tr
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 import utils
-
+import config
 
 trajOptions = ["position", "velocity"] # "altitude", "attitude"]
 
