@@ -3,6 +3,8 @@
 import numpy as np
 from numpy.linalg import inv
 import utils
+import config
+
 
 def sys_params():
     mB  = 1.2       # mass (kg)
@@ -55,10 +57,17 @@ def makeMixerFM(params):
     kTo = params["kTo"] 
 
     # Motor 1 is front left, then clockwise numbering
-    mixerFM = np.array([[     kTh,      kTh,      kTh,     kTh],
-                        [ dym*kTh, -dym*kTh, -dym*kTh, dym*kTh],
-                        [-dxm*kTh, -dxm*kTh,  dxm*kTh, dxm*kTh],
-                        [     kTo,     -kTo,      kTo,    -kTo]])
+    if (config.orient == "NED"):
+        mixerFM = np.array([[    kTh,      kTh,      kTh,      kTh],
+                            [dym*kTh, -dym*kTh,  -dym*kTh, dym*kTh],
+                            [dxm*kTh,  dxm*kTh, -dxm*kTh, -dxm*kTh],
+                            [   -kTo,      kTo,     -kTo,      kTo]])
+    elif (config.orient == "ENU"):
+        mixerFM = np.array([[     kTh,      kTh,      kTh,     kTh],
+                            [ dym*kTh, -dym*kTh, -dym*kTh, dym*kTh],
+                            [-dxm*kTh, -dxm*kTh,  dxm*kTh, dxm*kTh],
+                            [     kTo,     -kTo,      kTo,    -kTo]])
+    
     
     return mixerFM
 
@@ -89,6 +98,9 @@ def init_state(params):
 
     quat = utils.YPRToQuat(psi0, theta0, phi0)
     
+    if (config.orient == "ENU"):
+        z0 = -z0
+
     s = np.zeros(21)
     s[0]  = x0       # x
     s[1]  = y0       # y

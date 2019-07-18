@@ -12,6 +12,7 @@ import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
 import math
 import utils
+import config
 
 numFrames = 20
 
@@ -29,6 +30,11 @@ def updateLines(i, t_all, pos_all, quat_all, params, lines, ax):
     dzm = params["dzm"]
     
     quat = quat_all[i*numFrames]
+
+    if (config.orient == "NED"):
+        z = -z
+        quat = np.array([quat[0], -quat[1], -quat[2], quat[3]])
+
     R = utils.quat2Dcm(quat)    
     motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
     motorPoints = np.dot(R, np.transpose(motorPoints))
@@ -55,6 +61,10 @@ def ini_plot(fig, ax, pos, quat, params):
     y = pos[1]
     z = pos[2]
 
+    if (config.orient == "NED"):
+        z = -z
+        quat = np.array([quat[0], -quat[1], -quat[2], quat[3]])
+
     R = utils.quat2Dcm(quat)
     motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
     motorPoints = np.dot(R, np.transpose(motorPoints))
@@ -73,6 +83,9 @@ def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
     y = pos_all[:,1]
     z = pos_all[:,2]
 
+    if (config.orient == "NED"):
+        z = -z
+
     fig = plt.figure()
     ax = p3.Axes3D(fig)
     
@@ -85,10 +98,13 @@ def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
     
     ax.set_xlim3d([mid_x-maxRange, mid_x+maxRange])
     ax.set_xlabel('X')
-    ax.set_ylim3d([mid_y-maxRange, mid_y+maxRange])
+    if (config.orient == "NED"):
+        ax.set_ylim3d([mid_y+maxRange, mid_y-maxRange])
+    elif (config.orient == "ENU"):
+        ax.set_ylim3d([mid_y-maxRange, mid_y+maxRange])
     ax.set_ylabel('Y')
     ax.set_zlim3d([mid_z-maxRange, mid_z+maxRange])
-    ax.set_zlabel('Z')
+    ax.set_zlabel('Altitude')
     ax.set_title('3D Test')
     
     lines = ini_plot(fig, ax, pos_all[0], quat_all[0], params)
