@@ -142,7 +142,7 @@ def testXYZposition(t):
     desThr     = np.array([0, 0, 0])
     
     if t >= 1 and t < 4:
-        desPos = np.array([2, 2, 0])
+        desPos = np.array([5, 5, 0])
     elif t >= 4:
         desPos = np.array([2, -2, -2])
         desEul = np.array([0, 0, pi/4])

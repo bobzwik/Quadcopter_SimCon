@@ -9,6 +9,8 @@ def mixerFM(quad, thr, moment):
     return w_cmd
 
 
+## Under here is the conventional type of mixer
+
 def mixer(throttle, pCmd, qCmd, rCmd, quad):
     maxCmd = quad.params["maxCmd"]
     minCmd = quad.params["minCmd"]

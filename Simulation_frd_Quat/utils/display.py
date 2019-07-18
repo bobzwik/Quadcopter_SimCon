@@ -8,11 +8,13 @@ import utils
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
 
+# Print complete vector or matrices
 def fullprint(*args, **kwargs):
     opt = np.get_printoptions()
     np.set_printoptions(threshold=np.inf)
     print(*args, **kwargs)
     np.set_printoptions(opt)
+
 
 def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, commands, wMotor_all, thrust, torque, desiredStates):
     x    = pos_all[:,0]
@@ -36,10 +38,6 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     phi   = euler_all[:,0]*rad2deg
     theta = euler_all[:,1]*rad2deg
     psi   = euler_all[:,2]*rad2deg
-
-    # uFlat = extended_states[:,0]
-    # vFlat = extended_states[:,1]
-    # wFlat = extended_states[:,2]
 
     x_sp     = desiredStates[:,0]
     y_sp     = desiredStates[:,1]
@@ -72,7 +70,6 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.figure()
     plt.plot(time, x, time, y, time, z)
     plt.plot(time, x_sp, '--', time, y_sp, '--', time, z_sp, '--')
-
     plt.grid(True)
     plt.legend(['x','y','z'])
 
@@ -114,11 +111,3 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.plot(time, torque[:,0], time, torque[:,1], time, torque[:,2], time, torque[:,3])
     plt.grid(True)
     plt.legend(['tor1','tor2','tor3','tor4'])
-
-    # plt.figure()
-    # plt.plot(time, torque[:,0]+torque[:,2]-2*torque[0,0], time, -torque[:,1]-torque[:,3]+2*torque[0,0])
-    # plt.grid(True)
-    # plt.legend(['tor1+3 (difference from hover)','tor2+4 (difference from hover)'])
-    
-    # plt.show()
-    
