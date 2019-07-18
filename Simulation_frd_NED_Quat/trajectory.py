@@ -28,7 +28,7 @@ def desiredState(t, trajType, trajSelect, quad):
         
     if trajType == "velocity":
         if   trajSelect == 1:
-            sDes = testUVW_FlatControl(t)  
+            sDes = testVelControl(t)  
     
     if trajType == "position":
         if   trajSelect == 1:
@@ -117,17 +117,17 @@ def TestPitchThenYawControl(t):
     return sDes
 
 
-def testUVW_FlatControl(t):
+def testVelControl(t):
     desPos     = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
     desEul     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
 
-    if t >= 1 and t < 3:
-        desVel = np.array([3, 3, 0])
-    elif t >= 3:
-        desVel = np.array([3, 3, 0])
+    if t >= 1 and t < 4:
+        desVel = np.array([3, 2, 0])
+    elif t >= 4:
+        desVel = np.array([3, -1, 0])
      
     sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
     
