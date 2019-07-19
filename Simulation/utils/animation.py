@@ -46,8 +46,7 @@ def updateLines(i, t_all, pos_all, quat_all, params, lines, ax):
     lines[0][0].set_3d_properties(motorPoints[2,0:3])
     lines[1][0].set_data(motorPoints[0,3:6], motorPoints[1,3:6])
     lines[1][0].set_3d_properties(motorPoints[2,3:6])
-    ax.set_title(u"Time = {:.2f}".format(time[0]))
-    
+    ax.set_title(u"Time = {:.2f} s".format(time[0]))
     return lines
     
 
@@ -74,7 +73,7 @@ def ini_plot(fig, ax, pos, quat, params):
     line1 = ax.plot(motorPoints[0,0:3], motorPoints[1,0:3], motorPoints[2,0:3], color='red')
     line2 = ax.plot(motorPoints[0,3:6], motorPoints[1,3:6], motorPoints[2,3:6], color='blue')
     lines = [line1, line2]
-    
+
     return lines
 
 def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
