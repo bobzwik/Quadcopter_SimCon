@@ -24,10 +24,10 @@ The quadcopter states are the following :
 
 * Position (*x*, *y*, *z*)
 * Rotation (*&phi;*, *&theta;*, *&psi;*) or (*q0*, *q1*, *q2*, *q3*)
-* Linear Velocity (*xdot*, *ydot*, *zdot*)
-* Angular Velocity (*p*, *q*, *r*)
+* Linear Velocity (*x_dot*, *y_dot*, *z_dot*)
+* Angular Velocity (*p*, *q*, *r*) (The drone's angular velocity described in its own body frame, also known as *&Omega;*. This is not equivalent to *phi_dot*, *theta_dot*, *psi_dot*)
 
-The PyDy scripts use the Kane Method to derive the system's equations and output a Mass Matrix (*MM*) and a right-hand-side vector (*RHS*). 
+The PyDy scripts use the Kane Method to derive the system's equations and output a Mass Matrix (*MM*) and a right-hand-side vector (*RHS*). These outputs are used to obtain the state derivative vector *s_dot* in the equation `MM*s_dot = RHS`. To solve for s_dot, one must first calculate the inverse of the Mass Matrix, to be used in the equation `s_dot = inv(MM)*RHS`. Fortunately, for the quadcopter in this project, the Mass Matrix is a diagonal matrix and inverses quite easily. One can numerically solve for *s_dot* during the integration, but PyDy is able to analytically solve the state derivatives, which then can easily be copied into the ODE function.
 
 ### PyDy Installation
 To be able to run the PyDy scripts of this project, you need to first install PyDy and its dependancies.
@@ -39,3 +39,12 @@ If you have the pip package manager installed you can simply type:
 Or if you have conda you can type:
 
 `$ conda install -c conda-forge pydy`
+
+## Simulation and Control
+Stuff here
+
+## To-Do
+* Finish Readme to match current state of the project
+* Implement trajectory generation
+* Implement "Manual control"
+* Simulate sensors and sensor noise, calculate states from sensor data
