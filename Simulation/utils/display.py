@@ -7,6 +7,8 @@ import utils
 
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
+rads2rpm = 60.0/(2.0*pi)
+rpm2rads = 2.0*pi/60.0
 
 # Print complete vector or matrices
 def fullprint(*args, **kwargs):
@@ -30,28 +32,34 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     p    = omega_all[:,0]*rad2deg
     q    = omega_all[:,1]*rad2deg
     r    = omega_all[:,2]*rad2deg
-    w1   = wMotor_all[:,0]
-    w2   = wMotor_all[:,1]
-    w3   = wMotor_all[:,2]
-    w4   = wMotor_all[:,3]
+
+    wM1  = wMotor_all[:,0]*rads2rpm
+    wM2  = wMotor_all[:,1]*rads2rpm
+    wM3  = wMotor_all[:,2]*rads2rpm
+    wM4  = wMotor_all[:,3]*rads2rpm
 
     phi   = euler_all[:,0]*rad2deg
     theta = euler_all[:,1]*rad2deg
     psi   = euler_all[:,2]*rad2deg
 
-    x_sp     = desiredStates[:,0]
-    y_sp     = desiredStates[:,1]
-    z_sp     = desiredStates[:,2]
-    q0Des    = desiredStates[:,3]
-    q1Des    = desiredStates[:,4]
-    q2Des    = desiredStates[:,5]
-    q3Des    = desiredStates[:,6]
-    Vx_sp    = desiredStates[:,7]
-    Vy_sp    = desiredStates[:,8]
-    Vz_sp    = desiredStates[:,9]
-    pDes     = desiredStates[:,10]*rad2deg
-    qDes     = desiredStates[:,11]*rad2deg
-    rDes     = desiredStates[:,12]*rad2deg
+    x_sp  = desiredStates[:,0]
+    y_sp  = desiredStates[:,1]
+    z_sp  = desiredStates[:,2]
+    q0Des = desiredStates[:,3]
+    q1Des = desiredStates[:,4]
+    q2Des = desiredStates[:,5]
+    q3Des = desiredStates[:,6]
+    Vx_sp = desiredStates[:,7]
+    Vy_sp = desiredStates[:,8]
+    Vz_sp = desiredStates[:,9]
+    pDes  = desiredStates[:,10]*rad2deg
+    qDes  = desiredStates[:,11]*rad2deg
+    rDes  = desiredStates[:,12]*rad2deg
+
+    uM1 = commands[:,0]*rads2rpm
+    uM2 = commands[:,1]*rads2rpm
+    uM3 = commands[:,2]*rads2rpm
+    uM4 = commands[:,3]*rads2rpm
 
     x_thr_sp = desiredStates[:,13]
     y_thr_sp = desiredStates[:,14]
@@ -72,42 +80,58 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.plot(time, x_sp, '--', time, y_sp, '--', time, z_sp, '--')
     plt.grid(True)
     plt.legend(['x','y','z'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Position (m)')
 
     plt.figure()
     plt.plot(time, xdot, time, ydot, time, zdot)
     plt.plot(time, Vx_sp, '--', time, Vy_sp, '--', time, Vz_sp, '--')
     plt.grid(True)
     plt.legend(['Vx','Vy','Vz','Vx_sp','Vy_sp','Vz_sp'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Velocity (m/s)')
 
     plt.figure()
     plt.plot(time, x_thr_sp, time, y_thr_sp, time, z_thr_sp)
     plt.grid(True)
     plt.legend(['x_thr_sp','y_thr_sp','z_thr_sp'])
-    
+    plt.xlabel('Time (s)')
+    plt.ylabel('Desired Thrust (N)')
+
     plt.figure()
     plt.plot(time, phi, time, theta, time, psi)
     plt.plot(time, phiDes, '--', time, thetaDes, '--', time, psiDes, '--')
     plt.grid(True)
     plt.legend(['roll','pitch','yaw'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Euler Angle (°)')
     
     plt.figure()
     plt.plot(time, p, time, q, time, r)
     plt.plot(time, pDes, '--', time, qDes, '--', time, rDes, '--')
     plt.grid(True)
     plt.legend(['p','q','r'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Angular Velocity (°/s)')
     
     plt.figure()
-    plt.plot(time, w1, time, w2, time, w3, time, w4)
-    plt.plot(time, commands[:,0], '--', time, commands[:,1], '--', time, commands[:,2], '--', time, commands[:,3], '--')
+    plt.plot(time, wM1, time, wM2, time, wM3, time, wM4)
+    plt.plot(time, uM1, '--', time, uM2, '--', time, uM3, '--', time, uM4, '--')
     plt.grid(True)
     plt.legend(['w1','w2','w3','w4'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Motor Angular Velocity (RPM)')
 
     plt.figure()
     plt.plot(time, thrust[:,0], time, thrust[:,1], time, thrust[:,2], time, thrust[:,3])
     plt.grid(True)
     plt.legend(['thr1','thr2','thr3','thr4'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Rotor Thrust (N)')
 
     plt.figure()
     plt.plot(time, torque[:,0], time, torque[:,1], time, torque[:,2], time, torque[:,3])
     plt.grid(True)
     plt.legend(['tor1','tor2','tor3','tor4'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Rotor Torque (N*m)')

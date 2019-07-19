@@ -98,25 +98,25 @@ class Quadcopter:
         p          = state[10]
         q          = state[11]
         r          = state[12]
-        wMotor1    = state[13]
-        wdotMotor1 = state[14]
-        wMotor2    = state[15]
-        wdotMotor2 = state[16]
-        wMotor3    = state[17]
-        wdotMotor3 = state[18]
-        wMotor4    = state[19]
-        wdotMotor4 = state[20]
+        wM1    = state[13]
+        wdotM1 = state[14]
+        wM2    = state[15]
+        wdotM2 = state[16]
+        wM3    = state[17]
+        wdotM3 = state[18]
+        wM4    = state[19]
+        wdotM4 = state[20]
 
         # Motor Dynamics and Rotor forces (Second Order System: https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)
         # ---------------------------
         
         uMotor = cmd
-        wddotMotor1 = (-2.0*damp*tau*wdotMotor1 - wMotor1 + kp*uMotor[0])/(tau**2)
-        wddotMotor2 = (-2.0*damp*tau*wdotMotor2 - wMotor2 + kp*uMotor[1])/(tau**2)
-        wddotMotor3 = (-2.0*damp*tau*wdotMotor3 - wMotor3 + kp*uMotor[2])/(tau**2)
-        wddotMotor4 = (-2.0*damp*tau*wdotMotor4 - wMotor4 + kp*uMotor[3])/(tau**2)
+        wddotM1 = (-2.0*damp*tau*wdotM1 - wM1 + kp*uMotor[0])/(tau**2)
+        wddotM2 = (-2.0*damp*tau*wdotM2 - wM2 + kp*uMotor[1])/(tau**2)
+        wddotM3 = (-2.0*damp*tau*wdotM3 - wM3 + kp*uMotor[2])/(tau**2)
+        wddotM4 = (-2.0*damp*tau*wdotM4 - wM4 + kp*uMotor[3])/(tau**2)
     
-        wMotor = np.array([wMotor1, wMotor2, wMotor3, wMotor4])
+        wMotor = np.array([wM1, wM2, wM3, wM4])
         thrust = kTh*wMotor*wMotor
         torque = kTo*wMotor*wMotor
     
@@ -179,14 +179,14 @@ class Quadcopter:
         sdot[10] = DynamicsDot[10]
         sdot[11] = DynamicsDot[11]
         sdot[12] = DynamicsDot[12]
-        sdot[13] = wdotMotor1
-        sdot[14] = wddotMotor1
-        sdot[15] = wdotMotor2
-        sdot[16] = wddotMotor2
-        sdot[17] = wdotMotor3
-        sdot[18] = wddotMotor3
-        sdot[19] = wdotMotor4
-        sdot[20] = wddotMotor4
+        sdot[13] = wdotM1
+        sdot[14] = wddotM1
+        sdot[15] = wdotM2
+        sdot[16] = wddotM2
+        sdot[17] = wdotM3
+        sdot[18] = wddotM3
+        sdot[19] = wdotM4
+        sdot[20] = wddotM4
 
         return sdot
 

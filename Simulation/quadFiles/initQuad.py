@@ -56,7 +56,9 @@ def makeMixerFM(params):
     kTh = params["kTh"]
     kTo = params["kTo"] 
 
-    # Motor 1 is front left, then clockwise numbering
+    # Motor 1 is front left, then clockwise numbering.
+    # A mixer like this one allows to find the exact RPM of each motor 
+    # given a desired thrust and desired moments.
     if (config.orient == "NED"):
         mixerFM = np.array([[    kTh,      kTh,      kTh,      kTh],
                             [dym*kTh, -dym*kTh,  -dym*kTh, dym*kTh],
@@ -84,7 +86,6 @@ def init_cmd(params):
     w_hover   = np.sqrt(thr_hover/kTh)
     tor_hover = kTo*w_hover*w_hover
     cmd_hover = (w_hover-c0)/c1
-    cmd_hover = utils.expoCmdInv(params, cmd_hover)
     return [cmd_hover, w_hover, thr_hover, tor_hover]
 
 def init_state(params):
