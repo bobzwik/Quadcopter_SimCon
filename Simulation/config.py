@@ -4,4 +4,4 @@
 # ---------------------------
 # "NED" for front-right-down (frd) and North-East-Down
 # "ENU" for front-left-up (flu) and East-North-Up
-orient = "ENU"
+orient = "NED"

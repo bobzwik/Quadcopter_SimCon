@@ -145,6 +145,8 @@ class Control:
         
         # Z Velocity Control (Thrust in D-direction)
         # ---------------------------
+        # Hover thrust (m*g) is sent as a Feed-Forward term, in order to 
+        # allow hover when the position and velocity error are nul
         vel_z_error = self.vel_sp[2] - quad.vel[2]
         if (config.orient == "NED"):
             thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"]
