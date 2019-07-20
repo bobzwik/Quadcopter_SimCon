@@ -47,6 +47,8 @@ Or if you have conda you can type:
 ## Simulation and Control
 First off, the world and body orientation can be switch between a NED or ENU frame in the `config.py` file. The other scripts then handle which equations to use, depending on the chosen orientation. It also has to be mentioned that both the PyDy scripts and the simulation aim to simulate the behaviour of a **X configuration** quadcopter (not a **+ configuration**).
 
+The only packages needed for the simulation part of this project are Numpy and Matplotlib. 
+
 ### Simulation
 In `quad.py`, I've defined a Quadcopter Class and its methods are relatively simple : initialize the quadcopter with various parameters and initial conditions, update the states, calculate the state derivatives, and calculate other useful information. The simulation uses a quaternion in the state vector to express the drone's rotation, and the state derivative vector is copied from the corresponding PyDy script. However, 8 other states were added to simulate each motors dynamics ([2nd Order System](https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)) :
 
@@ -56,11 +58,13 @@ In `quad.py`, I've defined a Quadcopter Class and its methods are relatively sim
 The current parameters are set to roughly match the characteristics of a DJI F450 that I have in my lab, and the rotor thrust and torque coefficients have been measured.
 
 ### Control
-There are currently 3 controllers coded in this project. One to control XYZ positions, one to control XY velocities and Z position, and one to control XYZ velocities. There are plans to add more ways of controlling the quadcopter.
+There are currently 3 controllers coded in this project. One to control XYZ positions, one to control XY velocities and Z position, and one to control XYZ velocities. In all 3 current controllers, it is also possible to set a Yaw angle (heading) setpoint. There are plans to add more ways of controlling the quadcopter.
 
-The control algorithm is strongly inspired by the PX4 multicopter control algorithm. It is a cascade controller, where the position error (difference between the desired position and the current position) generates a velocity setpoint, the velocity error then creates a desired thrust orientation, which is interpreted as a desired rotation (expressed as a quaternion). The quaternion error then generates angular rate setpoints, which then creates desired moments. 
+The control algorithm is strongly inspired by the PX4 multicopter control algorithm. It is a cascade controller, where the position error (difference between the desired position and the current position) generates a velocity setpoint, the velocity error then creates a desired thrust magnitude and orientation, which is then interpreted as a desired rotation (expressed as a quaternion). The quaternion error then generates angular rate setpoints, which then creates desired moments. 
 
-The mixer (not based from PX4) allows to find the exact RPM of each motor given the desired thrust and desired moments.
+The mixer (not based from PX4) allows to find the exact RPM of each motor given the desired thrust magnitude and desired moments.
+
+The main difference between this control algorithm and the PX4's, is that this code doesn't have integral gain for the velocity and angular rate controllers (yet). There is no need for it yet since wind isn't modeled in the simulation and hover thrust is perfectly known.
 
 ### Useful links
 * [PX4 "Position and Velocity Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/PositionControl.cpp)
@@ -71,6 +75,6 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 ## To-Do
 * Implement trajectory generation
 * Implement "Manual control"
-* Simulate sensors and sensor noise, calculate states from sensor data
+* Simulate sensors and sensor noise, calculate states from sensor data (Maybe somehow running simultaneously? I'll have to figure out how.)
 * Add integral gain (maybe?)
 * Add the possibility for more controllers

@@ -10,11 +10,10 @@ from numpy import pi
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
-import math
 import utils
 import config
 
-numFrames = 20
+numFrames = 5
 
 
 def updateLines(i, t_all, pos_all, quat_all, params, lines, ax):
