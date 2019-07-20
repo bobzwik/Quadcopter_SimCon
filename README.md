@@ -53,14 +53,24 @@ In `quad.py`, I've defined a Quadcopter Class and its methods are relatively sim
 * Motor Angular Velocities (*wM1*, *wM2*, *wM3*, *wM4*)
 * Motor Angular Acceleration (*wdotM1*, *wdotM2*, *wdotM3*, *wdotM4*)
 
-The current parameters are set to roughly match the characteristics of a DJI F450 that I have at my lab, and the rotor thrust and torque coefficients have been measured.
+The current parameters are set to roughly match the characteristics of a DJI F450 that I have in my lab, and the rotor thrust and torque coefficients have been measured.
 
 ### Control
+There are currently 3 controllers coded in this project. One to control XYZ positions, one to control XY velocities and Z position, and one to control XYZ velocities. There are plans to add more ways of controlling the quadcopter.
 
+The control algorithm is strongly inspired by the PX4 multicopter control algorithm. It is a cascade controller, where the position error (difference between the desired position and the current position) generates a velocity setpoint, the velocity error then creates a desired thrust orientation, which is interpreted as a desired rotation (expressed as a quaternion). The quaternion error then generates angular rate setpoints, which then creates desired moments. 
+
+The mixer (not based from PX4) allows to find the exact RPM of each motor given the desired thrust and desired moments.
+
+### Useful links
+* [PX4 "Position and Velocity Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/PositionControl.cpp)
+* [PX4 "Desired Thrust to Desired Attitude" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/Utility/ControlMath.cpp)
+* [PX4 "Attitude Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp) --- [Article](https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/154099/eth-7387-01.pdf)
+* [PX4 "Rate Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/mc_att_control_main.cpp)
 
 ## To-Do
-* Finish Readme to match current state of the project
 * Implement trajectory generation
 * Implement "Manual control"
 * Simulate sensors and sensor noise, calculate states from sensor data
 * Add integral gain (maybe?)
+* Add the possibility for more controllers
