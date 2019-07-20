@@ -6,33 +6,37 @@ import config
 
 
 def desiredState(t, trajType, trajSelect, quad):
-    if trajType == "attitude":
-        if   trajSelect == 1:
-            sDes = hover(t)
-        elif trajSelect == 2:
-            sDes = TestYawControl(t)
-        elif trajSelect == 3:
-            sDes = TestRollThenPitchControl(t)
-        elif trajSelect == 4:
-            sDes = TestPitchThenYawControl(t)
+    # if trajType == "attitude":
+    #     if   trajSelect == 1:
+    #         sDes = hover(t)
+    #     elif trajSelect == 2:
+    #         sDes = TestYawControl(t)
+    #     elif trajSelect == 3:
+    #         sDes = TestRollThenPitchControl(t)
+    #     elif trajSelect == 4:
+    #         sDes = TestPitchThenYawControl(t)
 
-    if trajType == "altitude":
-        if   trajSelect == 1:
-            sDes = hover(t)
-        elif trajSelect == 2:
-            sDes = TestYawControl(t)
-        elif trajSelect == 3:
-            sDes = TestRollThenPitchControl(t)
-        elif trajSelect == 4:
-            sDes = TestPitchThenYawControl(t)
-        elif trajSelect == 5:
-            sDes = testZControl(t)
+    # if trajType == "altitude":
+    #     if   trajSelect == 1:
+    #         sDes = hover(t)
+    #     elif trajSelect == 2:
+    #         sDes = TestYawControl(t)
+    #     elif trajSelect == 3:
+    #         sDes = TestRollThenPitchControl(t)
+    #     elif trajSelect == 4:
+    #         sDes = TestPitchThenYawControl(t)
+    #     elif trajSelect == 5:
+    #         sDes = testZControl(t)
         
-    if trajType == "velocity":
+    if trajType == "xyz_vel":
         if   trajSelect == 1:
-            sDes = testVelControl(t)  
+            sDes = testVelControl(t)
+
+    if trajType == "xy_vel_z_pos":
+        if   trajSelect == 1:
+            sDes = testVelControl(t)
     
-    if trajType == "position":
+    elif trajType == "xyz_pos":
         if   trajSelect == 1:
             sDes = testXYZposition(t)
     
