@@ -16,51 +16,66 @@ import config
 rad2deg = 180.0/pi
 deg2rad = pi/180.0
 
+# Set PID Gains and Max Values
+# ---------------------------
+
+# Position P gains
 Py    = 1.0
+Px    = Py
+Pz    = 2.0
+
+pos_P_gain = np.array([Px, Py, Pz])
+
+# Velocity P-D gains
 Pxdot = 5.0
 Dxdot = 0.5
 
-Px    = Py
 Pydot = Pxdot
 Dydot = Dxdot
 
-Pz    = 2.0
 Pzdot = 6.0
 Dzdot = 0.2
 
-pos_P_gain = np.array([Px, Py, Pz])
 vel_P_gain = np.array([Pxdot, Pydot, Pzdot])
 vel_D_gain = np.array([Dxdot, Dydot, Dzdot])
 
+# Attitude P gains
 Pphi = 8.0
+Ptheta = Pphi
+Ppsi = 0.8
+
+att_P_gain = np.array([Pphi, Ptheta, Ppsi])
+
+# Rate P-D gains
 Pp = 1.5
 Dp = 0.04
 
-Ptheta = Pphi
 Pq = Pp
 Dq = Dp 
 
-Ppsi = 0.8
 Pr = 1.0
 Dr = 0.1
 
-att_P_gain = np.array([Pphi, Ptheta, Ppsi])
 rate_P_gain = np.array([Pp, Pq, Pr])
 rate_D_gain = np.array([Dp, Dq, Dr])
 
+# Max Velocities
 uMax = 3.0
 vMax = 3.0
 wMax = 3.0
 
 velMax = np.array([uMax, vMax, wMax])
 
+# Max tilt
 tiltMax = 25.0*deg2rad
 
+# Max Rate
 pMax = 200.0*deg2rad
 qMax = 200.0*deg2rad
 rMax = 100.0*deg2rad
 
 rateMax = np.array([pMax, qMax, rMax])
+
 
 class Control:
     
