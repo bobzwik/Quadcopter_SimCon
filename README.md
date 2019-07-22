@@ -2,7 +2,7 @@
 
 This project serves 2 purposes. The first is to provide a PyDy template for creating quadcopter dynamics and outputing the relevant equations of motion.
 
-The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control, and eventualy trajectory generation.
+The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control, and eventually trajectory generation.
 
 (The third was to help me learn Python and Git by starting a project and continuously adding to it.)
 
