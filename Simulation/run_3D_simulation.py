@@ -26,7 +26,7 @@ def main():
     # Setup
     # --------------------------- 
     Ti = 0
-    Ts = 0.0055
+    Ts = 0.005
     Tf = 10
     trajType = trajOptions[0]
     trajSelect = 1
