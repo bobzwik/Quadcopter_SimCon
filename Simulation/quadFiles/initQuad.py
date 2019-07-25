@@ -27,6 +27,7 @@ def sys_params():
     params["IB"]   = IB
     params["invI"] = inv(IB)
     params["IRzz"] = IRzz
+    params["usePrecession"] = bool(False) # Include gyroscopic precession in drone dynamics equation. Set to False if rotor inertia isn't known (gyro precession has negigeable effect on drone dynamics)
 
     params["kTh"]        = 1.076e-5 # thrust coeff (N/(rad/s)^2)  (1.18e-7 N/RPM^2)
     params["kTo"]        = 1.632e-7 # torque coeff (Nm/(rad/s)^2)  (1.79e-9 Nm/RPM^2)
