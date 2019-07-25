@@ -62,6 +62,8 @@ def makeMixerFM(params):
     # Motor 1 is front left, then clockwise numbering.
     # A mixer like this one allows to find the exact RPM of each motor 
     # given a desired thrust and desired moments.
+    # Inspiration for this mixer (or coefficient matrix) and how it is used : 
+    # https://link.springer.com/article/10.1007/s13369-017-2433-2 (https://sci-hub.tw/10.1007/s13369-017-2433-2)
     if (config.orient == "NED"):
         mixerFM = np.array([[    kTh,      kTh,      kTh,      kTh],
                             [dym*kTh, -dym*kTh,  -dym*kTh, dym*kTh],
