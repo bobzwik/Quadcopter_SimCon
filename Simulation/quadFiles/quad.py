@@ -74,6 +74,7 @@ class Quadcopter:
         IBxx = IB[0,0]
         IByy = IB[1,1]
         IBzz = IB[2,2]
+        IRzz = self.params["IRzz"]
         kTh  = self.params["kTh"]
         kTo  = self.params["kTo"]
         c1   = self.params["motorc1"]
@@ -133,34 +134,34 @@ class Quadcopter:
         # ---------------------------
         if (config.orient == "NED"):
             DynamicsDot = np.array([
-                [                                                                        xdot],
-                [                                                                        ydot],
-                [                                                                        zdot],
-                [                                             -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
-                [                                              0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
-                [                                              0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
-                [                                             -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
-                [                       -2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
-                [                        2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
-                [((-ThrM1 - ThrM2 - ThrM3 - ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) + g*mB)/mB],
-                [  (IByy*q*r - IBzz*q*r + ThrM1*dym - ThrM2*dym - ThrM3*dym + ThrM4*dym)/IBxx],
-                [ (-IBxx*p*r + IBzz*p*r + ThrM1*dxm + ThrM2*dxm - ThrM3*dxm - ThrM4*dxm)/IByy],
-                [                  (IBxx*p*q - IByy*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz]])
+                [                                                                                             xdot],
+                [                                                                                             ydot],
+                [                                                                                             zdot],
+                [                                                                  -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
+                [                                                                   0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
+                [                                                                   0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
+                [                                                                  -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
+                [                                            -2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
+                [                                             2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
+                [                     ((-ThrM1 - ThrM2 - ThrM3 - ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) + g*mB)/mB],
+                [ ((IByy - IBzz)*q*r - IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx],
+                [ ((IBzz - IBxx)*p*r + IRzz*(wM1 - wM2 + wM3 - wM4)*p + ( ThrM1 + ThrM2 - ThrM3 - ThrM4)*dxm)/IByy],
+                [                                         ((IBxx - IByy)*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz]])
         elif (config.orient == "ENU"):
             DynamicsDot = np.array([
-                [                                                                       xdot],
-                [                                                                       ydot],
-                [                                                                       zdot],
-                [                                            -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
-                [                                             0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
-                [                                             0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
-                [                                            -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
-                [                       2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
-                [                      -2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
-                [((ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) - g*mB)/mB],
-                [ (IByy*q*r - IBzz*q*r + ThrM1*dym - ThrM2*dym - ThrM3*dym + ThrM4*dym)/IBxx],
-                [(-IBxx*p*r + IBzz*p*r - ThrM1*dxm - ThrM2*dxm + ThrM3*dxm + ThrM4*dxm)/IByy],
-                [                 (IBxx*p*q - IByy*p*q + TorM1 - TorM2 + TorM3 - TorM4)/IBzz]])
+                [                                                                                             xdot],
+                [                                                                                             ydot],
+                [                                                                                             zdot],
+                [                                                                  -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
+                [                                                                   0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
+                [                                                                   0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
+                [                                                                  -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
+                [                                             2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
+                [                                            -2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4)/mB],
+                [                      ((ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) - g*mB)/mB],
+                [ ((IByy - IBzz)*q*r + IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx],
+                [ ((IBzz - IBxx)*p*r - IRzz*(wM1 - wM2 + wM3 - wM4)*p + (-ThrM1 - ThrM2 + ThrM3 + ThrM4)*dxm)/IByy],
+                [                                         ((IBxx - IBzz)*p*q + TorM1 - TorM2 + TorM3 - TorM4)/IBzz]])
     
     
         # State Derivative Vector

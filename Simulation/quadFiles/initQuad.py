@@ -15,7 +15,9 @@ def sys_params():
     IB  = np.array([[0.0123, 0,      0     ],
                     [0,      0.0123, 0     ],
                     [0,      0,      0.0224]]) # Inertial tensor (kg*m^2)
-    
+    IRzz = 2.7e-5   # Rotor moment of inertia (kg*m^2)
+
+
     params = {}
     params["mB"]   = mB
     params["g"]    = g
@@ -24,7 +26,8 @@ def sys_params():
     params["dzm"]  = dzm
     params["IB"]   = IB
     params["invI"] = inv(IB)
-    
+    params["IRzz"] = IRzz
+
     params["kTh"]        = 1.076e-5 # thrust coeff (N/(rad/s)^2)  (1.18e-7 N/RPM^2)
     params["kTo"]        = 1.632e-7 # torque coeff (Nm/(rad/s)^2)  (1.79e-9 Nm/RPM^2)
     params["mixerFM"]    = makeMixerFM(params) # Make mixer that calculated Thrust (F) and moments (M) as a function on motor speeds

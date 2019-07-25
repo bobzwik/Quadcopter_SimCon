@@ -87,6 +87,7 @@ def main():
     plt.show()
 
 if __name__ == "__main__":
-    main()
-
-
+    if (config.orient == "NED" or config.orient == "ENU"):
+        main()
+    else:
+        print("{} is not a valid orientation. Verify config.py file.".format(config.orient))
