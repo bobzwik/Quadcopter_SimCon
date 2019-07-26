@@ -29,7 +29,7 @@ def main():
     Ts = 0.005
     Tf = 10
     trajType = trajOptions[0]
-    trajSelect = 1
+    trajSelect = 0
 
     # Initialize Quadcopter, Controller, Result Matrixes
     # ---------------------------

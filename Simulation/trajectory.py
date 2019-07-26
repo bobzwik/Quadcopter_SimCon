@@ -37,6 +37,8 @@ def desiredState(t, trajType, trajSelect, quad):
             sDes = testVelControl(t)
     
     elif trajType == "xyz_pos":
+        if   trajSelect == 0:
+            sDes = hover(t)
         if   trajSelect == 1:
             sDes = testXYZposition(t)
     
