@@ -107,9 +107,9 @@ TM2 = (B, -TorM2*B.z)
 TM3 = (B,  TorM3*B.z)
 TM4 = (B, -TorM4*B.z)
 
-Gyro = (B, -IRzz*cross(B.ang_vel_in(N), (-wM1 + wM2 - wM3 + wM4)*B.z))
+gyro = (B, -IRzz*cross(B.ang_vel_in(N), (-wM1 + wM2 - wM3 + wM4)*B.z))
 
-ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4, Gyro]
+ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4, gyro]
 
 # Kinematic Differential Equations
 # ---------------------------

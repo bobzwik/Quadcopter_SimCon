@@ -115,10 +115,13 @@ TM3 = (B, -TorM3*B.z)
 TM4 = (B,  TorM4*B.z)
 
 drag = (Bcm, -Cd*airVel.normalize()*(airVel.magnitude())**2)
+dragX = (Bcm, -Cd*(dot(airVel, N.x)**2)*N.x)
+dragY = (Bcm, -Cd*(dot(airVel, N.y)**2)*N.y)
+dragZ = (Bcm, -Cd*(dot(airVel, N.z)**2)*N.z)
 
 gyro = (B, -IRzz*cross(B.ang_vel_in(N), (wM1 - wM2 + wM3 - wM4)*B.z))
 
-ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4, drag, gyro]
+ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4, dragX, dragY, dragZ, gyro]
 
 # Calculate Quaternion Derivative
 # ---------------------------
