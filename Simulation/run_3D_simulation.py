@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 import trajectory as tr
 from ctrl import Control
 from quadFiles.quad import Quadcopter
+from utils.windModel import Wind
 import utils
 import config
+import cProfile
 
 trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"] # "altitude", "attitude"]
 
@@ -35,6 +37,7 @@ def main():
     # ---------------------------
     quad = Quadcopter()
     ctrl = Control(quad)
+    wind = Wind()
 
     t_all     = Ti
     s_all     = quad.state.T
@@ -62,10 +65,10 @@ def main():
                 
         # Dynamics
         # ---------------------------
-        quad.update(t, Ts, ctrl.w_cmd)
+        quad.update(t, Ts, ctrl.w_cmd, wind)
         t += Ts
 
-        print("{:.3f}".format(t))
+        # print("{:.3f}".format(t))
         t_all     = np.vstack((t_all, t))
         s_all     = np.vstack((s_all, quad.state.T))
         pos_all   = np.vstack((pos_all, quad.pos.T))
@@ -89,5 +92,6 @@ def main():
 if __name__ == "__main__":
     if (config.orient == "NED" or config.orient == "ENU"):
         main()
+        # cProfile.run('main()')
     else:
         print("{} is not a valid orientation. Verify config.py file.".format(config.orient))

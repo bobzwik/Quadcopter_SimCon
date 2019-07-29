@@ -63,7 +63,7 @@ class Quadcopter:
         self.tor = self.params["kTo"]*self.wMotor*self.wMotor
 
 
-    def state_dot(self, state, t, cmd):
+    def state_dot(self, state, t, cmd, wind):
 
         # Import Params
         # ---------------------------    
@@ -141,9 +141,12 @@ class Quadcopter:
 
         # Wind Model
         # ---------------------------
-        velW = 2           # m/s
-        qW1 = 0*deg2rad    # Wind heading
-        qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
+        [velW, qW1, qW2] = wind.randomWind(t)
+        # velW = 0
+
+        # velW = 5          # m/s
+        # qW1 = 0*deg2rad    # Wind heading
+        # qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
     
         # State Derivatives (from PyDy) This is already the analytically solved vector of MM*x = RHS
         # ---------------------------
@@ -206,11 +209,11 @@ class Quadcopter:
 
         return sdot
 
-    def update(self, t, Ts, cmd):
+    def update(self, t, Ts, cmd, wind):
 
         prev_vel   = self.vel
         prev_omega = self.omega     
-        self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd,))[1]
+        self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd, wind), atol=1e-4, rtol=1e-4)[1]
 
         self.pos   = self.state[0:3]
         self.quat  = self.state[3:7]
