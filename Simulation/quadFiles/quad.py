@@ -4,6 +4,8 @@ import numpy as np
 from numpy import sin, cos, tan, pi, sign
 from scipy.linalg import solve
 from scipy.integrate import odeint
+from numba import jit
+
 from quadFiles.initQuad import sys_params, init_cmd, init_state
 import utils
 import config
@@ -55,14 +57,14 @@ class Quadcopter:
         self.theta = YPR[1]
         self.phi   = YPR[2]
 
-
+    
     def forces(self):
         
         # Rotor thrusts and torques
         self.thr = self.params["kTh"]*self.wMotor*self.wMotor
         self.tor = self.params["kTo"]*self.wMotor*self.wMotor
 
-
+    # @jit(nopython = True)
     def state_dot(self, state, t, cmd, wind):
 
         # Import Params
@@ -95,19 +97,19 @@ class Quadcopter:
     
         # Import State Vector
         # ---------------------------  
-        x          = state[0]
-        y          = state[1]
-        z          = state[2]
-        q0         = state[3]
-        q1         = state[4]
-        q2         = state[5]
-        q3         = state[6]
-        xdot       = state[7]
-        ydot       = state[8]
-        zdot       = state[9]
-        p          = state[10]
-        q          = state[11]
-        r          = state[12]
+        x      = state[0]
+        y      = state[1]
+        z      = state[2]
+        q0     = state[3]
+        q1     = state[4]
+        q2     = state[5]
+        q3     = state[6]
+        xdot   = state[7]
+        ydot   = state[8]
+        zdot   = state[9]
+        p      = state[10]
+        q      = state[11]
+        r      = state[12]
         wM1    = state[13]
         wdotM1 = state[14]
         wM2    = state[15]

@@ -2,13 +2,13 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import cProfile
 import trajectory as tr
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 from utils.windModel import Wind
 import utils
 import config
-import cProfile
 
 trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"] # "altitude", "attitude"]
 
