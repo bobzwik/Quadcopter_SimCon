@@ -67,7 +67,7 @@ wMax = 3.0
 velMax = np.array([uMax, vMax, wMax])
 
 # Max tilt
-tiltMax = 25.0*deg2rad
+tiltMax = 40.0*deg2rad
 
 # Max Rate
 pMax = 200.0*deg2rad

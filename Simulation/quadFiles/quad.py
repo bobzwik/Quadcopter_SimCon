@@ -65,160 +65,158 @@ class Quadcopter:
         self.thr = self.params["kTh"]*self.wMotor*self.wMotor
         self.tor = self.params["kTo"]*self.wMotor*self.wMotor
 
-    # # @jit(nopython = True)
-    # def state_dot(self, state, t, cmd, wind):
+    def state_dot(self, state, t, cmd, wind):
 
-    #     # Import Params
-    #     # ---------------------------    
-    #     mB   = self.params["mB"]
-    #     g    = self.params["g"]
-    #     dxm  = self.params["dxm"]
-    #     dym  = self.params["dym"]
-    #     dzm  = self.params["dzm"]
-    #     IB   = self.params["IB"]
-    #     IBxx = IB[0,0]
-    #     IByy = IB[1,1]
-    #     IBzz = IB[2,2]
-    #     Cd   = self.params["Cd"]
+        # Import Params
+        # ---------------------------    
+        mB   = self.params["mB"]
+        g    = self.params["g"]
+        dxm  = self.params["dxm"]
+        dym  = self.params["dym"]
+        dzm  = self.params["dzm"]
+        IB   = self.params["IB"]
+        IBxx = IB[0,0]
+        IByy = IB[1,1]
+        IBzz = IB[2,2]
+        Cd   = self.params["Cd"]
         
-    #     kTh  = self.params["kTh"]
-    #     kTo  = self.params["kTo"]
-    #     c1   = self.params["motorc1"]
-    #     c0   = self.params["motorc0"]
-    #     tau  = self.params["tau"]
-    #     kp   = self.params["kp"]
-    #     damp = self.params["damp"]
-    #     db   = self.params["motordeadband"]
+        kTh  = self.params["kTh"]
+        kTo  = self.params["kTo"]
+        c1   = self.params["motorc1"]
+        c0   = self.params["motorc0"]
+        tau  = self.params["tau"]
+        kp   = self.params["kp"]
+        damp = self.params["damp"]
+        db   = self.params["motordeadband"]
 
-    #     IRzz = self.params["IRzz"]
-    #     if (self.params["usePrecession"]):
-    #         uP = 1
-    #     else:
-    #         uP = 0
+        IRzz = self.params["IRzz"]
+        if (self.params["usePrecession"]):
+            uP = 1
+        else:
+            uP = 0
     
-    #     # Import State Vector
-    #     # ---------------------------  
-    #     x      = state[0]
-    #     y      = state[1]
-    #     z      = state[2]
-    #     q0     = state[3]
-    #     q1     = state[4]
-    #     q2     = state[5]
-    #     q3     = state[6]
-    #     xdot   = state[7]
-    #     ydot   = state[8]
-    #     zdot   = state[9]
-    #     p      = state[10]
-    #     q      = state[11]
-    #     r      = state[12]
-    #     wM1    = state[13]
-    #     wdotM1 = state[14]
-    #     wM2    = state[15]
-    #     wdotM2 = state[16]
-    #     wM3    = state[17]
-    #     wdotM3 = state[18]
-    #     wM4    = state[19]
-    #     wdotM4 = state[20]
+        # Import State Vector
+        # ---------------------------  
+        x      = state[0]
+        y      = state[1]
+        z      = state[2]
+        q0     = state[3]
+        q1     = state[4]
+        q2     = state[5]
+        q3     = state[6]
+        xdot   = state[7]
+        ydot   = state[8]
+        zdot   = state[9]
+        p      = state[10]
+        q      = state[11]
+        r      = state[12]
+        wM1    = state[13]
+        wdotM1 = state[14]
+        wM2    = state[15]
+        wdotM2 = state[16]
+        wM3    = state[17]
+        wdotM3 = state[18]
+        wM4    = state[19]
+        wdotM4 = state[20]
 
-    #     # Motor Dynamics and Rotor forces (Second Order System: https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)
-    #     # ---------------------------
+        # Motor Dynamics and Rotor forces (Second Order System: https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)
+        # ---------------------------
         
-    #     uMotor = cmd
-    #     wddotM1 = (-2.0*damp*tau*wdotM1 - wM1 + kp*uMotor[0])/(tau**2)
-    #     wddotM2 = (-2.0*damp*tau*wdotM2 - wM2 + kp*uMotor[1])/(tau**2)
-    #     wddotM3 = (-2.0*damp*tau*wdotM3 - wM3 + kp*uMotor[2])/(tau**2)
-    #     wddotM4 = (-2.0*damp*tau*wdotM4 - wM4 + kp*uMotor[3])/(tau**2)
+        uMotor = cmd
+        wddotM1 = (-2.0*damp*tau*wdotM1 - wM1 + kp*uMotor[0])/(tau**2)
+        wddotM2 = (-2.0*damp*tau*wdotM2 - wM2 + kp*uMotor[1])/(tau**2)
+        wddotM3 = (-2.0*damp*tau*wdotM3 - wM3 + kp*uMotor[2])/(tau**2)
+        wddotM4 = (-2.0*damp*tau*wdotM4 - wM4 + kp*uMotor[3])/(tau**2)
     
-    #     wMotor = np.array([wM1, wM2, wM3, wM4])
-    #     thrust = kTh*wMotor*wMotor
-    #     torque = kTo*wMotor*wMotor
+        wMotor = np.array([wM1, wM2, wM3, wM4])
+        thrust = kTh*wMotor*wMotor
+        torque = kTo*wMotor*wMotor
     
-    #     ThrM1 = thrust[0]
-    #     ThrM2 = thrust[1]
-    #     ThrM3 = thrust[2]
-    #     ThrM4 = thrust[3]
-    #     TorM1 = torque[0]
-    #     TorM2 = torque[1]
-    #     TorM3 = torque[2]
-    #     TorM4 = torque[3]
+        ThrM1 = thrust[0]
+        ThrM2 = thrust[1]
+        ThrM3 = thrust[2]
+        ThrM4 = thrust[3]
+        TorM1 = torque[0]
+        TorM2 = torque[1]
+        TorM3 = torque[2]
+        TorM4 = torque[3]
 
-    #     # Wind Model
-    #     # ---------------------------
-    #     [velW, qW1, qW2] = wind.randomWind(t)
-    #     # velW = 0
+        # Wind Model
+        # ---------------------------
+        [velW, qW1, qW2] = wind.randomWind(t)
+        # velW = 0
 
-    #     # velW = 5          # m/s
-    #     # qW1 = 0*deg2rad    # Wind heading
-    #     # qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
+        # velW = 5          # m/s
+        # qW1 = 0*deg2rad    # Wind heading
+        # qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
     
-    #     # State Derivatives (from PyDy) This is already the analytically solved vector of MM*x = RHS
-    #     # ---------------------------
-    #     if (config.orient == "NED"):
-    #         DynamicsDot = np.array([
-    #             [                                                                                                                                   xdot],
-    #             [                                                                                                                                   ydot],
-    #             [                                                                                                                                   zdot],
-    #             [                                                                                                        -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
-    #             [                                                                                                         0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
-    #             [                                                                                                         0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
-    #             [                                                                                                        -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
-    #             [     (Cd*sign(velW*cos(qW1)*cos(qW2) - xdot)*(velW*cos(qW1)*cos(qW2) - xdot)**2 - 2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-    #             [     (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)**2 + 2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-    #             [ (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)**2 - (ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) + g*mB)/mB],
-    #             [                                    ((IByy - IBzz)*q*r - uP*IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx], # uP activates or deactivates the use of gyroscopic precession.
-    #             [                                    ((IBzz - IBxx)*p*r + uP*IRzz*(wM1 - wM2 + wM3 - wM4)*p + ( ThrM1 + ThrM2 - ThrM3 - ThrM4)*dxm)/IByy], # Set uP to False if rotor inertia is not known (gyro precession has negigeable effect on drone dynamics)
-    #             [                                                                               ((IBxx - IByy)*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz]])
-    #     elif (config.orient == "ENU"):
-    #         DynamicsDot = np.array([
-    #             [                                                                                                                                   xdot],
-    #             [                                                                                                                                   ydot],
-    #             [                                                                                                                                   zdot],
-    #             [                                                                                                        -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
-    #             [                                                                                                         0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
-    #             [                                                                                                         0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
-    #             [                                                                                                        -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
-    #             [     (Cd*sign(velW*cos(qW1)*cos(qW2) - xdot)*(velW*cos(qW1)*cos(qW2) - xdot)**2 + 2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-    #             [     (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)**2 - 2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-    #             [ (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)**2 + (ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) - g*mB)/mB],
-    #             [                                    ((IByy - IBzz)*q*r + uP*IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx], # uP activates or deactivates the use of gyroscopic precession.
-    #             [                                    ((IBzz - IBxx)*p*r - uP*IRzz*(wM1 - wM2 + wM3 - wM4)*p + (-ThrM1 - ThrM2 + ThrM3 + ThrM4)*dxm)/IByy], # Set uP to False if rotor inertia is not known (gyro precession has negigeable effect on drone dynamics)
-    #             [                                                                               ((IBxx - IBzz)*p*q + TorM1 - TorM2 + TorM3 - TorM4)/IBzz]])
+        # State Derivatives (from PyDy) This is already the analytically solved vector of MM*x = RHS
+        # ---------------------------
+        if (config.orient == "NED"):
+            DynamicsDot = np.array([
+                [                                                                                                                                   xdot],
+                [                                                                                                                                   ydot],
+                [                                                                                                                                   zdot],
+                [                                                                                                        -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
+                [                                                                                                         0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
+                [                                                                                                         0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
+                [                                                                                                        -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
+                [     (Cd*sign(velW*cos(qW1)*cos(qW2) - xdot)*(velW*cos(qW1)*cos(qW2) - xdot)**2 - 2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
+                [     (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)**2 + 2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
+                [ (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)**2 - (ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) + g*mB)/mB],
+                [                                    ((IByy - IBzz)*q*r - uP*IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx], # uP activates or deactivates the use of gyroscopic precession.
+                [                                    ((IBzz - IBxx)*p*r + uP*IRzz*(wM1 - wM2 + wM3 - wM4)*p + ( ThrM1 + ThrM2 - ThrM3 - ThrM4)*dxm)/IByy], # Set uP to False if rotor inertia is not known (gyro precession has negigeable effect on drone dynamics)
+                [                                                                               ((IBxx - IByy)*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz]])
+        elif (config.orient == "ENU"):
+            DynamicsDot = np.array([
+                [                                                                                                                                   xdot],
+                [                                                                                                                                   ydot],
+                [                                                                                                                                   zdot],
+                [                                                                                                        -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
+                [                                                                                                         0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
+                [                                                                                                         0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
+                [                                                                                                        -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
+                [     (Cd*sign(velW*cos(qW1)*cos(qW2) - xdot)*(velW*cos(qW1)*cos(qW2) - xdot)**2 + 2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
+                [     (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)**2 - 2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
+                [ (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)**2 + (ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) - g*mB)/mB],
+                [                                    ((IByy - IBzz)*q*r + uP*IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx], # uP activates or deactivates the use of gyroscopic precession.
+                [                                    ((IBzz - IBxx)*p*r - uP*IRzz*(wM1 - wM2 + wM3 - wM4)*p + (-ThrM1 - ThrM2 + ThrM3 + ThrM4)*dxm)/IByy], # Set uP to False if rotor inertia is not known (gyro precession has negigeable effect on drone dynamics)
+                [                                                                               ((IBxx - IBzz)*p*q + TorM1 - TorM2 + TorM3 - TorM4)/IBzz]])
     
     
-    #     # State Derivative Vector
-    #     # ---------------------------
-    #     sdot     = np.zeros([21])
-    #     sdot[0]  = DynamicsDot[0]
-    #     sdot[1]  = DynamicsDot[1]
-    #     sdot[2]  = DynamicsDot[2]
-    #     sdot[3]  = DynamicsDot[3]
-    #     sdot[4]  = DynamicsDot[4]
-    #     sdot[5]  = DynamicsDot[5]
-    #     sdot[6]  = DynamicsDot[6]
-    #     sdot[7]  = DynamicsDot[7]
-    #     sdot[8]  = DynamicsDot[8]
-    #     sdot[9]  = DynamicsDot[9]
-    #     sdot[10] = DynamicsDot[10]
-    #     sdot[11] = DynamicsDot[11]
-    #     sdot[12] = DynamicsDot[12]
-    #     sdot[13] = wdotM1
-    #     sdot[14] = wddotM1
-    #     sdot[15] = wdotM2
-    #     sdot[16] = wddotM2
-    #     sdot[17] = wdotM3
-    #     sdot[18] = wddotM3
-    #     sdot[19] = wdotM4
-    #     sdot[20] = wddotM4
+        # State Derivative Vector
+        # ---------------------------
+        sdot     = np.zeros([21])
+        sdot[0]  = DynamicsDot[0]
+        sdot[1]  = DynamicsDot[1]
+        sdot[2]  = DynamicsDot[2]
+        sdot[3]  = DynamicsDot[3]
+        sdot[4]  = DynamicsDot[4]
+        sdot[5]  = DynamicsDot[5]
+        sdot[6]  = DynamicsDot[6]
+        sdot[7]  = DynamicsDot[7]
+        sdot[8]  = DynamicsDot[8]
+        sdot[9]  = DynamicsDot[9]
+        sdot[10] = DynamicsDot[10]
+        sdot[11] = DynamicsDot[11]
+        sdot[12] = DynamicsDot[12]
+        sdot[13] = wdotM1
+        sdot[14] = wddotM1
+        sdot[15] = wdotM2
+        sdot[16] = wddotM2
+        sdot[17] = wdotM3
+        sdot[18] = wddotM3
+        sdot[19] = wdotM4
+        sdot[20] = wddotM4
 
-    #     return sdot
+        return sdot
 
     def update(self, t, Ts, cmd, wind):
 
         prev_vel   = self.vel
         prev_omega = self.omega
 
-        # self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd, wind), atol=1e-4, rtol=1e-4)[1]
-        self.state = odeint(state_dot, self.state, [t,t+Ts], args = (cmd, self.params, wind))[1]
+        self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd, wind), atol=1e-5, rtol=1e-5)[1]
 
         self.pos   = self.state[0:3]
         self.quat  = self.state[3:7]
@@ -231,150 +229,3 @@ class Quadcopter:
 
         self.extended_state()
         self.forces()
-
-@jit(void(float_[:], float_, float_[:], numba.typed.Dict )) #(nopython = True)
-def state_dot(state, t, cmd, params):
-
-    # Import Params
-    # ---------------------------    
-    mB   = params["mB"]
-    g    = params["g"]
-    dxm  = params["dxm"]
-    dym  = params["dym"]
-    dzm  = params["dzm"]
-    IB   = params["IB"]
-    IBxx = IB[0,0]
-    IByy = IB[1,1]
-    IBzz = IB[2,2]
-    Cd   = params["Cd"]
-        
-    kTh  = params["kTh"]
-    kTo  = params["kTo"]
-    c1   = params["motorc1"]
-    c0   = params["motorc0"]
-    tau  = params["tau"]
-    kp   = params["kp"]
-    damp = params["damp"]
-    db   = params["motordeadband"]
-
-    IRzz = params["IRzz"]
-    if (params["usePrecession"]):
-        uP = 1
-    else:
-        uP = 0
-    
-    # Import State Vector
-    # ---------------------------  
-    x      = state[0]
-    y      = state[1]
-    z      = state[2]
-    q0     = state[3]
-    q1     = state[4]
-    q2     = state[5]
-    q3     = state[6]
-    xdot   = state[7]
-    ydot   = state[8]
-    zdot   = state[9]
-    p      = state[10]
-    q      = state[11]
-    r      = state[12]
-    wM1    = state[13]
-    wdotM1 = state[14]
-    wM2    = state[15]
-    wdotM2 = state[16]
-    wM3    = state[17]
-    wdotM3 = state[18]
-    wM4    = state[19]
-    wdotM4 = state[20]
-
-    # Motor Dynamics and Rotor forces (Second Order System: https://apmonitor.com/pdc/index.php/Main/SecondOrderSystems)
-    # ---------------------------
-        
-    uMotor = cmd
-    wddotM1 = (-2.0*damp*tau*wdotM1 - wM1 + kp*uMotor[0])/(tau**2)
-    wddotM2 = (-2.0*damp*tau*wdotM2 - wM2 + kp*uMotor[1])/(tau**2)
-    wddotM3 = (-2.0*damp*tau*wdotM3 - wM3 + kp*uMotor[2])/(tau**2)
-    wddotM4 = (-2.0*damp*tau*wdotM4 - wM4 + kp*uMotor[3])/(tau**2)
-    
-    wMotor = np.array([wM1, wM2, wM3, wM4])
-    thrust = kTh*wMotor*wMotor
-    torque = kTo*wMotor*wMotor
-    
-    ThrM1 = thrust[0]
-    ThrM2 = thrust[1]
-    ThrM3 = thrust[2]
-    ThrM4 = thrust[3]
-    TorM1 = torque[0]
-    TorM2 = torque[1]
-    TorM3 = torque[2]
-    TorM4 = torque[3]
-
-    # Wind Model
-    # ---------------------------
-    # [velW, qW1, qW2] = wind.randomWind(t)
-    # velW = 0
-
-    velW = 5          # m/s
-    qW1 = 0*deg2rad    # Wind heading
-    qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
-    
-    # State Derivatives (from PyDy) This is already the analytically solved vector of MM*x = RHS
-    # ---------------------------
-    if (config.orient == "NED"):
-        DynamicsDot = np.array([
-            [                                                                                                                                   xdot],
-            [                                                                                                                                   ydot],
-            [                                                                                                                                   zdot],
-            [                                                                                                        -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
-            [                                                                                                         0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
-            [                                                                                                         0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
-            [                                                                                                        -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
-            [     (Cd*sign(velW*cos(qW1)*cos(qW2) - xdot)*(velW*cos(qW1)*cos(qW2) - xdot)**2 - 2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-            [     (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)**2 + 2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-            [ (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)**2 - (ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) + g*mB)/mB],
-            [                                    ((IByy - IBzz)*q*r - uP*IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx], # uP activates or deactivates the use of gyroscopic precession.
-            [                                    ((IBzz - IBxx)*p*r + uP*IRzz*(wM1 - wM2 + wM3 - wM4)*p + ( ThrM1 + ThrM2 - ThrM3 - ThrM4)*dxm)/IByy], # Set uP to False if rotor inertia is not known (gyro precession has negigeable effect on drone dynamics)
-            [                                                                               ((IBxx - IByy)*p*q - TorM1 + TorM2 - TorM3 + TorM4)/IBzz]])
-    elif (config.orient == "ENU"):
-        DynamicsDot = np.array([
-            [                                                                                                                                   xdot],
-            [                                                                                                                                   ydot],
-            [                                                                                                                                   zdot],
-            [                                                                                                        -0.5*p*q1 - 0.5*q*q2 - 0.5*q3*r],
-            [                                                                                                         0.5*p*q0 - 0.5*q*q3 + 0.5*q2*r],
-            [                                                                                                         0.5*p*q3 + 0.5*q*q0 - 0.5*q1*r],
-            [                                                                                                        -0.5*p*q2 + 0.5*q*q1 + 0.5*q0*r],
-            [     (Cd*sign(velW*cos(qW1)*cos(qW2) - xdot)*(velW*cos(qW1)*cos(qW2) - xdot)**2 + 2*(q0*q2 + q1*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-            [     (Cd*sign(velW*sin(qW1)*cos(qW2) - ydot)*(velW*sin(qW1)*cos(qW2) - ydot)**2 - 2*(q0*q1 - q2*q3)*(ThrM1 + ThrM2 + ThrM3 + ThrM4))/mB],
-            [ (-Cd*sign(velW*sin(qW2) + zdot)*(velW*sin(qW2) + zdot)**2 + (ThrM1 + ThrM2 + ThrM3 + ThrM4)*(q0**2 - q1**2 - q2**2 + q3**2) - g*mB)/mB],
-            [                                    ((IByy - IBzz)*q*r + uP*IRzz*(wM1 - wM2 + wM3 - wM4)*q + ( ThrM1 - ThrM2 - ThrM3 + ThrM4)*dym)/IBxx], # uP activates or deactivates the use of gyroscopic precession.
-            [                                    ((IBzz - IBxx)*p*r - uP*IRzz*(wM1 - wM2 + wM3 - wM4)*p + (-ThrM1 - ThrM2 + ThrM3 + ThrM4)*dxm)/IByy], # Set uP to False if rotor inertia is not known (gyro precession has negigeable effect on drone dynamics)
-            [                                                                               ((IBxx - IBzz)*p*q + TorM1 - TorM2 + TorM3 - TorM4)/IBzz]])
-    
-    
-    # State Derivative Vector
-    # ---------------------------
-    sdot     = np.zeros([21])
-    sdot[0]  = DynamicsDot[0]
-    sdot[1]  = DynamicsDot[1]
-    sdot[2]  = DynamicsDot[2]
-    sdot[3]  = DynamicsDot[3]
-    sdot[4]  = DynamicsDot[4]
-    sdot[5]  = DynamicsDot[5]
-    sdot[6]  = DynamicsDot[6]
-    sdot[7]  = DynamicsDot[7]
-    sdot[8]  = DynamicsDot[8]
-    sdot[9]  = DynamicsDot[9]
-    sdot[10] = DynamicsDot[10]
-    sdot[11] = DynamicsDot[11]
-    sdot[12] = DynamicsDot[12]
-    sdot[13] = wdotM1
-    sdot[14] = wddotM1
-    sdot[15] = wdotM2
-    sdot[16] = wddotM2
-    sdot[17] = wdotM3
-    sdot[18] = wddotM3
-    sdot[19] = wdotM4
-    sdot[20] = wddotM4
-
-    return sdot
