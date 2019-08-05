@@ -11,10 +11,13 @@ class Wind:
 
     def __init__(self):
         
+        # Wind Velocity
         velW_max = 6.0     # m/s
-        velW_min = 4.0      # m/s
+        velW_min = 4.0     # m/s
+        # Wind Heading
         qW1_max  = 259.9    # deg
         qW1_min  = 0.0      # deg
+        # Wind Elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
         qW2_max  = 25.0     # deg
         qW2_min  = -25.0    # deg
 
@@ -23,6 +26,7 @@ class Wind:
         self.qW1_med  = ((qW1_max - qW1_min)*rd.random() + qW1_min)*deg2rad
         self.qW2_med  = ((qW2_max - qW2_min)*rd.random() + qW2_min)*deg2rad
 
+        # Wind Velocity
         self.velW_a1 = 1.5  # Wind velocity amplitude 1
         self.velW_f1 = 0.7  # Wind velocity frequency 1
         self.velW_d1 = 0    # Wind velocity delay (offset) 1
@@ -33,6 +37,7 @@ class Wind:
         self.velW_f3 = 2.3  # Wind velocity frequency 3
         self.velW_d3 = 2.0  # Wind velocity delay (offset) 3
 
+        # Wind Heading
         self.qW1_a1  = 15.0*deg2rad # Wind heading amplitude 1
         self.qW1_f1  = 0.1          # Wind heading frequency 1
         self.qW1_d1  = 0            # Wind heading delay (offset) 1
@@ -40,6 +45,7 @@ class Wind:
         self.qW1_f2  = 0.54         # Wind heading frequency 2
         self.qW1_d2  = 0            # Wind heading delay (offset) 2
 
+        # Wind Elevation
         self.qW2_a1  = 4.0*deg2rad  # Wind elevation amplitude 1
         self.qW2_f1  = 0.1          # Wind elevation frequency 1
         self.qW2_d1  = 0            # Wind elevation delay (offset) 1

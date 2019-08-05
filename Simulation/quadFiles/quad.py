@@ -65,7 +65,8 @@ class Quadcopter:
         self.thr = self.params["kTh"]*self.wMotor*self.wMotor
         self.tor = self.params["kTo"]*self.wMotor*self.wMotor
 
-    def state_dot(self, state, t, cmd, wind):
+    # def state_dot(self, state, t, cmd, wind):
+    def state_dot(self, t, state, cmd, wind):
 
         # Import Params
         # ---------------------------    
@@ -144,7 +145,7 @@ class Quadcopter:
         # Wind Model
         # ---------------------------
         [velW, qW1, qW2] = wind.randomWind(t)
-        # velW = 0
+        velW = 0
 
         # velW = 5          # m/s
         # qW1 = 0*deg2rad    # Wind heading
@@ -211,12 +212,13 @@ class Quadcopter:
 
         return sdot
 
-    def update(self, t, Ts, cmd, wind):
+    def update(self, t, Ts, cmd, wind, integrator):
 
         prev_vel   = self.vel
         prev_omega = self.omega
 
-        self.state = odeint(self.state_dot, self.state, [t,t+Ts], args = (cmd, wind), atol=1e-5, rtol=1e-5)[1]
+        integrator.set_f_params(cmd, wind)
+        self.state = integrator.integrate(t, t+Ts)
 
         self.pos   = self.state[0:3]
         self.quat  = self.state[3:7]

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from scipy.integrate import ode
 import matplotlib.pyplot as plt
+import time
 import cProfile
 import trajectory as tr
 from ctrl import Control
@@ -24,6 +26,7 @@ def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
 
 
 def main():
+    start_time = time.perf_counter()
 
     # Setup
     # --------------------------- 
@@ -31,13 +34,15 @@ def main():
     Ts = 0.005
     Tf = 10
     trajType = trajOptions[0]
-    trajSelect = 0
+    trajSelect = 1
 
-    # Initialize Quadcopter, Controller, Result Matrixes
+    # Initialize Quadcopter, Controller, Wind, Integrator, Result Matrixes
     # ---------------------------
     quad = Quadcopter()
     ctrl = Control(quad)
     wind = Wind()
+    integrator = ode(quad.state_dot).set_integrator('dopri5', first_step=Ts/10)
+    integrator.set_initial_value(quad.state, Ti)
 
     t_all     = Ti
     s_all     = quad.state.T
@@ -65,7 +70,7 @@ def main():
                 
         # Dynamics
         # ---------------------------
-        quad.update(t, Ts, ctrl.w_cmd, wind)
+        quad.update(t, Ts, ctrl.w_cmd, wind, integrator)
         t += Ts
 
         # print("{:.3f}".format(t))
@@ -82,6 +87,9 @@ def main():
         thr_all   = np.vstack((thr_all, quad.thr.T))
         tor_all   = np.vstack((tor_all, quad.tor.T))
         i += 1
+    
+    end_time = time.perf_counter()
+    print(end_time - start_time)
 
     # View Results
     # ---------------------------
