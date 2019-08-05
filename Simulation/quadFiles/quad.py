@@ -2,10 +2,7 @@
 
 import numpy as np
 from numpy import sin, cos, tan, pi, sign
-from scipy.linalg import solve
-from scipy.integrate import odeint
-from numba import jit, void, float_, int_
-import numba
+from scipy.integrate import ode
 
 from quadFiles.initQuad import sys_params, init_cmd, init_state
 import utils
@@ -15,7 +12,7 @@ deg2rad = pi/180.0
 
 class Quadcopter:
 
-    def __init__(self):
+    def __init__(self, Ti):
         
         # Quad Params
         # ---------------------------
@@ -45,6 +42,11 @@ class Quadcopter:
         self.extended_state()
         self.forces()
 
+        # Set Integrator
+        # ---------------------------
+        self.integrator = ode(self.state_dot).set_integrator('dopri5', first_step='0.00005', atol='10e-6', rtol='10e-6')
+        self.integrator.set_initial_value(self.state, Ti)
+
 
     def extended_state(self):
 
@@ -65,7 +67,6 @@ class Quadcopter:
         self.thr = self.params["kTh"]*self.wMotor*self.wMotor
         self.tor = self.params["kTo"]*self.wMotor*self.wMotor
 
-    # def state_dot(self, state, t, cmd, wind):
     def state_dot(self, t, state, cmd, wind):
 
         # Import Params
@@ -145,7 +146,7 @@ class Quadcopter:
         # Wind Model
         # ---------------------------
         [velW, qW1, qW2] = wind.randomWind(t)
-        velW = 0
+        # velW = 0
 
         # velW = 5          # m/s
         # qW1 = 0*deg2rad    # Wind heading
@@ -212,13 +213,13 @@ class Quadcopter:
 
         return sdot
 
-    def update(self, t, Ts, cmd, wind, integrator):
+    def update(self, t, Ts, cmd, wind):
 
         prev_vel   = self.vel
         prev_omega = self.omega
 
-        integrator.set_f_params(cmd, wind)
-        self.state = integrator.integrate(t, t+Ts)
+        self.integrator.set_f_params(cmd, wind)
+        self.state = self.integrator.integrate(t, t+Ts)
 
         self.pos   = self.state[0:3]
         self.quat  = self.state[3:7]
