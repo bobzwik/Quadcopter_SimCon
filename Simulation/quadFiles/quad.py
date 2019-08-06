@@ -148,9 +148,9 @@ class Quadcopter:
         [velW, qW1, qW2] = wind.randomWind(t)
         # velW = 0
 
-        velW = 5          # m/s
-        qW1 = 0*deg2rad    # Wind heading
-        qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
+        # velW = 5          # m/s
+        # qW1 = 0*deg2rad    # Wind heading
+        # qW2 = 60*deg2rad     # Wind elevation (positive = upwards wind in NED, positive = downwards wind in ENU)
     
         # State Derivatives (from PyDy) This is already the analytically solved vector of MM*x = RHS
         # ---------------------------
