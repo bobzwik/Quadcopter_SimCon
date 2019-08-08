@@ -34,13 +34,13 @@ def main():
     Ts = 0.005
     Tf = 10
     trajType = trajOptions[0]
-    trajSelect = 1
+    trajSelect = 0
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
     quad = Quadcopter(Ti)
     ctrl = Control(quad)
-    wind = Wind()
+    wind = Wind('Fixed', 1.2, 90, -15)
 
     t_all     = Ti
     s_all     = quad.state.T

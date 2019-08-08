@@ -75,7 +75,6 @@ class Quadcopter:
         g    = self.params["g"]
         dxm  = self.params["dxm"]
         dym  = self.params["dym"]
-        dzm  = self.params["dzm"]
         IB   = self.params["IB"]
         IBxx = IB[0,0]
         IByy = IB[1,1]
@@ -84,12 +83,9 @@ class Quadcopter:
         
         kTh  = self.params["kTh"]
         kTo  = self.params["kTo"]
-        c1   = self.params["motorc1"]
-        c0   = self.params["motorc0"]
         tau  = self.params["tau"]
         kp   = self.params["kp"]
         damp = self.params["damp"]
-        db   = self.params["motordeadband"]
 
         IRzz = self.params["IRzz"]
         if (self.params["usePrecession"]):
