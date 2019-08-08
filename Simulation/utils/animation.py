@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Nov  4 15:51:44 2018
-
-@author: John
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
 """
 
 import numpy as np

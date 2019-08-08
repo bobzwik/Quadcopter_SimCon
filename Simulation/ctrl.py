@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
 
 # Position and Velocity Control based on https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/PositionControl.cpp
 # Desired Thrust to Desired Attitude based on https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/Utility/ControlMath.cpp
@@ -193,7 +199,7 @@ class Control:
 
         # Calculate integral part
         if not (stop_int_D):
-            self.thr_int[2] += vel_I_gain[2]*vel_z_error*Ts
+            self.thr_int[2] += vel_I_gain[2]*vel_z_error*Ts * quad.params["useIntergral"]
             # Limit thrust integral
             self.thr_int[2] = min(abs(self.thr_int[2]), quad.params["maxThr"])*np.sign(self.thr_int[2])
 
@@ -223,7 +229,7 @@ class Control:
         # see Anti-Reset Windup for PID controllers, L.Rundqwist, 1990
         arw_gain = 2.0/vel_P_gain[0:2]
         vel_err_lim = vel_xy_error - (thrust_xy_sp - self.thrust_sp[0:2])*arw_gain
-        self.thr_int[0:2] += vel_I_gain[0:2]*vel_err_lim*Ts
+        self.thr_int[0:2] += vel_I_gain[0:2]*vel_err_lim*Ts * quad.params["useIntergral"]
     
     def thrustToAttitude(self, quad, Ts):
         

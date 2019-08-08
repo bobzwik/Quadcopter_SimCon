@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
+
 """
 Using PyDy and Sympy, this script generates the equations for the state derivatives 
 of a quadcopter in a 3-dimensional space. The states in this particular script are:
