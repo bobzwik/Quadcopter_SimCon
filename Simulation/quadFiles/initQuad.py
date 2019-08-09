@@ -33,8 +33,8 @@ def sys_params():
     params["IB"]   = IB
     params["invI"] = inv(IB)
     params["IRzz"] = IRzz
-    params["usePrecession"] = bool(False) # Include gyroscopic precession in drone dynamics equation. Set to False if rotor inertia isn't known (gyro precession has negigeable effect on drone dynamics)
-    params["useIntergral"] = bool(False)
+    params["usePrecession"] = bool(False)   # Include gyroscopic precession in drone dynamics equation. Set to False if rotor inertia isn't known (gyro precession has negigeable effect on drone dynamics)
+    params["useIntergral"] = bool(False)    # Include integral gains in linear velocity control
 
     params["Cd"]         = 0.1
     params["kTh"]        = 1.076e-5 # thrust coeff (N/(rad/s)^2)  (1.18e-7 N/RPM^2)

@@ -20,7 +20,7 @@ import config
 
 trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"] # "altitude", "attitude"]
 
-def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
+def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect):
     
     # Trajectory for Desired States
     # ---------------------------
@@ -29,6 +29,10 @@ def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     # Generate Commands
     # ---------------------------
     ctrl.controller(quad, sDes, Ts, trajType, trajSelect)
+
+    # Dynamics
+    # ---------------------------
+    quad.update(t, Ts, ctrl.w_cmd, wind)
 
 
 def main():
@@ -40,13 +44,13 @@ def main():
     Ts = 0.005
     Tf = 10
     trajType = trajOptions[0]
-    trajSelect = 0
+    trajSelect = 1
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
     quad = Quadcopter(Ti)
     ctrl = Control(quad)
-    wind = Wind('Fixed', 1.2, 90, -15)
+    wind = Wind('Fixed', 2.0, 90, -15)
 
     t_all     = Ti
     s_all     = quad.state.T
@@ -68,13 +72,7 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        # Quadcopter Control
-        # ---------------------------
-        quad_control(quad, ctrl, t, Ts, trajType, trajSelect)
-                
-        # Dynamics
-        # ---------------------------
-        quad.update(t, Ts, ctrl.w_cmd, wind)
+        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect)
         t += Ts
 
         # print("{:.3f}".format(t))

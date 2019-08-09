@@ -10,7 +10,7 @@ The second purpose is to provide a simple working simulation of the quadcopter's
 
 [PyDy](https://pypi.org/project/pydy/), short for Python Dynamics, is a tool kit made to enable the study of multibody dynamics. At it's core is the SymPy [mechanics package](https://docs.sympy.org/latest/modules/physics/mechanics/index.html#vector), which provides an API for building models and generating the symbolic equations of motion for complex multibody systems. 
 
-In the *PyDy Scripts* folder, one will find multiple different scripts. Some express the drone's orientation in the NED frame, and some in the ENU frame.
+In the *PyDy Scripts* folder, you will find multiple different scripts. Some express the drone's orientation in the NED frame, and some in the ENU frame.
 
 __NED frame__ : The world is oriented in such a way that the *X* direction is **North**, *Y* is **East** and *Z* is **Down**. The drone's orientation in this frame is **front-right-down (frd)**. This is a conventional/classic frame used in aeronautics, and also the frame used for the PX4 multicopter controller.
 
@@ -30,6 +30,8 @@ The quadcopter states are the following :
 * Angular Velocity (*p*, *q*, *r*) (The drone's angular velocity described in its own body frame, also known as *&Omega;*. This is not equivalent to *phi_dot*, *theta_dot*, *psi_dot*)
 
 The PyDy scripts use the Kane Method to derive the system's equations and output a Mass Matrix (*MM*) and a right-hand-side vector (*RHS*). These outputs are used to obtain the state derivative vector *s_dot* in the equation `MM*s_dot = RHS`. To solve for *s_dot*, one must first calculate the inverse of the Mass Matrix, to be used in the equation `s_dot = inv(MM)*RHS`. Fortunately, for the quadcopter in this project, the Mass Matrix is a diagonal matrix and inverses quite easily. One can numerically solve for *s_dot* during the integration, but PyDy is able to analytically solve the state derivatives, which then can easily be copied into the ODE function.
+
+Currently, I have seperated the PyDy scripts into 3 folders. The first is just a basic quadcopter. In the second, I have added gyroscopic precession of the rotors. And in the third, wind and aerodynamic drag was added.
 
 **NOTE**: In my scripts, Motor 1 is the front left motor, and the rest are numbered clockwise. This is not really conventional, but is simple enough.  
 
@@ -60,9 +62,9 @@ The current parameters are set to roughly match the characteristics of a DJI F45
 ### Control
 There are currently 3 controllers coded in this project. One to control XYZ positions, one to control XY velocities and Z position, and one to control XYZ velocities. In all 3 current controllers, it is also possible to set a Yaw angle (heading) setpoint. There are plans to add more ways of controlling the quadcopter.
 
-The control algorithm is strongly inspired by the PX4 multicopter control algorithm. It is a cascade controller, where the position error (difference between the desired position and the current position) generates a velocity setpoint, the velocity error then creates a desired thrust magnitude and orientation, which is then interpreted as a desired rotation (expressed as a quaternion). The quaternion error then generates angular rate setpoints, which then creates desired moments. The states are controlled using a PID control. Position and Attitude control uses a simple Proportional (P) gain, while Velocity and Rate uses Proportional and Derivative (D) gains. 
+The control algorithm is strongly inspired by the PX4 multicopter control algorithm. It is a cascade controller, where the position error (difference between the desired position and the current position) generates a velocity setpoint, the velocity error then creates a desired thrust magnitude and orientation, which is then interpreted as a desired rotation (expressed as a quaternion). The quaternion error then generates angular rate setpoints, which then creates desired moments. The states are controlled using a PID control. Position and Attitude control uses a simple Proportional (P) gain, while Velocity and Rate uses Proportional and Derivative (D) gains. Velocity also has an optional Integral (I) gain if wind is activated in the simulation.
 
-The main difference between this control algorithm and the PX4's, is that this code doesn't have integral (I) gain for the velocity and angular rate controllers (yet). There is no need for it yet since wind isn't modeled in the simulation and hover thrust is perfectly known.
+There are multiple wind model implemented. One were the wind velocity, heading and elevation remain constant, one where they vary using a sine function, and one where they vary using a sine function with a random average value.
 
 The mixer (not based from PX4) allows to find the exact RPM of each motor given the desired thrust magnitude and desired moments.
 
@@ -76,9 +78,6 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 ## To-Do
 * Implement trajectory generation
 * Develop method to find gains for best response
-* Add the possibility for more controllers
-* Implement Attitude and Rate control
+* Add the possibility for more controllers (Attitude/Stabilize and Rate/Acro)
 * Add scheduler to simulate and display animation in realtime simultaneously
 * Simulate sensors and sensor noise, calculate states from sensor data (Maybe somehow running simultaneously? I'll have to figure out how.)
-* Add integral gain (maybe?)
-* Add air resistance and wind
