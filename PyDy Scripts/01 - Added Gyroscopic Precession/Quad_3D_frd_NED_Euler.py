@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
+
 """
 Using PyDy and Sympy, this script generates the equations for the state derivatives 
 of a quadcopter in a 3-dimensional space. The states in this particular script are:
@@ -54,7 +62,7 @@ phid, thetad, psid, pd, qd, rd = dynamicsymbols('phi theta psi p q r', 1)
 
 # Constants
 # ---------------------------
-mB, g, dxm, dym, dzm, IBxx, IByy, IBzz = symbols('mB g dxm dym dzm IBxx IByy IBzz')
+mB, g, dxm, dym, dzm, IBxx, IByy, IBzz, IRzz, wM1, wM2, wM3, wM4 = symbols('mB g dxm dym dzm IBxx IByy IBzz IRzz wM1 wM2 wM3 wM4')
 ThrM1, ThrM2, ThrM3, ThrM4, TorM1, TorM2, TorM3, TorM4 = symbols('ThrM1 ThrM2 ThrM3 ThrM4 TorM1 TorM2 TorM3 TorM4')
 
 # Rotation ZYX Body
@@ -106,7 +114,10 @@ TM1 = (B, -TorM1*B.z)
 TM2 = (B,  TorM2*B.z)
 TM3 = (B, -TorM3*B.z)
 TM4 = (B,  TorM4*B.z)
-ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4]
+
+gyro = (B, -IRzz*cross(B.ang_vel_in(N), (wM1 - wM2 + wM3 - wM4)*B.z))
+
+ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4, gyro]
 
 # Kinematic Differential Equations
 # ---------------------------

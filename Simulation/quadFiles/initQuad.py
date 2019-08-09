@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
 
 import numpy as np
 from numpy.linalg import inv
@@ -15,7 +21,9 @@ def sys_params():
     IB  = np.array([[0.0123, 0,      0     ],
                     [0,      0.0123, 0     ],
                     [0,      0,      0.0224]]) # Inertial tensor (kg*m^2)
-    
+    IRzz = 2.7e-5   # Rotor moment of inertia (kg*m^2)
+
+
     params = {}
     params["mB"]   = mB
     params["g"]    = g
@@ -24,7 +32,11 @@ def sys_params():
     params["dzm"]  = dzm
     params["IB"]   = IB
     params["invI"] = inv(IB)
-    
+    params["IRzz"] = IRzz
+    params["usePrecession"] = bool(False)   # Include gyroscopic precession in drone dynamics equation. Set to False if rotor inertia isn't known (gyro precession has negigeable effect on drone dynamics)
+    params["useIntergral"] = bool(False)    # Include integral gains in linear velocity control
+
+    params["Cd"]         = 0.1
     params["kTh"]        = 1.076e-5 # thrust coeff (N/(rad/s)^2)  (1.18e-7 N/RPM^2)
     params["kTo"]        = 1.632e-7 # torque coeff (Nm/(rad/s)^2)  (1.79e-9 Nm/RPM^2)
     params["mixerFM"]    = makeMixerFM(params) # Make mixer that calculated Thrust (F) and moments (M) as a function on motor speeds
@@ -59,6 +71,8 @@ def makeMixerFM(params):
     # Motor 1 is front left, then clockwise numbering.
     # A mixer like this one allows to find the exact RPM of each motor 
     # given a desired thrust and desired moments.
+    # Inspiration for this mixer (or coefficient matrix) and how it is used : 
+    # https://link.springer.com/article/10.1007/s13369-017-2433-2 (https://sci-hub.tw/10.1007/s13369-017-2433-2)
     if (config.orient == "NED"):
         mixerFM = np.array([[    kTh,      kTh,      kTh,      kTh],
                             [dym*kTh, -dym*kTh,  -dym*kTh, dym*kTh],

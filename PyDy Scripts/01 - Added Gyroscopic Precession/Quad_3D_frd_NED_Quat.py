@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
+
 """
 Using PyDy and Sympy, this script generates the equations for the state derivatives 
 of a quadcopter in a 3-dimensional space. The states in this particular script are:
@@ -10,8 +18,8 @@ q0, q1, q2, q3    : Orientation of the drone in the inertial frame using quatern
 p, q, r           : Angular velocity of the drone in the inertial frame,
                     expressed in the drone's frame
 
-Important note    : This script uses a flu body orientation (front-left-up) and 
-                    a ENU world orientation (East-North-Up)
+Important note    : This script uses a frd body orientation (front-right-down) and 
+                    a NED world orientation (North-East-Down). The drone's altitude is -z.
 
 Other note        : In the resulting state derivatives, there are still simplifications
                     that can be made that SymPy cannot simplify (factoring).
@@ -51,7 +59,7 @@ q0d, q1d, q2d, q3d, pd, qd, rd = dynamicsymbols('q0 q1 q2 q3 p q r', 1)
 
 # Constants
 # ---------------------------
-mB, g, dxm, dym, dzm, IBxx, IByy, IBzz = symbols('mB g dxm dym dzm IBxx IByy IBzz')
+mB, g, dxm, dym, dzm, IBxx, IByy, IBzz, IRzz, wM1, wM2, wM3, wM4 = symbols('mB g dxm dym dzm IBxx IByy IBzz IRzz wM1 wM2 wM3 wM4')
 ThrM1, ThrM2, ThrM3, ThrM4, TorM1, TorM2, TorM3, TorM4 = symbols('ThrM1 ThrM2 ThrM3 ThrM4 TorM1 TorM2 TorM3 TorM4')
 
 # Rotation Quaternion
@@ -72,10 +80,10 @@ Bcm.set_vel(N, Bcm.pos_from(No).dt(N))
 # M1 is front left, then clockwise numbering
 # dzm is positive for motors above center of mass
 # ---------------------------
-M1.set_pos(Bcm,  dxm*B.x + dym*B.y + dzm*B.z)
-M2.set_pos(Bcm,  dxm*B.x - dym*B.y + dzm*B.z)
-M3.set_pos(Bcm, -dxm*B.x - dym*B.y + dzm*B.z)
-M4.set_pos(Bcm, -dxm*B.x + dym*B.y + dzm*B.z)
+M1.set_pos(Bcm,  dxm*B.x - dym*B.y - dzm*B.z)
+M2.set_pos(Bcm,  dxm*B.x + dym*B.y - dzm*B.z)
+M3.set_pos(Bcm, -dxm*B.x + dym*B.y - dzm*B.z)
+M4.set_pos(Bcm, -dxm*B.x - dym*B.y - dzm*B.z)
 M1.v2pt_theory(Bcm, N, B)
 M2.v2pt_theory(Bcm, N, B)
 M3.v2pt_theory(Bcm, N, B)
@@ -92,17 +100,20 @@ BodyList = [BodyB]
 
 # Forces and Torques
 # ---------------------------
-Grav_Force = (Bcm, -mB*g*N.z)
-FM1 = (M1, ThrM1*B.z)
-FM2 = (M2, ThrM2*B.z)
-FM3 = (M3, ThrM3*B.z)
-FM4 = (M4, ThrM4*B.z)
+Grav_Force = (Bcm, mB*g*N.z)
+FM1 = (M1, -ThrM1*B.z)
+FM2 = (M2, -ThrM2*B.z)
+FM3 = (M3, -ThrM3*B.z)
+FM4 = (M4, -ThrM4*B.z)
 
-TM1 = (B,  TorM1*B.z)
-TM2 = (B, -TorM2*B.z)
-TM3 = (B,  TorM3*B.z)
-TM4 = (B, -TorM4*B.z)
-ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4]
+TM1 = (B, -TorM1*B.z)
+TM2 = (B,  TorM2*B.z)
+TM3 = (B, -TorM3*B.z)
+TM4 = (B,  TorM4*B.z)
+
+gyro = (B, -IRzz*cross(B.ang_vel_in(N), (wM1 - wM2 + wM3 - wM4)*B.z))
+
+ForceList = [Grav_Force, FM1, FM2, FM3, FM4, TM1, TM2, TM3, TM4, gyro]
 
 # Calculate Quaternion Derivative
 # ---------------------------

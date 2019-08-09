@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
 
 import numpy as np
 from numpy import pi
@@ -37,6 +43,8 @@ def desiredState(t, trajType, trajSelect, quad):
             sDes = testVelControl(t)
     
     elif trajType == "xyz_pos":
+        if   trajSelect == 0:
+            sDes = hover(t)
         if   trajSelect == 1:
             sDes = testXYZposition(t)
     

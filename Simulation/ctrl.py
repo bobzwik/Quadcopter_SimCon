@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
 
 # Position and Velocity Control based on https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/PositionControl.cpp
 # Desired Thrust to Desired Attitude based on https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/Utility/ControlMath.cpp
@@ -29,15 +35,19 @@ pos_P_gain = np.array([Px, Py, Pz])
 # Velocity P-D gains
 Pxdot = 5.0
 Dxdot = 0.5
+Ixdot = 5.0
 
 Pydot = Pxdot
 Dydot = Dxdot
+Iydot = Ixdot
 
 Pzdot = 6.0
 Dzdot = 0.2
+Izdot = 8.0
 
 vel_P_gain = np.array([Pxdot, Pydot, Pzdot])
 vel_D_gain = np.array([Dxdot, Dydot, Dzdot])
+vel_I_gain = np.array([Ixdot, Iydot, Izdot])
 
 # Attitude P gains
 Pphi = 8.0
@@ -67,7 +77,7 @@ wMax = 3.0
 velMax = np.array([uMax, vMax, wMax])
 
 # Max tilt
-tiltMax = 25.0*deg2rad
+tiltMax = 40.0*deg2rad
 
 # Max Rate
 pMax = 200.0*deg2rad
@@ -82,6 +92,7 @@ class Control:
     def __init__(self, quad):
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
+        self.thr_int = np.zeros(3)
         self.setYawWeight()
 
     
@@ -170,16 +181,30 @@ class Control:
         # allow hover when the position and velocity error are nul
         vel_z_error = self.vel_sp[2] - quad.vel[2]
         if (config.orient == "NED"):
-            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"]
+            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"] + self.thr_int[2]
         elif (config.orient == "ENU"):
-            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*quad.params["g"]
+            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*quad.params["g"] + self.thr_int[2]
         
-        # Saturate thrust setpoint in D-direction
+        # Get thrust limits
         if (config.orient == "NED"):
             # The Thrust limits are negated and swapped due to NED-frame
-            self.thrust_sp[2] = np.clip(thrust_z_sp, -quad.params["maxThr"], -quad.params["minThr"])
+            uMax = -quad.params["minThr"]
+            uMin = -quad.params["maxThr"]
         elif (config.orient == "ENU"):
-            self.thrust_sp[2] = np.clip(thrust_z_sp,  quad.params["minThr"],  quad.params["maxThr"])
+            uMax = quad.params["maxThr"]
+            uMin = quad.params["minThr"]
+
+        # Apply Anti-Windup in D-direction
+        stop_int_D = (thrust_z_sp >= uMax and vel_z_error >= 0.0) or (thrust_z_sp <= uMin and vel_z_error <= 0.0)
+
+        # Calculate integral part
+        if not (stop_int_D):
+            self.thr_int[2] += vel_I_gain[2]*vel_z_error*Ts * quad.params["useIntergral"]
+            # Limit thrust integral
+            self.thr_int[2] = min(abs(self.thr_int[2]), quad.params["maxThr"])*np.sign(self.thr_int[2])
+
+        # Saturate thrust setpoint in D-direction
+        self.thrust_sp[2] = np.clip(thrust_z_sp, uMin, uMax)
 
     
     def xy_vel_control(self, quad, Ts):
@@ -187,7 +212,7 @@ class Control:
         # XY Velocity Control (Thrust in NE-direction)
         # ---------------------------
         vel_xy_error = self.vel_sp[0:2] - quad.vel[0:2]
-        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2]
+        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2] + self.thr_int[0:2]
 
         # Max allowed thrust in NE based on tilt and excess thrust
         thrust_max_xy_tilt = abs(self.thrust_sp[2])*np.tan(tiltMax)
@@ -199,7 +224,12 @@ class Control:
         if (np.dot(self.thrust_sp[0:2].T, self.thrust_sp[0:2]) > thrust_max_xy**2):
             mag = norm(self.thrust_sp[0:2])
             self.thrust_sp[0:2] = thrust_xy_sp/mag*thrust_max_xy
-
+        
+        # Use tracking Anti-Windup for NE-direction: during saturation, the integrator is used to unsaturate the output
+        # see Anti-Reset Windup for PID controllers, L.Rundqwist, 1990
+        arw_gain = 2.0/vel_P_gain[0:2]
+        vel_err_lim = vel_xy_error - (thrust_xy_sp - self.thrust_sp[0:2])*arw_gain
+        self.thr_int[0:2] += vel_I_gain[0:2]*vel_err_lim*Ts * quad.params["useIntergral"]
     
     def thrustToAttitude(self, quad, Ts):
         

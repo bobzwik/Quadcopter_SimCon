@@ -1,16 +1,26 @@
 # -*- coding: utf-8 -*-
+"""
+author: John Bass
+email: john.bobzwik@gmail.com
+license: MIT
+Please feel free to use and modify this, but keep the above information. Thanks!
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import cProfile
+
 import trajectory as tr
 from ctrl import Control
 from quadFiles.quad import Quadcopter
+from utils.windModel import Wind
 import utils
 import config
 
 trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"] # "altitude", "attitude"]
 
-def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
+def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect):
     
     # Trajectory for Desired States
     # ---------------------------
@@ -20,8 +30,13 @@ def quad_control(quad, ctrl, t, Ts, trajType, trajSelect):
     # ---------------------------
     ctrl.controller(quad, sDes, Ts, trajType, trajSelect)
 
+    # Dynamics
+    # ---------------------------
+    quad.update(t, Ts, ctrl.w_cmd, wind)
+
 
 def main():
+    start_time = time.time()
 
     # Setup
     # --------------------------- 
@@ -31,10 +46,11 @@ def main():
     trajType = trajOptions[0]
     trajSelect = 1
 
-    # Initialize Quadcopter, Controller, Result Matrixes
+    # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
-    quad = Quadcopter()
+    quad = Quadcopter(Ti)
     ctrl = Control(quad)
+    wind = Wind('Fixed', 2.0, 90, -15)
 
     t_all     = Ti
     s_all     = quad.state.T
@@ -56,16 +72,10 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        # Quadcopter Control
-        # ---------------------------
-        quad_control(quad, ctrl, t, Ts, trajType, trajSelect)
-                
-        # Dynamics
-        # ---------------------------
-        quad.update(t, Ts, ctrl.w_cmd)
+        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect)
         t += Ts
 
-        print("{:.3f}".format(t))
+        # print("{:.3f}".format(t))
         t_all     = np.vstack((t_all, t))
         s_all     = np.vstack((s_all, quad.state.T))
         pos_all   = np.vstack((pos_all, quad.pos.T))
@@ -79,6 +89,9 @@ def main():
         thr_all   = np.vstack((thr_all, quad.thr.T))
         tor_all   = np.vstack((tor_all, quad.tor.T))
         i += 1
+    
+    end_time = time.time()
+    print("Simulated {:.2f}s in {:.6f}s.".format(t, end_time - start_time))
 
     # View Results
     # ---------------------------
@@ -87,6 +100,8 @@ def main():
     plt.show()
 
 if __name__ == "__main__":
-    main()
-
-
+    if (config.orient == "NED" or config.orient == "ENU"):
+        main()
+        # cProfile.run('main()')
+    else:
+        print("{} is not a valid orientation. Verify config.py file.".format(config.orient))
