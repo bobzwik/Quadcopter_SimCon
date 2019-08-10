@@ -17,7 +17,7 @@ def desiredState(t, trajType, trajSelect, quad, *args):
         if trajSelect == 1:
             sDes = testVelControl(t)
 
-    if trajType == "xy_vel_z_pos":
+    elif trajType == "xy_vel_z_pos":
         if trajSelect == 1:
             sDes = testVelControl(t)
     
@@ -72,7 +72,7 @@ def waypoint_timed(t, t_wps, waypoints, y_wps):
     
     return sDes
 
-    
+
 def waypoint_interp(t, quad, waypoints, y_wps, v_wp):
     
     desPos     = np.array([0, 0, 0])
