@@ -54,7 +54,7 @@ def hover(t):
 
 def testXYZposition(t):
     desPos     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 2*pi/3])
+    desEul     = np.array([0, 0, 0])
     desVel     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
@@ -63,8 +63,7 @@ def testXYZposition(t):
         desPos = np.array([2, 2, 1])
     elif t >= 4:
         desPos = np.array([2, -2, -2])
-        desEul = np.array([0, 0, 2*pi/3])
-    
+        desEul = np.array([0, 0, pi/3])
     sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
 
     return sDes

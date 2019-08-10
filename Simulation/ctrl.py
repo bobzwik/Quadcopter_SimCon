@@ -266,8 +266,8 @@ class Control:
         qe_red = utils.vectNormalize(qe_red)
         
         # Reduced desired quaternion (reduced because it doesn't consider the desired Yaw angle)
-        self.qd_red = utils.quatMultiply(quad.quat, qe_red)
-        
+        self.qd_red = utils.quatMultiply(qe_red, quad.quat)
+
         # Mixed desired quaternion (between reduced and full) and resulting desired quaternion qd
         q_mix = utils.quatMultiply(utils.inverse(self.qd_red), self.qd_full)
         q_mix = q_mix*np.sign(q_mix[0])
