@@ -47,7 +47,8 @@ def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
     ax.set_ylabel('Y')
     ax.set_zlim3d([mid_z-maxRange, mid_z+maxRange])
     ax.set_zlabel('Altitude')
-    ax.set_title("")
+    
+    title = ax.text2D(0.05, 0.95, "2D Text", transform=ax.transAxes)
         
     
     def updateLines(i):
@@ -79,7 +80,8 @@ def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
         line1.set_3d_properties(motorPoints[2,0:3])
         line2.set_data(motorPoints[0,3:6], motorPoints[1,3:6])
         line2.set_3d_properties(motorPoints[2,3:6])
-        ax.set_title(u"Time = {:.2f} s".format(time[0]))
+        title.set_text(u"Time = {:.2f} s".format(time[0]))
+        
         return line1, line2
 
 

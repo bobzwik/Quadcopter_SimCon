@@ -108,28 +108,20 @@ class Control:
 
         # Select Controller
         # ---------------------------
-        # if trajType == "attitude":
-        #     self.attitude_control(quad, Ts)
-            # self.rate_control(quad, Ts)
-        # elif trajType == "altitude":
-        #     self.z_pos_control(quad, Ts)
-        #     self.z_vel_control(quad, Ts)
-            # self.attitude(quad, Ts)
-            # self.rate(quad, Ts)
-        if trajType == "xyz_vel":
+        if (trajType == "xyz_vel"):
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif trajType == "xy_vel_z_pos":
+        elif (trajType == "xy_vel_z_pos"):
             self.z_pos_control(quad, Ts)
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif trajType == "xyz_pos":
+        elif (trajType == "xyz_pos" or trajType == "waypoints"):
             self.z_pos_control(quad, Ts)
             self.xy_pos_control(quad, Ts)    
             self.z_vel_control(quad, Ts)
