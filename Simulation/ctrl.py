@@ -121,7 +121,7 @@ class Control:
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif (trajType == "xyz_pos" or trajType == "waypoints"):
+        elif (trajType == "xyz_pos"):
             self.z_pos_control(quad, Ts)
             self.xy_pos_control(quad, Ts)    
             self.z_vel_control(quad, Ts)

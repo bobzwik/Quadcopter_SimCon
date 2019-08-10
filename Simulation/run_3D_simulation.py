@@ -19,7 +19,7 @@ from utils.windModel import Wind
 import utils
 import config
 
-trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel", "waypoints"]
+trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
 
 def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp):
     
@@ -44,8 +44,8 @@ def main():
     Ti = 0
     Ts = 0.005
     Tf = 16
-    trajType = trajOptions[3]
-    trajSelect = 0
+    trajType = trajOptions[0]
+    trajSelect = 1
     print("Trajectory type: {}".format(trajType))
 
     t_wp, wp, y_wp, v_wp = makeWaypoints()
@@ -78,7 +78,7 @@ def main():
         quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp)
         t += Ts
 
-        print("{:.3f}".format(t))
+        # print("{:.3f}".format(t))
         t_all     = np.vstack((t_all, t))
         s_all     = np.vstack((s_all, quad.state.T))
         pos_all   = np.vstack((pos_all, quad.pos.T))
