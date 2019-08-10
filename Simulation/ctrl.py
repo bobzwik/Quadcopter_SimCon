@@ -108,28 +108,20 @@ class Control:
 
         # Select Controller
         # ---------------------------
-        # if trajType == "attitude":
-        #     self.attitude_control(quad, Ts)
-            # self.rate_control(quad, Ts)
-        # elif trajType == "altitude":
-        #     self.z_pos_control(quad, Ts)
-        #     self.z_vel_control(quad, Ts)
-            # self.attitude(quad, Ts)
-            # self.rate(quad, Ts)
-        if trajType == "xyz_vel":
+        if (trajType == "xyz_vel"):
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif trajType == "xy_vel_z_pos":
+        elif (trajType == "xy_vel_z_pos"):
             self.z_pos_control(quad, Ts)
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif trajType == "xyz_pos":
+        elif (trajType == "xyz_pos"):
             self.z_pos_control(quad, Ts)
             self.xy_pos_control(quad, Ts)    
             self.z_vel_control(quad, Ts)
@@ -274,8 +266,8 @@ class Control:
         qe_red = utils.vectNormalize(qe_red)
         
         # Reduced desired quaternion (reduced because it doesn't consider the desired Yaw angle)
-        self.qd_red = utils.quatMultiply(quad.quat, qe_red)
-        
+        self.qd_red = utils.quatMultiply(qe_red, quad.quat)
+
         # Mixed desired quaternion (between reduced and full) and resulting desired quaternion qd
         q_mix = utils.quatMultiply(utils.inverse(self.qd_red), self.qd_full)
         q_mix = q_mix*np.sign(q_mix[0])

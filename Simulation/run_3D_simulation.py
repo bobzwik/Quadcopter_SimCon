@@ -11,20 +11,21 @@ import matplotlib.pyplot as plt
 import time
 import cProfile
 
-import trajectory as tr
+from waypoints import makeWaypoints
+from trajectory import desiredState
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 from utils.windModel import Wind
 import utils
 import config
 
-trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"] # "altitude", "attitude"]
+trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
 
-def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect):
+def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp):
     
     # Trajectory for Desired States
     # ---------------------------
-    sDes = tr.desiredState(t, trajType, trajSelect, quad)
+    sDes = desiredState(t, trajType, trajSelect, quad, t_wp, wp, y_wp, v_wp)        
     
     # Generate Commands
     # ---------------------------
@@ -42,9 +43,12 @@ def main():
     # --------------------------- 
     Ti = 0
     Ts = 0.005
-    Tf = 10
+    Tf = 16
     trajType = trajOptions[0]
     trajSelect = 1
+    print("Trajectory type: {}".format(trajType))
+
+    t_wp, wp, y_wp, v_wp = makeWaypoints()
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
@@ -64,7 +68,6 @@ def main():
     wMotor_all= quad.wMotor.T
     thr_all   = quad.thr.T
     tor_all   = quad.tor.T
-    
 
     # Run Simulation
     # ---------------------------
@@ -72,7 +75,7 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect)
+        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp)
         t += Ts
 
         # print("{:.3f}".format(t))
@@ -104,4 +107,4 @@ if __name__ == "__main__":
         main()
         # cProfile.run('main()')
     else:
-        print("{} is not a valid orientation. Verify config.py file.".format(config.orient))
+        raise Exception("{} is not a valid orientation. Verify config.py file.".format(config.orient))

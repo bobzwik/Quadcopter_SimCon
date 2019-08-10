@@ -7,6 +7,7 @@ Please feel free to use and modify this, but keep the above information. Thanks!
 """
 
 import numpy as np
+from numpy import pi
 from numpy.linalg import inv
 import utils
 import config
@@ -108,7 +109,7 @@ def init_state(params):
     y0     = 0  # m
     z0     = 0  # m
     phi0   = 0  # rad
-    theta0 = 0 # rad
+    theta0 = 0  # rad
     psi0   = 0  # rad
 
     quat = utils.YPRToQuat(psi0, theta0, phi0)

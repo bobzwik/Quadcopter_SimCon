@@ -11,73 +11,14 @@ from numpy import pi
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
+
 import utils
 import config
 
-numFrames = 5
-
-
-def updateLines(i, t_all, pos_all, quat_all, params, lines, ax):
-    
-    time = t_all[i*numFrames]
-    pos = pos_all[i*numFrames]
-    x = pos[0]
-    y = pos[1]
-    z = pos[2]
-
-    dxm = params["dxm"]
-    dym = params["dym"]
-    dzm = params["dzm"]
-    
-    quat = quat_all[i*numFrames]
-
-    if (config.orient == "NED"):
-        z = -z
-        quat = np.array([quat[0], -quat[1], -quat[2], quat[3]])
-
-    R = utils.quat2Dcm(quat)    
-    motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
-    motorPoints = np.dot(R, np.transpose(motorPoints))
-    motorPoints[0,:] += x 
-    motorPoints[1,:] += y 
-    motorPoints[2,:] += z 
-    
-    lines[0][0].set_data(motorPoints[0,0:3], motorPoints[1,0:3])
-    lines[0][0].set_3d_properties(motorPoints[2,0:3])
-    lines[1][0].set_data(motorPoints[0,3:6], motorPoints[1,3:6])
-    lines[1][0].set_3d_properties(motorPoints[2,3:6])
-    ax.set_title(u"Time = {:.2f} s".format(time[0]))
-    return lines
-    
-
-def ini_plot(fig, ax, pos, quat, params):
-    
-    dxm = params["dxm"]
-    dym = params["dym"]
-    dzm = params["dzm"]
-    
-    x = pos[0]
-    y = pos[1]
-    z = pos[2]
-
-    if (config.orient == "NED"):
-        z = -z
-        quat = np.array([quat[0], -quat[1], -quat[2], quat[3]])
-
-    R = utils.quat2Dcm(quat)
-    motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
-    motorPoints = np.dot(R, np.transpose(motorPoints))
-    motorPoints[0,:] += x 
-    motorPoints[1,:] += y 
-    motorPoints[2,:] += z 
-    line1 = ax.plot(motorPoints[0,0:3], motorPoints[1,0:3], motorPoints[2,0:3], color='red')
-    line2 = ax.plot(motorPoints[0,3:6], motorPoints[1,3:6], motorPoints[2,3:6], color='blue')
-    lines = [line1, line2]
-
-    return lines
+numFrames = 15
 
 def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
-    
+
     x = pos_all[:,0]
     y = pos_all[:,1]
     z = pos_all[:,2]
@@ -87,7 +28,9 @@ def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
 
     fig = plt.figure()
     ax = p3.Axes3D(fig)
-    
+    line1, = ax.plot([], [], [], lw=2, color='red')
+    line2, = ax.plot([], [], [], lw=2, color='blue')
+
     # Setting the axes properties
     extraEachSide = 1
     maxRange = 0.5*np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() + extraEachSide
@@ -104,14 +47,56 @@ def sameAxisAnimation(t_all, pos_all, quat_all, Ts, params):
     ax.set_ylabel('Y')
     ax.set_zlim3d([mid_z-maxRange, mid_z+maxRange])
     ax.set_zlabel('Altitude')
-    ax.set_title('3D Test')
     
-    lines = ini_plot(fig, ax, pos_all[0], quat_all[0], params)
+    title = ax.text2D(0.05, 0.95, "2D Text", transform=ax.transAxes)
+        
     
+    def updateLines(i):
+    
+        time = t_all[i*numFrames]
+        pos = pos_all[i*numFrames]
+        x = pos[0]
+        y = pos[1]
+        z = pos[2]
+    
+        dxm = params["dxm"]
+        dym = params["dym"]
+        dzm = params["dzm"]
+        
+        quat = quat_all[i*numFrames]
+    
+        if (config.orient == "NED"):
+            z = -z
+            quat = np.array([quat[0], -quat[1], -quat[2], quat[3]])
+    
+        R = utils.quat2Dcm(quat)    
+        motorPoints = np.array([[dxm, -dym, dzm], [0, 0, 0], [dxm, dym, dzm], [-dxm, dym, dzm], [0, 0, 0], [-dxm, -dym, dzm]])
+        motorPoints = np.dot(R, np.transpose(motorPoints))
+        motorPoints[0,:] += x 
+        motorPoints[1,:] += y 
+        motorPoints[2,:] += z 
+        
+        line1.set_data(motorPoints[0,0:3], motorPoints[1,0:3])
+        line1.set_3d_properties(motorPoints[2,0:3])
+        line2.set_data(motorPoints[0,3:6], motorPoints[1,3:6])
+        line2.set_3d_properties(motorPoints[2,3:6])
+        title.set_text(u"Time = {:.2f} s".format(time[0]))
+        
+        return line1, line2
+
+
+    def ini_plot():
+
+        line1.set_data([], [])
+        line1.set_3d_properties([])
+        line2.set_data([], [])
+        line2.set_3d_properties([])
+
+        return line1, line2
+
+        
     # Creating the Animation object
-    line_ani = animation.FuncAnimation(fig, updateLines, int(len(x)/numFrames), fargs=(t_all, pos_all, quat_all, params, lines, ax), interval=int(Ts*1000*numFrames), blit=False, repeat=True)
-    
+    line_ani = animation.FuncAnimation(fig, updateLines, init_func=ini_plot, frames=len(t_all[0:-2:numFrames]), interval=(Ts*1000*numFrames), blit=False)
     plt.show()
     
     return line_ani
-

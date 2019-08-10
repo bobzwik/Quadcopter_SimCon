@@ -11,130 +11,115 @@ from numpy import pi
 import config
 
 
-def desiredState(t, trajType, trajSelect, quad):
-    # if trajType == "attitude":
-    #     if   trajSelect == 1:
-    #         sDes = hover(t)
-    #     elif trajSelect == 2:
-    #         sDes = TestYawControl(t)
-    #     elif trajSelect == 3:
-    #         sDes = TestRollThenPitchControl(t)
-    #     elif trajSelect == 4:
-    #         sDes = TestPitchThenYawControl(t)
-
-    # if trajType == "altitude":
-    #     if   trajSelect == 1:
-    #         sDes = hover(t)
-    #     elif trajSelect == 2:
-    #         sDes = TestYawControl(t)
-    #     elif trajSelect == 3:
-    #         sDes = TestRollThenPitchControl(t)
-    #     elif trajSelect == 4:
-    #         sDes = TestPitchThenYawControl(t)
-    #     elif trajSelect == 5:
-    #         sDes = testZControl(t)
-        
+def desiredState(t, trajType, trajSelect, quad, *args):
+           
     if trajType == "xyz_vel":
-        if   trajSelect == 1:
+        if trajSelect == 1:
             sDes = testVelControl(t)
 
     if trajType == "xy_vel_z_pos":
-        if   trajSelect == 1:
+        if trajSelect == 1:
             sDes = testVelControl(t)
     
     elif trajType == "xyz_pos":
-        if   trajSelect == 0:
-            sDes = hover(t)
-        if   trajSelect == 1:
+        t_wp = args[0]
+        wp   = args[1]
+        y_wp = args[2]
+        v_wp = args[3]
+        if trajSelect == 0:
+            sDes = hover(t)        
+        elif trajSelect == 1:
+            sDes = waypoint_timed(t, t_wp, wp, y_wp)
+        elif trajSelect == 2:
+            sDes = waypoint_interp(t, quad, wp, y_wp, v_wp)
+        elif trajSelect == 99:
             sDes = testXYZposition(t)
-    
-    # if trajType == "waypoint":
-    #     if   trajSelect == 1:
-    #         sDes = waypointTrajectory(t, quad)
 
     return sDes
 
 
 def hover(t):
     desPos     = np.array([0, 0, 0])    # Associated to state x, y, z
-    desVel     = np.array([0, 0, 0])    # Associated to state xdot, ydot, zdot
     desEul     = np.array([0, 0, 0])    # Associated to state phi, theta, psi
+    desVel     = np.array([0, 0, 0])    # Associated to state xdot, ydot, zdot
     desPQR     = np.array([0, 0, 0])    # Associated to state p, q, r
     desThr     = np.array([0, 0, 0])    # Desired thrust in N-E-D directions
     
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
+    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
     
     return sDes  
 
 
-def testZControl(t):
+def waypoint_timed(t, t_wps, waypoints, y_wps):
+    
     desPos     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
     desEul     = np.array([0, 0, 0])
+    desVel     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
     
-    if t >= 1:
-        desPos = np.array([0, 0, -1])
-    
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
-    
-    return sDes    
-        
+    if not (len(t_wps) == waypoints.shape[0]):
+        raise Exception("Time array and waypoint array not the same size.")
+    elif (np.diff(t_wps) <= 0).any():
+        raise Exception("Time array isn't properly ordered.")  
 
-def TestYawControl(t):
+    for t_wp, waypoint, y_wp in zip(t_wps, waypoints, y_wps):
+        if (t >= t_wp):
+            desPos = waypoint
+            desEul = [0, 0, y_wp]
+
+    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
+    
+    return sDes
+
+    
+def waypoint_interp(t, quad, waypoints, y_wps, v_wp):
+    
     desPos     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
     desEul     = np.array([0, 0, 0])
+    desVel     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
 
-    if t >= 1:
-        desEul = np.array([0, 0, pi])
-       
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
+    distance_segment = waypoints[:-1] - waypoints[1:]
+
+    T_segment = np.sqrt(distance_segment[:,0]**2 + distance_segment[:,1]**2 + distance_segment[:,2]**2)/v_wp
+    
+    T_cum = np.zeros(len(T_segment) + 1)
+    T_cum[1:] = np.cumsum(T_segment)
+    print(T_cum)
+
+    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
     
     return sDes
 
 
-def TestRollThenPitchControl(t):
+
+
+
+## Testing scripts
+
+def testXYZposition(t):
     desPos     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
     desEul     = np.array([0, 0, 0])
+    desVel     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
     
-    if t >= 1 and t < 3:
-        desEul = np.array([0.3, 0, 0])
-    elif t >= 3:
-        desEul = np.array([0.3, -0.3, 0])
-     
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
-    
-    return sDes
+    if t >= 1 and t < 4:
+        desPos = np.array([2, 2, 1])
+    elif t >= 4:
+        desPos = np.array([2, -2, -2])
+        desEul = np.array([0, 0, pi/3])
+    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
 
-
-def TestPitchThenYawControl(t):
-    desPos     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
-    desPQR     = np.array([0, 0, 0])
-    desThr     = np.array([0, 0, 0])
-    
-    if t >= 1 and t < 3:
-        desEul = np.array([0, 0.4, 0])
-    elif t >= 3:
-        desEul = np.array([0, 0.4, pi])
-     
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
-    
     return sDes
 
 
 def testVelControl(t):
     desPos     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
     desEul     = np.array([0, 0, 0])
+    desVel     = np.array([0, 0, 0])
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
 
@@ -143,50 +128,6 @@ def testVelControl(t):
     elif t >= 4:
         desVel = np.array([3, -1, 0])
      
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
-    
-    return sDes
-
-
-def testXYZposition(t):
-    desPos     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
-    desPQR     = np.array([0, 0, 0])
-    desThr     = np.array([0, 0, 0])
-    
-    if t >= 1 and t < 4:
-        desPos = np.array([2, 2, 1])
-    elif t >= 4:
-        desPos = np.array([2, -2, -2])
-        desEul = np.array([0, 0, pi/4])
-    
-    sDes = makesDes(desPos, desVel, desEul, desPQR, desThr)
-    
-    return sDes
-
-def makesDes(desPos, desVel, desEul, desPQR, desThr):
-    
-    # if (config.orient == "ENU"):
-    #     desPos[1:2] = -desPos[1:2]
-    #     desVel[1:2] = -desVel[1:2]
-
-    sDes = np.zeros(15)
-    sDes[0]  = desPos[0]
-    sDes[1]  = desPos[1]
-    sDes[2]  = desPos[2]
-    sDes[3]  = desEul[0]
-    sDes[4]  = desEul[1]
-    sDes[5]  = desEul[2]
-    sDes[6]  = desVel[0]
-    sDes[7]  = desVel[1]
-    sDes[8]  = desVel[2]
-    sDes[9]  = desPQR[0]
-    sDes[10] = desPQR[1]
-    sDes[11] = desPQR[2]
-
-    sDes[12] = desThr[0]
-    sDes[13] = desThr[1]
-    sDes[14] = desThr[2]
+    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
     
     return sDes
