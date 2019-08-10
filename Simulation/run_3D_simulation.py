@@ -21,11 +21,11 @@ import config
 
 trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel", "waypoints"]
 
-def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp):
+def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp):
     
     # Trajectory for Desired States
     # ---------------------------
-    sDes = desiredState(t, trajType, trajSelect, quad, t_wp, wp)        
+    sDes = desiredState(t, trajType, trajSelect, quad, t_wp, wp, y_wp, v_wp)        
     
     # Generate Commands
     # ---------------------------
@@ -44,11 +44,11 @@ def main():
     Ti = 0
     Ts = 0.005
     Tf = 16
-    trajType = trajOptions[3]
-    trajSelect = 0
+    trajType = trajOptions[0]
+    trajSelect = 1
     print("Trajectory type: {}".format(trajType))
 
-    t_wp, wp = makeWaypoints()
+    t_wp, wp, y_wp, v_wp = makeWaypoints()
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
@@ -75,7 +75,7 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp)
+        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp)
         t += Ts
 
         # print("{:.3f}".format(t))
