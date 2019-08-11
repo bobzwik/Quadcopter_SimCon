@@ -81,13 +81,20 @@ def waypoint_interp(t, quad, waypoints, y_wps, v_wp):
     desPQR     = np.array([0, 0, 0])
     desThr     = np.array([0, 0, 0])
 
-    distance_segment = waypoints[:-1] - waypoints[1:]
+    distance_segment = waypoints[1:] - waypoints[:-1]
 
     T_segment = np.sqrt(distance_segment[:,0]**2 + distance_segment[:,1]**2 + distance_segment[:,2]**2)/v_wp
-    
     T_cum = np.zeros(len(T_segment) + 1)
     T_cum[1:] = np.cumsum(T_segment)
-    print(T_cum)
+
+    if (t == 0):
+        desPos = waypoints[0,:]
+    elif (t >= T_cum[-1]):
+        desPos = waypoints[-1,:]
+    else:
+        t_idx = np.where(T_cum >= t)[0][0]
+        scale = (t - T_cum[t_idx-1])/T_segment[t_idx-1]
+        desPos = (1 - scale) * waypoints[t_idx-1,:] + scale * waypoints[t_idx,:]
 
     sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
     

@@ -45,7 +45,7 @@ def main():
     Ts = 0.005
     Tf = 16
     trajType = trajOptions[0]
-    trajSelect = 1
+    trajSelect = 2
     print("Trajectory type: {}".format(trajType))
 
     t_wp, wp, y_wp, v_wp = makeWaypoints()
@@ -54,7 +54,7 @@ def main():
     # ---------------------------
     quad = Quadcopter(Ti)
     ctrl = Control(quad)
-    wind = Wind('Fixed', 2.0, 90, -15)
+    wind = Wind('None', 2.0, 90, -15)
 
     t_all     = Ti
     s_all     = quad.state.T

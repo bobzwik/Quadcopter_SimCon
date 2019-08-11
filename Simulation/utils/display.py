@@ -85,7 +85,7 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.plot(time, x, time, y, time, z)
     plt.plot(time, x_sp, '--', time, y_sp, '--', time, z_sp, '--')
     plt.grid(True)
-    plt.legend(['x','y','z'])
+    plt.legend(['x','y','z','x_sp','y_sp','z_sp'])
     plt.xlabel('Time (s)')
     plt.ylabel('Position (m)')
 
