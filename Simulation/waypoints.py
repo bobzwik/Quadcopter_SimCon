@@ -16,7 +16,7 @@ def makeWaypoints():
     t_ini = 0
     wp_ini = np.array([0, 0, 0])
     yaw_ini = 0
-    v_average = 1.6
+    v_average = 2
 
 
     t = np.array([1, 5, 8, 12])

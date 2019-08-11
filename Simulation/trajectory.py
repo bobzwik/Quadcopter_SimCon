@@ -33,11 +33,16 @@ def desiredState(t, trajType, trajSelect, quad, *args):
             raise Exception("Time array and waypoint array not the same size.")
         elif (np.diff(t_wps) <= 0).any():
             raise Exception("Time array isn't properly ordered.")  
-    
-        for t_wp, waypoint, y_wp in zip(t_wps, wps, y_wps):
-            if (t >= t_wp):
-                desPos = waypoint
-                desEul[2] = y_wp
+        
+        if (t == 0):
+            t_idx = 0
+        elif (t >= t_wps[-1]):
+            t_idx = -1
+        else:
+            t_idx = np.where(t <= t_wps)[0][0] - 1
+        
+        desPos = wps[t_idx,:]
+        desEul[2] = y_wps[t_idx]
     
         sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
         
@@ -49,23 +54,25 @@ def desiredState(t, trajType, trajSelect, quad, *args):
         distance_segment = wps[1:] - wps[:-1]
     
         T_segment = np.sqrt(distance_segment[:,0]**2 + distance_segment[:,1]**2 + distance_segment[:,2]**2)/v_wp
-        T_cum = np.zeros(len(T_segment) + 1)
-        T_cum[1:] = np.cumsum(T_segment)
+        t_wps = np.zeros(len(T_segment) + 1)
+        t_wps[1:] = np.cumsum(T_segment)
     
         if (t == 0):
+            t_idx = 0
             desPos = wps[0,:]
             desEul[2] = y_wps[0]
-        elif (t >= T_cum[-1]):
+        elif (t >= t_wps[-1]):
+            t_idx = -1
             desPos = wps[-1,:]
             desEul[2] = y_wps[-1]
         else:
-            t_idx = np.where(T_cum >= t)[0][0]
-            scale = (t - T_cum[t_idx-1])/T_segment[t_idx-1]
-            desPos = (1 - scale) * wps[t_idx-1,:] + scale * wps[t_idx,:]
-            if (quad.params["interpYaw"]):
-                desEul[2] = (1 - scale)*y_wps[t_idx-1] + scale*y_wps[t_idx]
-            else:
+            t_idx = np.where(t <= t_wps)[0][0] - 1
+            scale = (t - t_wps[t_idx])/T_segment[t_idx]
+            desPos = (1 - scale) * wps[t_idx,:] + scale * wps[t_idx + 1,:]
+            if (trajSelect[1] == 1):
                 desEul[2] = y_wps[t_idx]
+            elif (trajSelect[1] == 2):
+                desEul[2] = (1 - scale)*y_wps[t_idx] + scale*y_wps[t_idx + 1]
     
         sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
         
@@ -73,11 +80,11 @@ def desiredState(t, trajType, trajSelect, quad, *args):
 
 
     if trajType == "xyz_vel":
-        if trajSelect == 1:
+        if trajSelect[0] == 1:
             sDes = testVelControl(t)
 
     elif trajType == "xy_vel_z_pos":
-        if trajSelect == 1:
+        if trajSelect[0] == 1:
             sDes = testVelControl(t)
     
     elif trajType == "xyz_pos":
@@ -85,13 +92,13 @@ def desiredState(t, trajType, trajSelect, quad, *args):
         wps   = args[1]
         y_wps = args[2]
         v_wp  = args[3]
-        if trajSelect == 0:
+        if trajSelect[0] == 0:
             sDes = hover()        
-        elif trajSelect == 1:
-            sDes = waypoint_timed()
-        elif trajSelect == 2:
-            sDes = waypoint_interp()
-        elif trajSelect == 99:
+        elif trajSelect[0] == 1:
+            sDes, t_idx = waypoint_timed()
+        elif trajSelect[0] == 2:
+            sDes, t_idx = waypoint_interp()
+        elif trajSelect[0] == 99:
             sDes = testXYZposition(t)
 
     return sDes

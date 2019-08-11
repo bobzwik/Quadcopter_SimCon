@@ -35,7 +35,7 @@ def sys_params():
     params["invI"] = inv(IB)
     params["IRzz"] = IRzz
     params["useIntergral"] = bool(False)    # Include integral gains in linear velocity control
-    params["interpYaw"] = bool(True)       # Interpolate Yaw setpoints in waypoint trajectory
+    # params["interpYaw"] = bool(False)       # Interpolate Yaw setpoints in waypoint trajectory
 
     params["Cd"]         = 0.1
     params["kTh"]        = 1.076e-5 # thrust coeff (N/(rad/s)^2)  (1.18e-7 N/RPM^2)

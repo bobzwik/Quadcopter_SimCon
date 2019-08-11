@@ -52,7 +52,7 @@ vel_I_gain = np.array([Ixdot, Iydot, Izdot])
 # Attitude P gains
 Pphi = 8.0
 Ptheta = Pphi
-Ppsi = 0.8
+Ppsi = 1.5
 
 att_P_gain = np.array([Pphi, Ptheta, Ppsi])
 
@@ -89,11 +89,11 @@ rateMax = np.array([pMax, qMax, rMax])
 
 class Control:
     
-    def __init__(self, quad):
+    def __init__(self, quad, trajSelect):
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.thr_int = np.zeros(3)
-        if (quad.params["interpYaw"]):
+        if (trajSelect[0] == 2 and trajSelect[1] == 2):
             att_P_gain[2] = att_P_gain[0]
         self.setYawWeight()
 

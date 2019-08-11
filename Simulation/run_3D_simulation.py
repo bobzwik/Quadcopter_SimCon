@@ -20,6 +20,7 @@ import utils
 import config
 
 trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
+trajSelect = np.ones(2)
 
 def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp):
     
@@ -45,7 +46,8 @@ def main():
     Ts = 0.005
     Tf = 16
     trajType = trajOptions[0]
-    trajSelect = 2
+    trajSelect[0] = 1       # Position trajectory selection
+    trajSelect[1] = 2       # Yaw trajectory selection
     print("Trajectory type: {}".format(trajType))
 
     t_wp, wp, y_wp, v_wp = makeWaypoints()
@@ -53,7 +55,7 @@ def main():
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
     quad = Quadcopter(Ti)
-    ctrl = Control(quad)
+    ctrl = Control(quad, trajSelect)
     wind = Wind('None', 2.0, 90, -15)
 
     t_all     = Ti
