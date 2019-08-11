@@ -94,7 +94,7 @@ class Quadcopter:
         damp = self.params["damp"]
 
         IRzz = self.params["IRzz"]
-        if (self.params["usePrecession"]):
+        if (config.usePrecession):
             uP = 1
         else:
             uP = 0

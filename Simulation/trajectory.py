@@ -52,13 +52,13 @@ def hover(t):
 
 def waypoint_timed(t, t_wps, waypoints, y_wps):
     
-    desPos     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
-    desPQR     = np.array([0, 0, 0])
-    desThr     = np.array([0, 0, 0])
+    desPos     = np.array([0., 0., 0.])
+    desEul     = np.array([0., 0., 0.])
+    desVel     = np.array([0., 0., 0.])
+    desPQR     = np.array([0., 0., 0.])
+    desThr     = np.array([0., 0., 0.])
     
-    if not (len(t_wps) == waypoints.shape[0]):
+    if not (len(t_wps) == waypoints.shape[0] or len(t_wps) == len(y_wps)):
         raise Exception("Time array and waypoint array not the same size.")
     elif (np.diff(t_wps) <= 0).any():
         raise Exception("Time array isn't properly ordered.")  
@@ -66,7 +66,7 @@ def waypoint_timed(t, t_wps, waypoints, y_wps):
     for t_wp, waypoint, y_wp in zip(t_wps, waypoints, y_wps):
         if (t >= t_wp):
             desPos = waypoint
-            desEul = [0, 0, y_wp]
+            desEul[2] = y_wp
 
     sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
     
@@ -75,11 +75,11 @@ def waypoint_timed(t, t_wps, waypoints, y_wps):
 
 def waypoint_interp(t, quad, waypoints, y_wps, v_wp):
     
-    desPos     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
-    desPQR     = np.array([0, 0, 0])
-    desThr     = np.array([0, 0, 0])
+    desPos     = np.array([0., 0., 0.])
+    desEul     = np.array([0., 0., 0.])
+    desVel     = np.array([0., 0., 0.])
+    desPQR     = np.array([0., 0., 0.])
+    desThr     = np.array([0., 0., 0.])
 
     distance_segment = waypoints[1:] - waypoints[:-1]
 
@@ -89,12 +89,18 @@ def waypoint_interp(t, quad, waypoints, y_wps, v_wp):
 
     if (t == 0):
         desPos = waypoints[0,:]
+        desEul[2] = y_wps[0]
     elif (t >= T_cum[-1]):
         desPos = waypoints[-1,:]
+        desEul[2] = y_wps[-1]
     else:
         t_idx = np.where(T_cum >= t)[0][0]
         scale = (t - T_cum[t_idx-1])/T_segment[t_idx-1]
         desPos = (1 - scale) * waypoints[t_idx-1,:] + scale * waypoints[t_idx,:]
+        if (quad.params["interpYaw"]):
+            desEul[2] = (1 - scale) * y_wps[t_idx-1] + scale * y_wps[t_idx]
+        else:
+            desEul[2] = y_wps[t_idx]
 
     sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
     

@@ -34,8 +34,8 @@ def sys_params():
     params["IB"]   = IB
     params["invI"] = inv(IB)
     params["IRzz"] = IRzz
-    params["usePrecession"] = bool(False)   # Include gyroscopic precession in drone dynamics equation. Set to False if rotor inertia isn't known (gyro precession has negigeable effect on drone dynamics)
     params["useIntergral"] = bool(False)    # Include integral gains in linear velocity control
+    params["interpYaw"] = bool(True)       # Interpolate Yaw setpoints in waypoint trajectory
 
     params["Cd"]         = 0.1
     params["kTh"]        = 1.076e-5 # thrust coeff (N/(rad/s)^2)  (1.18e-7 N/RPM^2)
@@ -49,17 +49,17 @@ def sys_params():
     params["tau"]        = 0.015    # Value for second order system for Motor dynamics
     params["kp"]         = 1.0      # Value for second order system for Motor dynamics
     params["damp"]       = 1.0      # Value for second order system for Motor dynamics
+    
     params["motorc1"]    = 8.49     # w (rad/s) = cmd*c1 + c0 (cmd in %)
     params["motorc0"]    = 74.7
     params["motordeadband"] = 1   
-    params["ifexpo"] = bool(False)
-    
-    if params["ifexpo"]:
-        params["maxCmd"] = 100      # cmd (%) min and max
-        params["minCmd"] = 0.01
-    else:
-        params["maxCmd"] = 100
-        params["minCmd"] = 1
+    # params["ifexpo"] = bool(False)
+    # if params["ifexpo"]:
+    #     params["maxCmd"] = 100      # cmd (%) min and max
+    #     params["minCmd"] = 0.01
+    # else:
+    #     params["maxCmd"] = 100
+    #     params["minCmd"] = 1
     
     return params
 
@@ -105,12 +105,12 @@ def init_cmd(params):
 
 def init_state(params):
     
-    x0     = 0  # m
-    y0     = 0  # m
-    z0     = 0  # m
-    phi0   = 0  # rad
-    theta0 = 0  # rad
-    psi0   = 0  # rad
+    x0     = 0.  # m
+    y0     = 0.  # m
+    z0     = 0.  # m
+    phi0   = 0.  # rad
+    theta0 = 0.  # rad
+    psi0   = 0.  # rad
 
     quat = utils.YPRToQuat(psi0, theta0, phi0)
     
@@ -125,15 +125,15 @@ def init_state(params):
     s[4]  = quat[1]  # q1
     s[5]  = quat[2]  # q2
     s[6]  = quat[3]  # q3
-    s[7]  = 0        # xdot
-    s[8]  = 0        # ydot
-    s[9]  = 0        # zdot
-    s[10] = 0        # p
-    s[11] = 0        # q
-    s[12] = 0        # r
+    s[7]  = 0.       # xdot
+    s[8]  = 0.       # ydot
+    s[9]  = 0.       # zdot
+    s[10] = 0.       # p
+    s[11] = 0.       # q
+    s[12] = 0.       # r
 
     w_hover = params["w_hover"] # Hovering motor speed
-    wdot_hover = 0              # Hovering motor acc
+    wdot_hover = 0.              # Hovering motor acc
 
     s[13] = w_hover
     s[14] = wdot_hover

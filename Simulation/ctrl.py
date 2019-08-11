@@ -93,6 +93,8 @@ class Control:
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.thr_int = np.zeros(3)
+        if (quad.params["interpYaw"]):
+            att_P_gain[2] = att_P_gain[0]
         self.setYawWeight()
 
     
