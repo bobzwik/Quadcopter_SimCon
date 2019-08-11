@@ -50,7 +50,10 @@ def desiredState(t, trajType, trajSelect, quad, *args):
     
     
     def waypoint_interp():
-    
+        
+        if not (len(y_wps) == wps.shape[0]):
+            raise Exception("Waypoint array and Yaw waypoint array not the same size.")
+
         distance_segment = wps[1:] - wps[:-1]
     
         T_segment = np.sqrt(distance_segment[:,0]**2 + distance_segment[:,1]**2 + distance_segment[:,2]**2)/v_wp
@@ -95,9 +98,9 @@ def desiredState(t, trajType, trajSelect, quad, *args):
         if trajSelect[0] == 0:
             sDes = hover()        
         elif trajSelect[0] == 1:
-            sDes, t_idx = waypoint_timed()
+            sDes = waypoint_timed()
         elif trajSelect[0] == 2:
-            sDes, t_idx = waypoint_interp()
+            sDes = waypoint_interp()
         elif trajSelect[0] == 99:
             sDes = testXYZposition(t)
 

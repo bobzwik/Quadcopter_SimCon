@@ -46,7 +46,7 @@ def main():
     Ts = 0.005
     Tf = 16
     trajType = trajOptions[0]
-    trajSelect[0] = 1       # Position trajectory selection
+    trajSelect[0] = 2       # Position trajectory selection
     trajSelect[1] = 2       # Yaw trajectory selection
     print("Trajectory type: {}".format(trajType))
 
