@@ -11,26 +11,25 @@ import matplotlib.pyplot as plt
 import time
 import cProfile
 
-from waypoints import makeWaypoints
-from trajectory import desiredState
+from trajectory import Trajectory
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 from utils.windModel import Wind
 import utils
 import config
 
-trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
+ctrlOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
 trajSelect = np.ones(2)
 
-def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp):
+def quad_sim(t, Ts, quad, ctrl, wind, traj):
     
     # Trajectory for Desired States
     # ---------------------------
-    sDes = desiredState(t, trajType, trajSelect, quad, t_wp, wp, y_wp, v_wp)        
+    sDes = traj.desiredState(t, quad)        
     
     # Generate Commands
     # ---------------------------
-    ctrl.controller(quad, sDes, Ts, trajType, trajSelect)
+    ctrl.controller(quad, sDes, Ts, traj)
 
     # Dynamics
     # ---------------------------
@@ -45,17 +44,16 @@ def main():
     Ti = 0
     Ts = 0.005
     Tf = 16
-    trajType = trajOptions[0]
+    ctrlType = ctrlOptions[0]
     trajSelect[0] = 2       # Position trajectory selection
-    trajSelect[1] = 2       # Yaw trajectory selection
-    print("Trajectory type: {}".format(trajType))
-
-    t_wp, wp, y_wp, v_wp = makeWaypoints()
+    trajSelect[1] = 1       # Yaw trajectory selection
+    print("Control type: {}".format(ctrlType))
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
     quad = Quadcopter(Ti)
-    ctrl = Control(quad, trajSelect)
+    traj = Trajectory(ctrlType, trajSelect)
+    ctrl = Control(quad, traj.yawType)
     wind = Wind('None', 2.0, 90, -15)
 
     t_all     = Ti
@@ -77,7 +75,7 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp)
+        quad_sim(t, Ts, quad, ctrl, wind, traj)
         t += Ts
 
         # print("{:.3f}".format(t))
