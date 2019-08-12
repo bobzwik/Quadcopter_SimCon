@@ -52,7 +52,7 @@ vel_I_gain = np.array([Ixdot, Iydot, Izdot])
 # Attitude P gains
 Pphi = 8.0
 Ptheta = Pphi
-Ppsi = 0.8
+Ppsi = 1.5
 
 att_P_gain = np.array([Pphi, Ptheta, Ppsi])
 
@@ -89,16 +89,16 @@ rateMax = np.array([pMax, qMax, rMax])
 
 class Control:
     
-    def __init__(self, quad):
+    def __init__(self, quad, yawType):
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.thr_int = np.zeros(3)
-        if (quad.params["interpYaw"]):
+        if (yawType == 2):
             att_P_gain[2] = att_P_gain[0]
         self.setYawWeight()
 
     
-    def controller(self, quad, sDes, Ts, trajType, trajSelect):
+    def controller(self, quad, sDes, Ts, traj):
 
         # Desired State
         # ---------------------------
@@ -110,20 +110,20 @@ class Control:
 
         # Select Controller
         # ---------------------------
-        if (trajType == "xyz_vel"):
+        if (traj.ctrlType == "xyz_vel"):
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif (trajType == "xy_vel_z_pos"):
+        elif (traj.ctrlType == "xy_vel_z_pos"):
             self.z_pos_control(quad, Ts)
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        elif (trajType == "xyz_pos"):
+        elif (traj.ctrlType == "xyz_pos"):
             self.z_pos_control(quad, Ts)
             self.xy_pos_control(quad, Ts)    
             self.z_vel_control(quad, Ts)

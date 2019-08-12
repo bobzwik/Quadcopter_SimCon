@@ -8,93 +8,158 @@ Please feel free to use and modify this, but keep the above information. Thanks!
 
 import numpy as np
 from numpy import pi
+from waypoints import makeWaypoints
 import config
 
+class Trajectory:
 
-def desiredState(t, trajType, trajSelect, quad, *args):
-    
-    desPos     = np.array([0., 0., 0.])    # Associated to state x, y, z
-    desEul     = np.array([0., 0., 0.])    # Associated to state phi, theta, psi
-    desVel     = np.array([0., 0., 0.])    # Associated to state xdot, ydot, zdot
-    desPQR     = np.array([0., 0., 0.])    # Associated to state p, q, r
-    desThr     = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions
+    def __init__(self, ctrlType, trajSelect):
+
+        self.ctrlType = ctrlType
+        self.xyzType = trajSelect[0]
+        self.yawType = trajSelect[1]
+
+        t_wps, wps, y_wps, v_wp = makeWaypoints()
+        self.t_wps = t_wps
+        self.wps   = wps
+        self.y_wps = y_wps
+        self.v_wp  = v_wp
+
+        if (self.ctrlType == "xyz_pos"):
+            if (self.xyzType == 1 or self.xyzType == 2):
+                self.T_segment = np.diff(self.t_wps)
+
+            if (self.xyzType == 3):
+                distance_segment = self.wps[1:] - self.wps[:-1]
+                self.T_segment = np.sqrt(distance_segment[:,0]**2 + distance_segment[:,1]**2 + distance_segment[:,2]**2)/self.v_wp
+                self.t_wps = np.zeros(len(self.T_segment) + 1)
+                self.t_wps[1:] = np.cumsum(self.T_segment)
 
 
-    def hover():
-    
-        sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
+    def desiredState(self, t, quad):
         
-        return sDes  
-    
-    
-    def waypoint_timed():
+        self.desPos = np.array([0., 0., 0.])    # Associated to state x, y, z
+        self.desEul = np.array([0., 0., 0.])    # Associated to state phi, theta, psi
+        self.desVel = np.array([0., 0., 0.])    # Associated to state xdot, ydot, zdot
+        self.desPQR = np.array([0., 0., 0.])    # Associated to state p, q, r
+        self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions
+     
         
-        if not (len(t_wps) == wps.shape[0] or len(t_wps) == len(y_wps)):
-            raise Exception("Time array and waypoint array not the same size.")
-        elif (np.diff(t_wps) <= 0).any():
-            raise Exception("Time array isn't properly ordered.")  
-    
-        for t_wp, waypoint, y_wp in zip(t_wps, wps, y_wps):
-            if (t >= t_wp):
-                desPos = waypoint
-                desEul[2] = y_wp
-    
-        sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
-        
-        return sDes
-    
-    
-    def waypoint_interp():
-    
-        distance_segment = wps[1:] - wps[:-1]
-    
-        T_segment = np.sqrt(distance_segment[:,0]**2 + distance_segment[:,1]**2 + distance_segment[:,2]**2)/v_wp
-        T_cum = np.zeros(len(T_segment) + 1)
-        T_cum[1:] = np.cumsum(T_segment)
-    
-        if (t == 0):
-            desPos = wps[0,:]
-            desEul[2] = y_wps[0]
-        elif (t >= T_cum[-1]):
-            desPos = wps[-1,:]
-            desEul[2] = y_wps[-1]
-        else:
-            t_idx = np.where(T_cum >= t)[0][0]
-            scale = (t - T_cum[t_idx-1])/T_segment[t_idx-1]
-            desPos = (1 - scale) * wps[t_idx-1,:] + scale * wps[t_idx,:]
-            if (quad.params["interpYaw"]):
-                desEul[2] = (1 - scale)*y_wps[t_idx-1] + scale*y_wps[t_idx]
+        def pos_waypoint_timed():
+            
+            if not (len(self.t_wps) == self.wps.shape[0]):
+                raise Exception("Time array and waypoint array not the same size.")
+            elif (np.diff(self.t_wps) <= 0).any():
+                raise Exception("Time array isn't properly ordered.")  
+            
+            if (t == 0):
+                self.t_idx = 0
+            elif (t >= self.t_wps[-1]):
+                self.t_idx = -1
             else:
-                desEul[2] = y_wps[t_idx]
-    
-        sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
+                self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
+            
+            self.desPos = self.wps[self.t_idx,:]
+                            
         
-        return sDes
+        def pos_waypoint_interp():
+            
+            if not (len(self.t_wps) == self.wps.shape[0]):
+                raise Exception("Time array and waypoint array not the same size.")
+            elif (np.diff(self.t_wps) <= 0).any():
+                raise Exception("Time array isn't properly ordered.") 
+
+            if (t == 0):
+                self.t_idx = 0
+                self.desPos = self.wps[0,:]
+            elif (t >= self.t_wps[-1]):
+                self.t_idx = -1
+                self.desPos = self.wps[-1,:]
+            else:
+                self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
+                scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
+                self.desPos = (1 - scale) * self.wps[self.t_idx,:] + scale * self.wps[self.t_idx + 1,:]
+                    
+            
+        def pos_waypoint_interp_speed():
+            
+            if not (len(self.y_wps) == self.wps.shape[0]):
+                raise Exception("Waypoint array and Yaw waypoint array not the same size.")
+        
+            if (t == 0):
+                self.t_idx = 0
+                self.desPos = self.wps[0,:]
+            elif (t >= self.t_wps[-1]):
+                self.t_idx = -1
+                self.desPos = self.wps[-1,:]
+            else:
+                self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
+                scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
+                self.desPos = (1 - scale) * self.wps[self.t_idx,:] + scale * self.wps[self.t_idx + 1,:]
+                    
+
+        def yaw_waypoint_timed():
+            
+            if not (len(self.t_wps) == len(self.y_wps)):
+                raise Exception("Time array and waypoint array not the same size.")
+            
+            self.desEul[2] = self.y_wps[self.t_idx]
+                    
+
+        def yaw_waypoint_interp():
+
+            if not (len(self.t_wps) == len(self.y_wps)):
+                raise Exception("Time array and waypoint array not the same size.")
+
+            if (t == 0) or (t >= self.t_wps[-1]):
+                self.desEul[2] = self.y_wps[self.t_idx]
+            else:
+                scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
+                self.desEul[2] = (1 - scale)*self.y_wps[self.t_idx] + scale*self.y_wps[self.t_idx + 1]
 
 
-    if trajType == "xyz_vel":
-        if trajSelect == 1:
-            sDes = testVelControl(t)
+        if self.ctrlType == "xyz_vel":
+            if self.xyzType == 1:
+                sDes = testVelControl(t)
+            return sDes
 
-    elif trajType == "xy_vel_z_pos":
-        if trajSelect == 1:
-            sDes = testVelControl(t)
-    
-    elif trajType == "xyz_pos":
-        t_wps = args[0]
-        wps   = args[1]
-        y_wps = args[2]
-        v_wp  = args[3]
-        if trajSelect == 0:
-            sDes = hover()        
-        elif trajSelect == 1:
-            sDes = waypoint_timed()
-        elif trajSelect == 2:
-            sDes = waypoint_interp()
-        elif trajSelect == 99:
-            sDes = testXYZposition(t)
+        elif self.ctrlType == "xy_vel_z_pos":
+            if self.xyzType == 1:
+                sDes = testVelControl(t)
+            return sDes
 
-    return sDes
+        elif self.ctrlType == "xyz_pos":
+            # Hover at [0, 0, 0]
+            if self.xyzType == 0:
+                pass 
+            # For simple testing
+            elif self.xyzType == 99:
+                sDes = testXYZposition(t)   
+            else:    
+                # List of possible position trajectories
+                # ---------------------------
+                # Set desired positions at every t_wps[i]
+                if self.xyzType == 1:
+                    pos_waypoint_timed()
+                # Interpolate position between every waypoint, to arrive at desired position every t_wps[i]
+                elif self.xyzType == 2:
+                    pos_waypoint_interp()
+                # Interpolate position between every waypoint, to arrive at desired position every t_wps[i] (calculated using the average speed provided)
+                elif self.xyzType == 3:
+                    pos_waypoint_interp_speed()
+                
+                # List of possible yaw trajectories
+                # ---------------------------
+                # Set desired yaw at every t_wps[i]
+                if self.yawType == 1:
+                    yaw_waypoint_timed()
+                # Interpolate yaw between every waypoint, to arrive at desired yaw every t_wps[i]
+                elif self.yawType == 2:
+                    yaw_waypoint_interp()
+
+                sDes = np.hstack((self.desPos, self.desEul, self.desVel, self.desPQR, self.desThr)).astype(float)
+
+            return sDes
 
 
 

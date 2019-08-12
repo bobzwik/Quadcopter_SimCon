@@ -11,25 +11,22 @@ import matplotlib.pyplot as plt
 import time
 import cProfile
 
-from waypoints import makeWaypoints
-from trajectory import desiredState
+from trajectory import Trajectory
 from ctrl import Control
 from quadFiles.quad import Quadcopter
 from utils.windModel import Wind
 import utils
 import config
 
-trajOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
-
-def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp):
+def quad_sim(t, Ts, quad, ctrl, wind, traj):
     
     # Trajectory for Desired States
     # ---------------------------
-    sDes = desiredState(t, trajType, trajSelect, quad, t_wp, wp, y_wp, v_wp)        
+    sDes = traj.desiredState(t, quad)        
     
     # Generate Commands
     # ---------------------------
-    ctrl.controller(quad, sDes, Ts, trajType, trajSelect)
+    ctrl.controller(quad, sDes, Ts, traj)
 
     # Dynamics
     # ---------------------------
@@ -39,21 +36,27 @@ def quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp
 def main():
     start_time = time.time()
 
-    # Setup
+    # Simulation Setup
     # --------------------------- 
     Ti = 0
     Ts = 0.005
     Tf = 16
-    trajType = trajOptions[0]
-    trajSelect = 2
-    print("Trajectory type: {}".format(trajType))
 
-    t_wp, wp, y_wp, v_wp = makeWaypoints()
+    # Choose trajectory settings
+    # --------------------------- 
+    ctrlOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
+    trajSelect = np.ones(2)
+
+    ctrlType = ctrlOptions[0]   # Select Control Type             (0: xyz_pos,    1: xy_vel_z_pos,          2: xyz_vel)
+    trajSelect[0] = 1           # Select Position Trajectory Type (0: hover,      1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: pos_waypoint_interp_speed)
+    trajSelect[1] = 1           # Select Yaw Trajectory Type                     (1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
+    print("Control type: {}".format(ctrlType))
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
     quad = Quadcopter(Ti)
-    ctrl = Control(quad)
+    traj = Trajectory(ctrlType, trajSelect)
+    ctrl = Control(quad, traj.yawType)
     wind = Wind('None', 2.0, 90, -15)
 
     t_all     = Ti
@@ -75,7 +78,7 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        quad_sim(t, Ts, quad, ctrl, wind, trajType, trajSelect, t_wp, wp, y_wp, v_wp)
+        quad_sim(t, Ts, quad, ctrl, wind, traj)
         t += Ts
 
         # print("{:.3f}".format(t))
