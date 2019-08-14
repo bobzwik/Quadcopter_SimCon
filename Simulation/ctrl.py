@@ -103,9 +103,12 @@ class Control:
         # Desired State
         # ---------------------------
         self.pos_sp = sDes[0:3]
-        self.eul_sp = sDes[3:6]
-        self.vel_sp = sDes[6:9]
-        self.thrust_sp = sDes[12:15]
+        self.vel_sp = sDes[3:6]
+        self.acc_sp = sDes[6:9]
+        self.thrust_sp = sDes[9:12]
+        self.eul_sp = sDes[12:15]
+        self.pqr_sp = sDes[15:18]
+        self.yawFF_sp = sDes[18]
 
 
         # Select Controller
@@ -139,10 +142,10 @@ class Control:
         # Add calculated Desired States
         # ---------------------------         
         self.sDesCalc[0:3] = self.pos_sp
-        self.sDesCalc[3:7] = self.qd
-        self.sDesCalc[7:10] = self.vel_sp
-        self.sDesCalc[10:13] = self.rate_sp
-        self.sDesCalc[13:16] = self.thrust_sp
+        self.sDesCalc[3:6] = self.vel_sp
+        self.sDesCalc[6:9] = self.thrust_sp
+        self.sDesCalc[9:13] = self.qd
+        self.sDesCalc[13:16] = self.rate_sp
 
 
     def z_pos_control(self, quad, Ts):

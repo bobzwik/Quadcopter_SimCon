@@ -38,11 +38,13 @@ class Trajectory:
 
     def desiredState(self, t, quad):
         
-        self.desPos = np.array([0., 0., 0.])    # Associated to state x, y, z
-        self.desEul = np.array([0., 0., 0.])    # Associated to state phi, theta, psi
-        self.desVel = np.array([0., 0., 0.])    # Associated to state xdot, ydot, zdot
-        self.desPQR = np.array([0., 0., 0.])    # Associated to state p, q, r
+        self.desPos = np.array([0., 0., 0.])    # Desired position (x, y, z)
+        self.desVel = np.array([0., 0., 0.])    # Desired velocity (xdot, ydot, zdot)
+        self.desAcc = np.array([0., 0., 0.])    # Desired acceleration (xdotdot, ydotdot, zdotdot)
         self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions
+        self.desEul = np.array([0., 0., 0.])    # Desired orientation in the world frame (phi, theta, psi)
+        self.desPQR = np.array([0., 0., 0.])    # Desired angular velocity in the body frame (p, q, r)
+        self.desYawRate = 0.                    # Desired yaw speed
      
         
         def pos_waypoint_timed():
@@ -157,7 +159,7 @@ class Trajectory:
                 elif self.yawType == 2:
                     yaw_waypoint_interp()
 
-                sDes = np.hstack((self.desPos, self.desEul, self.desVel, self.desPQR, self.desThr)).astype(float)
+                sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
 
             return sDes
 
@@ -167,34 +169,38 @@ class Trajectory:
 ## Testing scripts
 
 def testXYZposition(t):
-    desPos     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
-    desPQR     = np.array([0, 0, 0])
-    desThr     = np.array([0, 0, 0])
+    desPos = np.array([0., 0., 0.])
+    desVel = np.array([0., 0., 0.])
+    desAcc = np.array([0., 0., 0.])
+    desThr = np.array([0., 0., 0.])
+    desEul = np.array([0., 0., 0.])
+    desPQR = np.array([0., 0., 0.])
+    desYawRate = 0.
     
     if t >= 1 and t < 4:
         desPos = np.array([2, 2, 1])
     elif t >= 4:
         desPos = np.array([2, -2, -2])
         desEul = np.array([0, 0, pi/3])
-    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
+        sDes = np.hstack((desPos, desVel, desAcc, desThr, desEul, desPQR, desYawRate)).astype(float)
 
     return sDes
 
 
 def testVelControl(t):
-    desPos     = np.array([0, 0, 0])
-    desEul     = np.array([0, 0, 0])
-    desVel     = np.array([0, 0, 0])
-    desPQR     = np.array([0, 0, 0])
-    desThr     = np.array([0, 0, 0])
+    desPos = np.array([0., 0., 0.])
+    desVel = np.array([0., 0., 0.])
+    desAcc = np.array([0., 0., 0.])
+    desThr = np.array([0., 0., 0.])
+    desEul = np.array([0., 0., 0.])
+    desPQR = np.array([0., 0., 0.])
+    desYawRate = 0.
 
     if t >= 1 and t < 4:
         desVel = np.array([3, 2, 0])
     elif t >= 4:
         desVel = np.array([3, -1, 0])
      
-    sDes = np.hstack((desPos, desEul, desVel, desPQR, desThr)).astype(float)
+        sDes = np.hstack((desPos, desVel, desAcc, desThr, desEul, desPQR, desYawRate)).astype(float)
     
     return sDes

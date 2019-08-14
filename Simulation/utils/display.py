@@ -51,31 +51,32 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     x_sp  = desiredStates[:,0]
     y_sp  = desiredStates[:,1]
     z_sp  = desiredStates[:,2]
-    q0Des = desiredStates[:,3]
-    q1Des = desiredStates[:,4]
-    q2Des = desiredStates[:,5]
-    q3Des = desiredStates[:,6]
-    Vx_sp = desiredStates[:,7]
-    Vy_sp = desiredStates[:,8]
-    Vz_sp = desiredStates[:,9]
-    pDes  = desiredStates[:,10]*rad2deg
-    qDes  = desiredStates[:,11]*rad2deg
-    rDes  = desiredStates[:,12]*rad2deg
+    Vx_sp = desiredStates[:,3]
+    Vy_sp = desiredStates[:,4]
+    Vz_sp = desiredStates[:,5]
+    x_thr_sp = desiredStates[:,6]
+    y_thr_sp = desiredStates[:,7]
+    z_thr_sp = desiredStates[:,8]
+    q0Des = desiredStates[:,9]
+    q1Des = desiredStates[:,10]
+    q2Des = desiredStates[:,11]
+    q3Des = desiredStates[:,12]    
+    pDes  = desiredStates[:,13]*rad2deg
+    qDes  = desiredStates[:,14]*rad2deg
+    rDes  = desiredStates[:,15]*rad2deg
 
     uM1 = commands[:,0]*rads2rpm
     uM2 = commands[:,1]*rads2rpm
     uM3 = commands[:,2]*rads2rpm
     uM4 = commands[:,3]*rads2rpm
 
-    x_thr_sp = desiredStates[:,13]
-    y_thr_sp = desiredStates[:,14]
-    z_thr_sp = desiredStates[:,15]
+    
 
     psiDes   = np.zeros(q0Des.shape[0])
     thetaDes = np.zeros(q0Des.shape[0])
     phiDes   = np.zeros(q0Des.shape[0])
     for ii in range(q0Des.shape[0]):
-        YPR = utils.quatToYPR_ZYX(desiredStates[ii,3:7])
+        YPR = utils.quatToYPR_ZYX(desiredStates[ii,9:13])
         psiDes[ii]   = YPR[0]*rad2deg
         thetaDes[ii] = YPR[1]*rad2deg
         phiDes[ii]   = YPR[2]*rad2deg
