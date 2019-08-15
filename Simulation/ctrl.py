@@ -108,7 +108,7 @@ class Control:
         self.thrust_sp = sDes[9:12]
         self.eul_sp = sDes[12:15]
         self.pqr_sp = sDes[15:18]
-        self.yawFF_sp = sDes[18]
+        self.yawFF  = sDes[18]
 
 
         # Select Controller
@@ -178,9 +178,9 @@ class Control:
         # allow hover when the position and velocity error are nul
         vel_z_error = self.vel_sp[2] - quad.vel[2]
         if (config.orient == "NED"):
-            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] - quad.params["mB"]*quad.params["g"] + self.thr_int[2]
+            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*(self.acc_sp[2] - quad.params["g"]) + self.thr_int[2]
         elif (config.orient == "ENU"):
-            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*quad.params["g"] + self.thr_int[2]
+            thrust_z_sp = vel_P_gain[2]*vel_z_error - vel_D_gain[2]*quad.vel_dot[2] + quad.params["mB"]*(self.acc_sp[2] + quad.params["g"]) + self.thr_int[2]
         
         # Get thrust limits
         if (config.orient == "NED"):
@@ -209,7 +209,7 @@ class Control:
         # XY Velocity Control (Thrust in NE-direction)
         # ---------------------------
         vel_xy_error = self.vel_sp[0:2] - quad.vel[0:2]
-        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2] + self.thr_int[0:2]
+        thrust_xy_sp = vel_P_gain[0:2]*vel_xy_error - vel_D_gain[0:2]*quad.vel_dot[0:2] + quad.params["mB"]*(self.acc_sp[0:2]) + self.thr_int[0:2]
 
         # Max allowed thrust in NE based on tilt and excess thrust
         thrust_max_xy_tilt = abs(self.thrust_sp[2])*np.tan(tiltMax)
@@ -286,7 +286,9 @@ class Control:
         # Create rate setpoint from quaternion error
         self.rate_sp = (2.0*np.sign(self.qe[0])*self.qe[1:4])*att_P_gain
         self.rate_sp = np.clip(self.rate_sp, -rateMax, rateMax)
-        # If needed to feed-forward Yaw rate setpoint, this is where i should. See AttitudeControl.cpp from PX4
+        
+        # Add Yaw rate feed-forward
+        self.rate_sp += utils.quat2Dcm(utils.inverse(quad.quat))[:,2]*self.yawFF
 
 
     def rate_control(self, quad, Ts):

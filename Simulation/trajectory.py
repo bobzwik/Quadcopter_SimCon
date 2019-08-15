@@ -175,14 +175,15 @@ def testXYZposition(t):
     desThr = np.array([0., 0., 0.])
     desEul = np.array([0., 0., 0.])
     desPQR = np.array([0., 0., 0.])
-    desYawRate = 0.
+    desYawRate = 30.0*pi/180
     
     if t >= 1 and t < 4:
         desPos = np.array([2, 2, 1])
     elif t >= 4:
         desPos = np.array([2, -2, -2])
         desEul = np.array([0, 0, pi/3])
-        sDes = np.hstack((desPos, desVel, desAcc, desThr, desEul, desPQR, desYawRate)).astype(float)
+    
+    sDes = np.hstack((desPos, desVel, desAcc, desThr, desEul, desPQR, desYawRate)).astype(float)
 
     return sDes
 
@@ -201,6 +202,6 @@ def testVelControl(t):
     elif t >= 4:
         desVel = np.array([3, -1, 0])
      
-        sDes = np.hstack((desPos, desVel, desAcc, desThr, desEul, desPQR, desYawRate)).astype(float)
+    sDes = np.hstack((desPos, desVel, desAcc, desThr, desEul, desPQR, desYawRate)).astype(float)
     
     return sDes
