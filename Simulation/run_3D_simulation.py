@@ -48,8 +48,8 @@ def main():
     trajSelect = np.ones(2)
 
     ctrlType = ctrlOptions[0]   # Select Control Type             (0: xyz_pos,    1: xy_vel_z_pos,          2: xyz_vel)
-    trajSelect[0] = 1           # Select Position Trajectory Type (0: hover,      1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: pos_waypoint_interp_speed)
-    trajSelect[1] = 1           # Select Yaw Trajectory Type                     (1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
+    trajSelect[0] = 3           # Select Position Trajectory Type (0: hover,      1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: pos_waypoint_interp_speed)
+    trajSelect[1] = 2           # Select Yaw Trajectory Type                     (1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
     print("Control type: {}".format(ctrlType))
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes

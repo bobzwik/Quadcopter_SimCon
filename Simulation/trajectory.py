@@ -82,23 +82,6 @@ class Trajectory:
                 scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
                 self.desPos = (1 - scale) * self.wps[self.t_idx,:] + scale * self.wps[self.t_idx + 1,:]
                     
-            
-        def pos_waypoint_interp_speed():
-            
-            if not (len(self.y_wps) == self.wps.shape[0]):
-                raise Exception("Waypoint array and Yaw waypoint array not the same size.")
-        
-            if (t == 0):
-                self.t_idx = 0
-                self.desPos = self.wps[0,:]
-            elif (t >= self.t_wps[-1]):
-                self.t_idx = -1
-                self.desPos = self.wps[-1,:]
-            else:
-                self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
-                scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
-                self.desPos = (1 - scale) * self.wps[self.t_idx,:] + scale * self.wps[self.t_idx + 1,:]
-                    
 
         def yaw_waypoint_timed():
             
@@ -148,7 +131,7 @@ class Trajectory:
                     pos_waypoint_interp()
                 # Interpolate position between every waypoint, to arrive at desired position every t_wps[i] (calculated using the average speed provided)
                 elif self.xyzType == 3:
-                    pos_waypoint_interp_speed()
+                    pos_waypoint_interp()
                 
                 # List of possible yaw trajectories
                 # ---------------------------
