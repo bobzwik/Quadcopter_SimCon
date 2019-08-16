@@ -45,11 +45,17 @@ def main():
     # Choose trajectory settings
     # --------------------------- 
     ctrlOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
-    trajSelect = np.ones(2)
+    trajSelect = np.ones(3)
 
-    ctrlType = ctrlOptions[0]   # Select Control Type             (0: xyz_pos,    1: xy_vel_z_pos,          2: xyz_vel)
-    trajSelect[0] = 3           # Select Position Trajectory Type (0: hover,      1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: pos_waypoint_interp_speed)
-    trajSelect[1] = 2           # Select Yaw Trajectory Type                     (1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
+    # Select Control Type             (0: xyz_pos,         1: xy_vel_z_pos,          2: xyz_vel)
+    ctrlType = ctrlOptions[0]   
+    # Select Position Trajectory Type (0: hover,           1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: minimum velocity
+    #                                  4: minimum accel,   5: minimum jerk,          6: minimum snap
+    trajSelect[0] = 3           
+    # Select Yaw Trajectory Type                          (1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
+    trajSelect[1] = 2           
+    # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)
+    trajSelect[2] = 0           
     print("Control type: {}".format(ctrlType))
 
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
