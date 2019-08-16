@@ -57,7 +57,7 @@ class Trajectory:
         self.desPos = np.array([0., 0., 0.])    # Desired position (x, y, z)
         self.desVel = np.array([0., 0., 0.])    # Desired velocity (xdot, ydot, zdot)
         self.desAcc = np.array([0., 0., 0.])    # Desired acceleration (xdotdot, ydotdot, zdotdot)
-        self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions
+        self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions (or E-N-U, if selected)
         self.desEul = np.array([0., 0., 0.])    # Desired orientation in the world frame (phi, theta, psi)
         self.desPQR = np.array([0., 0., 0.])    # Desired angular velocity in the body frame (p, q, r)
         self.desYawRate = 0.                    # Desired yaw speed
