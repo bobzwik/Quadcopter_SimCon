@@ -20,17 +20,20 @@ import config
 
 def quad_sim(t, Ts, quad, ctrl, wind, traj):
     
-    # Trajectory for Desired States
+    # Dynamics (using last timestep's commands)
+    # ---------------------------
+    quad.update(t, Ts, ctrl.w_cmd, wind)
+    t += Ts
+
+    # Trajectory for Desired States 
     # ---------------------------
     traj.desiredState(t, Ts, quad)        
 
-    # Generate Commands
+    # Generate Commands (for next iteration)
     # ---------------------------
     ctrl.controller(traj, quad, Ts, traj.sDes)
-    
-    # Dynamics
-    # ---------------------------
-    quad.update(t, Ts, ctrl.w_cmd, wind)
+
+    return t
     
 
 def main():
@@ -45,13 +48,13 @@ def main():
     # Choose trajectory settings
     # --------------------------- 
     ctrlOptions = ["xyz_pos", "xy_vel_z_pos", "xyz_vel"]
-    trajSelect = np.ones(3)
+    trajSelect = np.zeros(3)
 
     # Select Control Type             (0: xyz_pos,         1: xy_vel_z_pos,          2: xyz_vel)
     ctrlType = ctrlOptions[0]   
     # Select Position Trajectory Type (0: hover,           1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: minimum velocity
     #                                  4: minimum accel,   5: minimum jerk,          6: minimum snap
-    trajSelect[0] = 6           
+    trajSelect[0] = 3           
     # Select Yaw Trajectory Type      (0: none             1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
     trajSelect[1] = 0           
     # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)
@@ -64,6 +67,14 @@ def main():
     traj = Trajectory(ctrlType, trajSelect)
     ctrl = Control(quad, traj.yawType)
     wind = Wind('None', 2.0, 90, -15)
+
+    # Trajectory for First Desired States
+    # ---------------------------
+    traj.desiredState(0, Ts, quad)        
+
+    # Generate First Commands
+    # ---------------------------
+    ctrl.controller(traj, quad, Ts, traj.sDes)
 
     t_all         = Ti
     s_all         = quad.state.T
@@ -85,23 +96,22 @@ def main():
     i = 0
     while round(t,3) < Tf:
         
-        quad_sim(t, Ts, quad, ctrl, wind, traj)
-        t += Ts
-
+        t = quad_sim(t, Ts, quad, ctrl, wind, traj)
+        
         # print("{:.3f}".format(t))
-        t_all     = np.vstack((t_all, t))
-        s_all     = np.vstack((s_all, quad.state.T))
-        pos_all   = np.vstack((pos_all, quad.pos.T))
-        vel_all   = np.vstack((vel_all, quad.vel.T))
-        quat_all  = np.vstack((quat_all, quad.quat.T))
-        omega_all = np.vstack((omega_all, quad.omega.T))
-        euler_all = np.vstack((euler_all, quad.euler.T))
-        sDes_traj_all  = np.vstack((sDes_traj_all, traj.sDes.T))
-        sDes_calc_all  = np.vstack((sDes_calc_all, ctrl.sDesCalc.T))
-        w_cmd_all = np.vstack((w_cmd_all, ctrl.w_cmd.T))
-        wMotor_all= np.vstack((wMotor_all, quad.wMotor.T))
-        thr_all   = np.vstack((thr_all, quad.thr.T))
-        tor_all   = np.vstack((tor_all, quad.tor.T))
+        t_all           = np.vstack((t_all, t))
+        s_all           = np.vstack((s_all, quad.state.T))
+        pos_all         = np.vstack((pos_all, quad.pos.T))
+        vel_all         = np.vstack((vel_all, quad.vel.T))
+        quat_all        = np.vstack((quat_all, quad.quat.T))
+        omega_all       = np.vstack((omega_all, quad.omega.T))
+        euler_all       = np.vstack((euler_all, quad.euler.T))
+        sDes_traj_all   = np.vstack((sDes_traj_all, traj.sDes.T))
+        sDes_calc_all   = np.vstack((sDes_calc_all, ctrl.sDesCalc.T))
+        w_cmd_all       = np.vstack((w_cmd_all, ctrl.w_cmd.T))
+        wMotor_all      = np.vstack((wMotor_all, quad.wMotor.T))
+        thr_all         = np.vstack((thr_all, quad.thr.T))
+        tor_all         = np.vstack((tor_all, quad.tor.T))
         i += 1
     
     end_time = time.time()

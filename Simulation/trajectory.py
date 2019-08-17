@@ -55,25 +55,25 @@ class Trajectory:
             self.current_heading = np.zeros(2)
         
         # Initialize trajectory setpoint
-        self.desPos = np.array([0., 0., 0.])    # Desired position (x, y, z)
-        self.desVel = np.array([0., 0., 0.])    # Desired velocity (xdot, ydot, zdot)
-        self.desAcc = np.array([0., 0., 0.])    # Desired acceleration (xdotdot, ydotdot, zdotdot)
-        self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions (or E-N-U, if selected)
-        self.desEul = np.array([0., 0., 0.])    # Desired orientation in the world frame (phi, theta, psi)
-        self.desPQR = np.array([0., 0., 0.])    # Desired angular velocity in the body frame (p, q, r)
-        self.desYawRate = 0.                    # Desired yaw speed
+        self.desPos = np.zeros(3)    # Desired position (x, y, z)
+        self.desVel = np.zeros(3)    # Desired velocity (xdot, ydot, zdot)
+        self.desAcc = np.zeros(3)    # Desired acceleration (xdotdot, ydotdot, zdotdot)
+        self.desThr = np.zeros(3)    # Desired thrust in N-E-D directions (or E-N-U, if selected)
+        self.desEul = np.zeros(3)    # Desired orientation in the world frame (phi, theta, psi)
+        self.desPQR = np.zeros(3)    # Desired angular velocity in the body frame (p, q, r)
+        self.desYawRate = 0.         # Desired yaw speed
         self.sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
 
 
     def desiredState(self, t, Ts, quad):
         
-        self.desPos = np.array([0., 0., 0.])    # Desired position (x, y, z)
-        self.desVel = np.array([0., 0., 0.])    # Desired velocity (xdot, ydot, zdot)
-        self.desAcc = np.array([0., 0., 0.])    # Desired acceleration (xdotdot, ydotdot, zdotdot)
-        self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions (or E-N-U, if selected)
-        self.desEul = np.array([0., 0., 0.])    # Desired orientation in the world frame (phi, theta, psi)
-        self.desPQR = np.array([0., 0., 0.])    # Desired angular velocity in the body frame (p, q, r)
-        self.desYawRate = 0.                    # Desired yaw speed
+        self.desPos = np.zeros(3)    # Desired position (x, y, z)
+        self.desVel = np.zeros(3)    # Desired velocity (xdot, ydot, zdot)
+        self.desAcc = np.zeros(3)    # Desired acceleration (xdotdot, ydotdot, zdotdot)
+        self.desThr = np.zeros(3)    # Desired thrust in N-E-D directions (or E-N-U, if selected)
+        self.desEul = np.zeros(3)    # Desired orientation in the world frame (phi, theta, psi)
+        self.desPQR = np.zeros(3)    # Desired angular velocity in the body frame (p, q, r)
+        self.desYawRate = 0.         # Desired yaw speed
 
         
         def pos_waypoint_timed():
