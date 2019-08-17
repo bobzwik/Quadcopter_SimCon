@@ -23,11 +23,11 @@ def quad_sim(t, Ts, quad, ctrl, wind, traj):
     # Trajectory for Desired States
     # ---------------------------
     traj.desiredState(t, Ts, quad)        
-    
+
     # Generate Commands
     # ---------------------------
     ctrl.controller(traj, quad, Ts, traj.sDes)
-
+    
     # Dynamics
     # ---------------------------
     quad.update(t, Ts, ctrl.w_cmd, wind)
@@ -40,7 +40,7 @@ def main():
     # --------------------------- 
     Ti = 0
     Ts = 0.005
-    Tf = 5
+    Tf = 16
 
     # Choose trajectory settings
     # --------------------------- 
@@ -51,7 +51,7 @@ def main():
     ctrlType = ctrlOptions[0]   
     # Select Position Trajectory Type (0: hover,           1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: minimum velocity
     #                                  4: minimum accel,   5: minimum jerk,          6: minimum snap
-    trajSelect[0] = 3           
+    trajSelect[0] = 6           
     # Select Yaw Trajectory Type      (0: none             1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
     trajSelect[1] = 0           
     # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)

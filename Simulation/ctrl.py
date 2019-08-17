@@ -109,17 +109,16 @@ class Control:
     
     def controller(self, traj, quad, Ts, sDes):
 
-        # Desired State
+        # Desired State (Create a copy, hence the [:])
         # ---------------------------
-        self.pos_sp    = sDes[0:3]
-        self.vel_sp    = sDes[3:6]
-        self.acc_sp    = sDes[6:9]
-        self.thrust_sp = sDes[9:12]
-        self.eul_sp    = sDes[12:15]
-        self.pqr_sp    = sDes[15:18]
-        self.yawFF     = sDes[18]
+        self.pos_sp[:]    = sDes[0:3]
+        self.vel_sp[:]    = sDes[3:6]
+        self.acc_sp[:]    = sDes[6:9]
+        self.thrust_sp[:] = sDes[9:12]
+        self.eul_sp[:]    = sDes[12:15]
+        self.pqr_sp[:]    = sDes[15:18]
+        self.yawFF[:]     = sDes[18]
         
-
         # Select Controller
         # ---------------------------
         if (traj.ctrlType == "xyz_vel"):
@@ -143,9 +142,7 @@ class Control:
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
-        # self.pos_sp[1] = 999    
 
-        print(sDes[0:6])
         # Mixer
         # --------------------------- 
         self.w_cmd = utils.mixerFM(quad, norm(self.thrust_sp), self.rateCtrl)
@@ -164,7 +161,7 @@ class Control:
         # Z Position Control
         # --------------------------- 
         pos_z_error = self.pos_sp[2] - quad.pos[2]
-        self.vel_sp[2] = pos_P_gain[2]*pos_z_error + self.vel_sp[2]
+        self.vel_sp[2] += pos_P_gain[2]*pos_z_error
         
         # Saturate velocity setpoint
         self.vel_sp[2] = np.clip(self.vel_sp[2], -velMax[2], velMax[2])
@@ -175,7 +172,7 @@ class Control:
         # XY Position Control
         # --------------------------- 
         pos_xy_error = (self.pos_sp[0:2] - quad.pos[0:2])
-        self.vel_sp[0:2] = pos_P_gain[0:2]*pos_xy_error + self.vel_sp[0:2]
+        self.vel_sp[0:2] += pos_P_gain[0:2]*pos_xy_error
         
         # Saturate velocity setpoint
         self.vel_sp[0:2] = np.clip(self.vel_sp[0:2], -velMax[0:2], velMax[0:2])

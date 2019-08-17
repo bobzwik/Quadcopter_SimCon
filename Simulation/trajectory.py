@@ -44,7 +44,7 @@ class Trajectory:
                 self.t_wps = np.zeros(len(self.T_segment) + 1)
                 self.t_wps[1:] = np.cumsum(self.T_segment)
             
-            if (self.xyzType >= 3):
+            if (self.xyzType >= 3 and not (self.xyzType == 99)):
                 self.deriv_order = int(self.xyzType-2)       # Looking to minimize which derivative order (eg: Minimum velocity -> first order)
 
                 # Calculate coefficients
@@ -74,7 +74,7 @@ class Trajectory:
         self.desEul = np.array([0., 0., 0.])    # Desired orientation in the world frame (phi, theta, psi)
         self.desPQR = np.array([0., 0., 0.])    # Desired angular velocity in the body frame (p, q, r)
         self.desYawRate = 0.                    # Desired yaw speed
-     
+
         
         def pos_waypoint_timed():
             
@@ -135,12 +135,11 @@ class Trajectory:
                 self.desPos = self.wps[-1,:]
             else:
                 self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
-
                 # scaled time
                 scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
                 start = nb_coeff * self.t_idx
                 end = nb_coeff * (self.t_idx + 1)
-
+                
                 t0 = get_poly_cc(nb_coeff, 0, scale)
                 self.desPos = np.array([self.coeff_x[start:end].dot(t0), self.coeff_y[start:end].dot(t0), self.coeff_z[start:end].dot(t0)])
 
@@ -195,14 +194,12 @@ class Trajectory:
 
         if self.ctrlType == "xyz_vel":
             if self.xyzType == 1:
-                sDes = testVelControl(t)
-            return sDes
+                self.sDes = testVelControl(t)
 
         elif self.ctrlType == "xy_vel_z_pos":
             if self.xyzType == 1:
-                sDes = testVelControl(t)
-            return sDes
-
+                self.sDes = testVelControl(t)
+        
         elif self.ctrlType == "xyz_pos":
             # Hover at [0, 0, 0]
             if self.xyzType == 0:
@@ -235,6 +232,8 @@ class Trajectory:
                     yaw_waypoint_interp()
 
                 self.sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
+        
+        return self.sDes
 
 
 
@@ -287,7 +286,7 @@ def get_poly_cc(n, k, t):
     assert (n > 0 and k >= 0), "order and derivative must be positive."
 
     cc = np.ones(n)
-    D  = np.linspace(0, n-1, n)
+    D  = np.linspace(n-1, 0, n)
 
     for i in range(n):
         for j in range(k):
