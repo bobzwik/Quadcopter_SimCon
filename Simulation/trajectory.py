@@ -48,9 +48,9 @@ class Trajectory:
                 self.deriv_order = int(self.xyzType-2)       # Looking to minimize which derivative order (eg: Minimum velocity -> first order)
 
                 # Calculate coefficients
-                self.coeff_x = minSomethingTraj(self.wps[:,0], self.deriv_order)
-                self.coeff_y = minSomethingTraj(self.wps[:,1], self.deriv_order)
-                self.coeff_z = minSomethingTraj(self.wps[:,2], self.deriv_order)
+                self.coeff_x = minSomethingTraj(self.wps[:,0], self.T_segment, self.deriv_order)
+                self.coeff_y = minSomethingTraj(self.wps[:,1], self.T_segment, self.deriv_order)
+                self.coeff_z = minSomethingTraj(self.wps[:,2], self.T_segment, self.deriv_order)
 
             self.current_heading = np.zeros(2)
         
@@ -136,7 +136,7 @@ class Trajectory:
             else:
                 self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
                 # scaled time
-                scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
+                scale = (t - self.t_wps[self.t_idx])
                 start = nb_coeff * self.t_idx
                 end = nb_coeff * (self.t_idx + 1)
                 
@@ -144,10 +144,10 @@ class Trajectory:
                 self.desPos = np.array([self.coeff_x[start:end].dot(t0), self.coeff_y[start:end].dot(t0), self.coeff_z[start:end].dot(t0)])
 
                 t1 = get_poly_cc(nb_coeff, 1, scale)
-                self.desVel = np.array([self.coeff_x[start:end].dot(t1), self.coeff_y[start:end].dot(t1), self.coeff_z[start:end].dot(t1)]) * (1.0 / self.T_segment[self.t_idx])
+                self.desVel = np.array([self.coeff_x[start:end].dot(t1), self.coeff_y[start:end].dot(t1), self.coeff_z[start:end].dot(t1)])
 
                 t2 = get_poly_cc(nb_coeff, 2, scale)
-                self.desAcc = np.array([self.coeff_x[start:end].dot(t2), self.coeff_y[start:end].dot(t2), self.coeff_z[start:end].dot(t2)]) * (1.0 / self.T_segment[self.t_idx]**2)
+                self.desAcc = np.array([self.coeff_x[start:end].dot(t2), self.coeff_y[start:end].dot(t2), self.coeff_z[start:end].dot(t2)])
 
                 # # calculate desired yaw and yaw rate
                 # next_heading = np.array([self.desVel[0], self.desVel[1]])
@@ -301,7 +301,7 @@ def get_poly_cc(n, k, t):
     return cc
 
 # Minimum velocity/acceleration/jerk/snap Trajectory
-def minSomethingTraj(waypoints, order):
+def minSomethingTraj(waypoints, times, order):
     """ This function takes a list of desired waypoint i.e. [x0, x1, x2...xN] and
     time, returns a [8N,1] coeffitients matrix for the N+1 waypoints.
 
@@ -366,7 +366,7 @@ def minSomethingTraj(waypoints, order):
 
     # Constraint 2
     for i in range(n):
-        A[i+n][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 0, 1)
+        A[i+n][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 0, times[i])
 
     # Constraint 3
     for k in range(1, order):
@@ -374,13 +374,13 @@ def minSomethingTraj(waypoints, order):
 
     # Constraint 4
     for k in range(1, order):
-        A[2*n+(order-1)+k-1][-nb_coeff:] = get_poly_cc(nb_coeff, k, 1)
+        A[2*n+(order-1)+k-1][-nb_coeff:] = get_poly_cc(nb_coeff, k, times[i])
 
     if (order > 1):
         # Constraint 5
         for i in range(n-1):
             for k in range(1, nb_coeff-1):
-                A[2*n+2*(order-1) + i*2*(order-1)+k-1][i*nb_coeff : (i*nb_coeff+nb_coeff*2)] = np.concatenate((get_poly_cc(nb_coeff, k, 1), -get_poly_cc(nb_coeff, k, 0)))
+                A[2*n+2*(order-1) + i*2*(order-1)+k-1][i*nb_coeff : (i*nb_coeff+nb_coeff*2)] = np.concatenate((get_poly_cc(nb_coeff, k, times[i]), -get_poly_cc(nb_coeff, k, 0)))
 
     # solve for the coefficients
     Coeff = np.linalg.solve(A, B)
