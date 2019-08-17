@@ -70,14 +70,14 @@ rate_P_gain = np.array([Pp, Pq, Pr])
 rate_D_gain = np.array([Dp, Dq, Dr])
 
 # Max Velocities
-uMax = 3.0
-vMax = 3.0
-wMax = 3.0
+uMax = 5.0
+vMax = 5.0
+wMax = 5.0
 
 velMax = np.array([uMax, vMax, wMax])
 
 # Max tilt
-tiltMax = 40.0*deg2rad
+tiltMax = 50.0*deg2rad
 
 # Max Rate
 pMax = 200.0*deg2rad
@@ -93,23 +93,32 @@ class Control:
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.thr_int = np.zeros(3)
+        if (yawType == 0):
+            att_P_gain[2] = 0
         if (yawType == 2):
             att_P_gain[2] = att_P_gain[0]
         self.setYawWeight()
+        self.pos_sp    = np.zeros(3)
+        self.vel_sp    = np.zeros(3)
+        self.acc_sp    = np.zeros(3)
+        self.thrust_sp = np.zeros(3)
+        self.eul_sp    = np.zeros(3)
+        self.pqr_sp    = np.zeros(3)
+        self.yawFF     = np.zeros(3)
 
     
-    def controller(self, quad, sDes, Ts, traj):
+    def controller(self, traj, quad, Ts, sDes):
 
         # Desired State
         # ---------------------------
-        self.pos_sp = sDes[0:3]
-        self.vel_sp = sDes[3:6]
-        self.acc_sp = sDes[6:9]
+        self.pos_sp    = sDes[0:3]
+        self.vel_sp    = sDes[3:6]
+        self.acc_sp    = sDes[6:9]
         self.thrust_sp = sDes[9:12]
-        self.eul_sp = sDes[12:15]
-        self.pqr_sp = sDes[15:18]
-        self.yawFF  = sDes[18]
-
+        self.eul_sp    = sDes[12:15]
+        self.pqr_sp    = sDes[15:18]
+        self.yawFF     = sDes[18]
+        
 
         # Select Controller
         # ---------------------------
@@ -128,17 +137,19 @@ class Control:
             self.rate_control(quad, Ts)
         elif (traj.ctrlType == "xyz_pos"):
             self.z_pos_control(quad, Ts)
-            self.xy_pos_control(quad, Ts)    
+            self.xy_pos_control(quad, Ts)
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
             self.attitude_control(quad, Ts)
             self.rate_control(quad, Ts)
+        # self.pos_sp[1] = 999    
 
+        print(sDes[0:6])
         # Mixer
         # --------------------------- 
         self.w_cmd = utils.mixerFM(quad, norm(self.thrust_sp), self.rateCtrl)
-
+        
         # Add calculated Desired States
         # ---------------------------         
         self.sDesCalc[0:3] = self.pos_sp
@@ -297,7 +308,7 @@ class Control:
         # ---------------------------
         rate_error = self.rate_sp - quad.omega
         self.rateCtrl = rate_P_gain*rate_error - rate_D_gain*quad.omega_dot     # Be sure it is right sign for the D part
-
+        
 
     def setYawWeight(self):
         

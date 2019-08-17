@@ -16,6 +16,7 @@ Please feel free to use and modify this, but keep the above information. Thanks!
 
 import numpy as np
 from numpy import pi
+from numpy.linalg import norm
 from waypoints import makeWaypoints
 import config
 
@@ -44,15 +45,27 @@ class Trajectory:
                 self.t_wps[1:] = np.cumsum(self.T_segment)
             
             if (self.xyzType >= 3):
-                self.deriv_order = self.xyzType-2       # looking to minimum which derivative order (eg: Minimum velocity -> first order)
+                self.deriv_order = int(self.xyzType-2)       # Looking to minimize which derivative order (eg: Minimum velocity -> first order)
 
                 # Calculate coefficients
-                self.coeff_x = minSomethingTraj(self.wps[:,0])
-                self.coeff_y = minSomethingTraj(self.wps[:,1])
-                self.coeff_z = minSomethingTraj(self.wps[:,2])
+                self.coeff_x = minSomethingTraj(self.wps[:,0], self.deriv_order)
+                self.coeff_y = minSomethingTraj(self.wps[:,1], self.deriv_order)
+                self.coeff_z = minSomethingTraj(self.wps[:,2], self.deriv_order)
+
+            self.current_heading = np.zeros(2)
+        
+        # Initialize trajectory setpoint
+        self.desPos = np.array([0., 0., 0.])    # Desired position (x, y, z)
+        self.desVel = np.array([0., 0., 0.])    # Desired velocity (xdot, ydot, zdot)
+        self.desAcc = np.array([0., 0., 0.])    # Desired acceleration (xdotdot, ydotdot, zdotdot)
+        self.desThr = np.array([0., 0., 0.])    # Desired thrust in N-E-D directions (or E-N-U, if selected)
+        self.desEul = np.array([0., 0., 0.])    # Desired orientation in the world frame (phi, theta, psi)
+        self.desPQR = np.array([0., 0., 0.])    # Desired angular velocity in the body frame (p, q, r)
+        self.desYawRate = 0.                    # Desired yaw speed
+        self.sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
 
 
-    def desiredState(self, t, quad):
+    def desiredState(self, t, Ts, quad):
         
         self.desPos = np.array([0., 0., 0.])    # Desired position (x, y, z)
         self.desVel = np.array([0., 0., 0.])    # Desired velocity (xdot, ydot, zdot)
@@ -97,6 +110,67 @@ class Trajectory:
                 self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
                 scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
                 self.desPos = (1 - scale) * self.wps[self.t_idx,:] + scale * self.wps[self.t_idx + 1,:]
+        
+        def pos_waypoint_min():
+            """ The function takes known number of waypoints and time, then generates a
+            minimum snap trajectory which goes through each waypoint. The output is
+            the desired state associated with the next waypont for the time t.
+            waypoints is [N,3] matrix, waypoints = [[x0,y0,z0]...[xn,yn,zn]].
+            v is velocity in m/s
+            """
+
+            nb_coeff = self.deriv_order*2
+
+            # prepare the next desired state
+            if t == 0:
+                self.t_idx = 0
+                self.desPos = self.wps[0,:]
+                t1 = get_poly_cc(nb_coeff, 1, 0)
+                # self.desVel = np.array([self.coeff_x[0:nb_coeff].dot(t1), self.coeff_y[0:nb_coeff].dot(t1), self.coeff_z[0:nb_coeff].dot(t1)]) * (1.0 / self.T_segment[0])
+                self.current_heading = np.array([self.desVel[0], self.desVel[1]])
+
+            # stay hover at the last waypoint position
+            elif (t >= self.t_wps[-1]):
+                self.t_idx = -1
+                self.desPos = self.wps[-1,:]
+            else:
+                self.t_idx = np.where(t <= self.t_wps)[0][0] - 1
+
+                # scaled time
+                scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
+                start = nb_coeff * self.t_idx
+                end = nb_coeff * (self.t_idx + 1)
+
+                t0 = get_poly_cc(nb_coeff, 0, scale)
+                self.desPos = np.array([self.coeff_x[start:end].dot(t0), self.coeff_y[start:end].dot(t0), self.coeff_z[start:end].dot(t0)])
+
+                t1 = get_poly_cc(nb_coeff, 1, scale)
+                self.desVel = np.array([self.coeff_x[start:end].dot(t1), self.coeff_y[start:end].dot(t1), self.coeff_z[start:end].dot(t1)]) * (1.0 / self.T_segment[self.t_idx])
+
+                t2 = get_poly_cc(nb_coeff, 2, scale)
+                self.desAcc = np.array([self.coeff_x[start:end].dot(t2), self.coeff_y[start:end].dot(t2), self.coeff_z[start:end].dot(t2)]) * (1.0 / self.T_segment[self.t_idx]**2)
+
+                # # calculate desired yaw and yaw rate
+                # next_heading = np.array([self.desVel[0], self.desVel[1]])
+                # # angle between current vector with the next heading vector
+                # print(self.current_heading)
+                # print(next_heading)
+                # delta_psi = np.arccos(np.dot(self.current_heading, next_heading) / (norm(self.current_heading)*norm(next_heading)))
+                # # cross product allow us to determine rotating direction
+                # norm_v = np.cross(self.current_heading,next_heading)
+
+                # if norm_v > 0:
+                #     self.desEul[2] += delta_psi
+                # else:
+                #     self.desEul[2] -= delta_psi
+
+                # # dirty hack, quadcopter's yaw range represented by quaternion is [-pi, pi]
+                # if self.desEul[2] > np.pi:
+                #     self.desEul[2] = self.desEul[2] - 2*pi
+
+                # # print next_heading, current_heading, "yaw", yaw*180/np.pi, 'pos', pos
+                # self.current_heading = next_heading
+                # self.desYawRate = delta_psi / Ts # dt is control period
                     
 
         def yaw_waypoint_timed():
@@ -135,7 +209,7 @@ class Trajectory:
                 pass 
             # For simple testing
             elif self.xyzType == 99:
-                sDes = testXYZposition(t)   
+                self.sDes = testXYZposition(t)   
             else:    
                 # List of possible position trajectories
                 # ---------------------------
@@ -146,21 +220,21 @@ class Trajectory:
                 elif self.xyzType == 2:
                     pos_waypoint_interp()
                 # Interpolate position between every waypoint, to arrive at desired position every t_wps[i] (calculated using the average speed provided)
-                elif self.xyzType == 3:
-                    pos_waypoint_interp()
+                elif self.xyzType >= 3:
+                    pos_waypoint_min()
                 
                 # List of possible yaw trajectories
                 # ---------------------------
                 # Set desired yaw at every t_wps[i]
-                if self.yawType == 1:
+                if self.yawType == 0:
+                    pass
+                elif self.yawType == 1:
                     yaw_waypoint_timed()
                 # Interpolate yaw between every waypoint, to arrive at desired yaw every t_wps[i]
                 elif self.yawType == 2:
                     yaw_waypoint_interp()
 
-                sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
-
-            return sDes
+                self.sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
 
 
 
@@ -206,77 +280,6 @@ def testVelControl(t):
     return sDes
 
 
-def generate_trajectory(t, v, waypoints, coeff_x, coeff_y, coeff_z):
-    """ The function takes known number of waypoints and time, then generates a
-    minimum snap trajectory which goes through each waypoint. The output is
-    the desired state associated with the next waypont for the time t.
-    waypoints is [N,3] matrix, waypoints = [[x0,y0,z0]...[xn,yn,zn]].
-    v is velocity in m/s
-    """
-    global yaw
-    global current_heading
-    yawdot = 0.0
-    pos = np.zeros(3)
-    acc = np.zeros(3)
-    vel = np.zeros(3)
-
-    # distance vector array, represents each segment's distance
-    distance = waypoints[0:-1] - waypoints[1:]
-    # T is now each segment's travel time
-    T = (1.0 / v) * np.sqrt(distance[:,0]**2 + distance[:,1]**2 + distance[:,2]**2)
-    # accumulated time
-    S = np.zeros(len(T) + 1)
-    S[1:] = np.cumsum(T)
-
-    # find which segment current t belongs to
-    t_index = np.where(t >= S)[0][-1]
-
-    # prepare the next desired state
-    if t == 0:
-        pos = waypoints[0]
-        t0 = get_poly_cc(8, 1, 0)
-        current_heading = np.array([coeff_x[0:8].dot(t0), coeff_y[0:8].dot(t0)]) * (1.0 / T[0])
-    # stay hover at the last waypoint position
-    elif t > S[-1]:
-        pos = waypoints[-1]
-    else:
-        # scaled time
-        scale = (t - S[t_index]) / T[t_index]
-        start = 8 * t_index
-        end = 8 * (t_index + 1)
-
-        t0 = get_poly_cc(8, 0, scale)
-        pos = np.array([coeff_x[start:end].dot(t0), coeff_y[start:end].dot(t0), coeff_z[start:end].dot(t0)])
-
-        t1 = get_poly_cc(8, 1, scale)
-        # chain rule applied
-        vel = np.array([coeff_x[start:end].dot(t1), coeff_y[start:end].dot(t1), coeff_z[start:end].dot(t1)]) * (1.0 / T[t_index])
-
-        t2 = get_poly_cc(8, 2, scale)
-        # chain rule applied
-        acc = np.array([coeff_x[start:end].dot(t2), coeff_y[start:end].dot(t2), coeff_z[start:end].dot(t2)]) * (1.0 / T[t_index]**2)
-
-        # calculate desired yaw and yaw rate
-        next_heading = np.array([vel[0], vel[1]])
-        # angle between current vector with the next heading vector
-        delta_psi = np.arccos(np.dot(current_heading, next_heading) / (LA.norm(current_heading)*LA.norm(next_heading)))
-        # cross product allow us to determine rotating direction
-        norm_v = np.cross(current_heading,next_heading)
-
-        if norm_v > 0:
-            yaw += delta_psi
-        else:
-            yaw -= delta_psi
-
-        # dirty hack, quadcopter's yaw range represented by quaternion is [-pi, pi]
-        if yaw > np.pi:
-            yaw = yaw - 2*np.pi
-
-        # print next_heading, current_heading, "yaw", yaw*180/np.pi, 'pos', pos
-        current_heading = next_heading
-        yawdot = delta_psi / 0.005 # dt is control period
-    return DesiredState(pos, vel, acc, yaw, yawdot)
-
 def get_poly_cc(n, k, t):
     """ This is a helper function to get the coeffitient of coefficient for n-th
         order polynomial with k-th derivative at time t.
@@ -299,7 +302,7 @@ def get_poly_cc(n, k, t):
     return cc
 
 # Minimum velocity/acceleration/jerk/snap Trajectory
-def minSomethingTraj(waypoints):
+def minSomethingTraj(waypoints, order):
     """ This function takes a list of desired waypoint i.e. [x0, x1, x2...xN] and
     time, returns a [8N,1] coeffitients matrix for the N+1 waypoints.
 
@@ -347,10 +350,11 @@ def minSomethingTraj(waypoints):
     """
 
     n = len(waypoints) - 1
+    nb_coeff = order*2
 
     # initialize A, and B matrix
-    A = np.zeros((8*n, 8*n))
-    B = np.zeros((8*n, 1))
+    A = np.zeros([nb_coeff*n, nb_coeff*n])
+    B = np.zeros(nb_coeff*n)
 
     # populate B matrix.
     for i in range(n):
@@ -359,24 +363,25 @@ def minSomethingTraj(waypoints):
 
     # Constraint 1
     for i in range(n):
-        A[i][8*i:8*(i+1)] = get_poly_cc(8, 0, 0)
+        A[i][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 0, 0)
 
     # Constraint 2
     for i in range(n):
-        A[i+n][8*i:8*(i+1)] = get_poly_cc(8, 0, 1)
+        A[i+n][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 0, 1)
 
     # Constraint 3
-    for k in range(1, 4):
-        A[2*n+k-1][:8] = get_poly_cc(8, k, 0)
+    for k in range(1, order):
+        A[2*n+k-1][:nb_coeff] = get_poly_cc(nb_coeff, k, 0)
 
     # Constraint 4
-    for k in range(1, 4):
-        A[2*n+3+k-1][-8:] = get_poly_cc(8, k, 1)
+    for k in range(1, order):
+        A[2*n+(order-1)+k-1][-nb_coeff:] = get_poly_cc(nb_coeff, k, 1)
 
-    # Constraint 5
-    for i in range(n-1):
-        for k in range(1, 7):
-            A[2*n+6 + i*6+k-1][i*8 : (i*8+16)] = np.concatenate((get_poly_cc(8, k, 1), -get_poly_cc(8, k, 0)))
+    if (order > 1):
+        # Constraint 5
+        for i in range(n-1):
+            for k in range(1, nb_coeff-1):
+                A[2*n+2*(order-1) + i*2*(order-1)+k-1][i*nb_coeff : (i*nb_coeff+nb_coeff*2)] = np.concatenate((get_poly_cc(nb_coeff, k, 1), -get_poly_cc(nb_coeff, k, 0)))
 
     # solve for the coefficients
     Coeff = np.linalg.solve(A, B)

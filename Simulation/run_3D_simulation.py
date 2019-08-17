@@ -22,16 +22,16 @@ def quad_sim(t, Ts, quad, ctrl, wind, traj):
     
     # Trajectory for Desired States
     # ---------------------------
-    sDes = traj.desiredState(t, quad)        
+    traj.desiredState(t, Ts, quad)        
     
     # Generate Commands
     # ---------------------------
-    ctrl.controller(quad, sDes, Ts, traj)
+    ctrl.controller(traj, quad, Ts, traj.sDes)
 
     # Dynamics
     # ---------------------------
     quad.update(t, Ts, ctrl.w_cmd, wind)
-
+    
 
 def main():
     start_time = time.time()
@@ -40,7 +40,7 @@ def main():
     # --------------------------- 
     Ti = 0
     Ts = 0.005
-    Tf = 16
+    Tf = 5
 
     # Choose trajectory settings
     # --------------------------- 
@@ -52,8 +52,8 @@ def main():
     # Select Position Trajectory Type (0: hover,           1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: minimum velocity
     #                                  4: minimum accel,   5: minimum jerk,          6: minimum snap
     trajSelect[0] = 3           
-    # Select Yaw Trajectory Type                          (1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
-    trajSelect[1] = 2           
+    # Select Yaw Trajectory Type      (0: none             1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
+    trajSelect[1] = 0           
     # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)
     trajSelect[2] = 0           
     print("Control type: {}".format(ctrlType))
@@ -65,18 +65,19 @@ def main():
     ctrl = Control(quad, traj.yawType)
     wind = Wind('None', 2.0, 90, -15)
 
-    t_all     = Ti
-    s_all     = quad.state.T
-    pos_all   = quad.pos.T
-    vel_all   = quad.vel.T
-    quat_all  = quad.quat.T
-    omega_all = quad.omega.T
-    euler_all = quad.euler.T
-    sDes_all  = ctrl.sDesCalc.T
-    w_cmd_all = ctrl.w_cmd.T
-    wMotor_all= quad.wMotor.T
-    thr_all   = quad.thr.T
-    tor_all   = quad.tor.T
+    t_all         = Ti
+    s_all         = quad.state.T
+    pos_all       = quad.pos.T
+    vel_all       = quad.vel.T
+    quat_all      = quad.quat.T
+    omega_all     = quad.omega.T
+    euler_all     = quad.euler.T
+    sDes_traj_all = traj.sDes.T
+    sDes_calc_all = ctrl.sDesCalc.T
+    w_cmd_all     = ctrl.w_cmd.T
+    wMotor_all    = quad.wMotor.T
+    thr_all       = quad.thr.T
+    tor_all       = quad.tor.T
 
     # Run Simulation
     # ---------------------------
@@ -95,7 +96,8 @@ def main():
         quat_all  = np.vstack((quat_all, quad.quat.T))
         omega_all = np.vstack((omega_all, quad.omega.T))
         euler_all = np.vstack((euler_all, quad.euler.T))
-        sDes_all  = np.vstack((sDes_all, ctrl.sDesCalc.T))
+        sDes_traj_all  = np.vstack((sDes_traj_all, traj.sDes.T))
+        sDes_calc_all  = np.vstack((sDes_calc_all, ctrl.sDesCalc.T))
         w_cmd_all = np.vstack((w_cmd_all, ctrl.w_cmd.T))
         wMotor_all= np.vstack((wMotor_all, quad.wMotor.T))
         thr_all   = np.vstack((thr_all, quad.thr.T))
@@ -107,7 +109,9 @@ def main():
 
     # View Results
     # ---------------------------
-    utils.makeFigures(quad.params, t_all, pos_all, vel_all, quat_all, omega_all, euler_all, w_cmd_all, wMotor_all, thr_all, tor_all, sDes_all)
+
+    # utils.fullprint(sDes_traj_all[:,3:6])
+    utils.makeFigures(quad.params, t_all, pos_all, vel_all, quat_all, omega_all, euler_all, w_cmd_all, wMotor_all, thr_all, tor_all, sDes_traj_all, sDes_calc_all)
     ani = utils.sameAxisAnimation(t_all, pos_all, quat_all, Ts, quad.params)
     plt.show()
 

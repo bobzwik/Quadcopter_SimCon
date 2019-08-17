@@ -24,7 +24,7 @@ def fullprint(*args, **kwargs):
     np.set_printoptions(opt)
 
 
-def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, commands, wMotor_all, thrust, torque, desiredStates):
+def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, commands, wMotor_all, thrust, torque, sDes_traj, sDes_calc):
     x    = pos_all[:,0]
     y    = pos_all[:,1]
     z    = pos_all[:,2]
@@ -48,22 +48,32 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     theta = euler_all[:,1]*rad2deg
     psi   = euler_all[:,2]*rad2deg
 
-    x_sp  = desiredStates[:,0]
-    y_sp  = desiredStates[:,1]
-    z_sp  = desiredStates[:,2]
-    Vx_sp = desiredStates[:,3]
-    Vy_sp = desiredStates[:,4]
-    Vz_sp = desiredStates[:,5]
-    x_thr_sp = desiredStates[:,6]
-    y_thr_sp = desiredStates[:,7]
-    z_thr_sp = desiredStates[:,8]
-    q0Des = desiredStates[:,9]
-    q1Des = desiredStates[:,10]
-    q2Des = desiredStates[:,11]
-    q3Des = desiredStates[:,12]    
-    pDes  = desiredStates[:,13]*rad2deg
-    qDes  = desiredStates[:,14]*rad2deg
-    rDes  = desiredStates[:,15]*rad2deg
+    x_sp  = sDes_calc[:,0]
+    y_sp  = sDes_calc[:,1]
+    z_sp  = sDes_calc[:,2]
+    Vx_sp = sDes_calc[:,3]
+    Vy_sp = sDes_calc[:,4]
+    Vz_sp = sDes_calc[:,5]
+    x_thr_sp = sDes_calc[:,6]
+    y_thr_sp = sDes_calc[:,7]
+    z_thr_sp = sDes_calc[:,8]
+    q0Des = sDes_calc[:,9]
+    q1Des = sDes_calc[:,10]
+    q2Des = sDes_calc[:,11]
+    q3Des = sDes_calc[:,12]    
+    pDes  = sDes_calc[:,13]*rad2deg
+    qDes  = sDes_calc[:,14]*rad2deg
+    rDes  = sDes_calc[:,15]*rad2deg
+
+    x_tr  = sDes_traj[:,0]
+    y_tr  = sDes_traj[:,1]
+    z_tr  = sDes_traj[:,2]
+    Vx_tr = sDes_traj[:,3]
+    Vy_tr = sDes_traj[:,4]
+    Vz_tr = sDes_traj[:,5]
+    Ax_tr = sDes_traj[:,6]
+    Ay_tr = sDes_traj[:,7]
+    Az_tr = sDes_traj[:,8]
 
     uM1 = commands[:,0]*rads2rpm
     uM2 = commands[:,1]*rads2rpm
@@ -76,7 +86,7 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     thetaDes = np.zeros(q0Des.shape[0])
     phiDes   = np.zeros(q0Des.shape[0])
     for ii in range(q0Des.shape[0]):
-        YPR = utils.quatToYPR_ZYX(desiredStates[ii,9:13])
+        YPR = utils.quatToYPR_ZYX(sDes_calc[ii,9:13])
         psiDes[ii]   = YPR[0]*rad2deg
         thetaDes[ii] = YPR[1]*rad2deg
         phiDes[ii]   = YPR[2]*rad2deg
@@ -142,3 +152,24 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.legend(['tor1','tor2','tor3','tor4'])
     plt.xlabel('Time (s)')
     plt.ylabel('Rotor Torque (N*m)')
+
+    plt.figure()
+    plt.plot(time, x_tr, time, y_tr, time, z_tr)
+    plt.grid(True)
+    plt.legend(['x','y','z'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Position Trajectory (m)')
+
+    plt.figure()
+    plt.plot(time, Vx_tr, time, Vy_tr, time, Vz_tr)
+    plt.grid(True)
+    plt.legend(['Vx','Vy','Vz'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Velocity Trajectory (m/s)')
+
+    plt.figure()
+    plt.plot(time, Ax_tr, time, Ay_tr, time, Az_tr)
+    plt.grid(True)
+    plt.legend(['Ax','Ay','Az'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Acceleration Trajectory (m/s^2)')
