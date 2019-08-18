@@ -31,7 +31,7 @@ def quad_sim(t, Ts, quad, ctrl, wind, traj):
 
     # Generate Commands (for next iteration)
     # ---------------------------
-    ctrl.controller(traj, quad, Ts, traj.sDes)
+    ctrl.controller(traj, quad, Ts)
 
     return t
     
@@ -65,7 +65,7 @@ def main():
     # ---------------------------
     quad = Quadcopter(Ti)
     traj = Trajectory(quad, ctrlType, trajSelect)
-    ctrl = Control(quad, traj.xyzType, traj.yawType)
+    ctrl = Control(quad, traj.yawType)
     wind = Wind('None', 2.0, 90, -15)
 
     # Trajectory for First Desired States
@@ -74,8 +74,10 @@ def main():
 
     # Generate First Commands
     # ---------------------------
-    ctrl.controller(traj, quad, Ts, traj.sDes)
-
+    ctrl.controller(traj, quad, Ts)
+    
+    # Initialize Result Matrixes
+    # ---------------------------
     t_all         = Ti
     s_all         = quad.state.T
     pos_all       = quad.pos.T

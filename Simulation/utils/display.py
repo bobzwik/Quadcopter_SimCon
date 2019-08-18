@@ -121,7 +121,7 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.plot(time, phiDes, '--', time, thetaDes, '--', time, psiDes, '--')
     plt.plot(time, yaw_tr, '-.')
     plt.grid(True)
-    plt.legend(['roll','pitch','yaw'])
+    plt.legend(['roll','pitch','yaw','roll_sp','pitch_sp','yaw_sp','yaw_tr'])
     plt.xlabel('Time (s)')
     plt.ylabel('Euler Angle (°)')
     
@@ -132,7 +132,6 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.legend(['p','q','r'])
     plt.xlabel('Time (s)')
     plt.ylabel('Angular Velocity (°/s)')
-    # plt.ylim((-200,200))
 
     plt.figure()
     plt.plot(time, wM1, time, wM2, time, wM3, time, wM4)

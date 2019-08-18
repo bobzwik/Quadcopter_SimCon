@@ -90,7 +90,7 @@ rateMax = np.array([pMax, qMax, rMax])
 
 class Control:
     
-    def __init__(self, quad, xyzType, yawType):
+    def __init__(self, quad, yawType):
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.thr_int = np.zeros(3)
@@ -106,17 +106,17 @@ class Control:
         self.yawFF     = np.zeros(3)
 
     
-    def controller(self, traj, quad, Ts, sDes):
+    def controller(self, traj, quad, Ts):
 
         # Desired State (Create a copy, hence the [:])
         # ---------------------------
-        self.pos_sp[:]    = sDes[0:3]
-        self.vel_sp[:]    = sDes[3:6]
-        self.acc_sp[:]    = sDes[6:9]
-        self.thrust_sp[:] = sDes[9:12]
-        self.eul_sp[:]    = sDes[12:15]
-        self.pqr_sp[:]    = sDes[15:18]
-        self.yawFF[:]     = sDes[18]
+        self.pos_sp[:]    = traj.sDes[0:3]
+        self.vel_sp[:]    = traj.sDes[3:6]
+        self.acc_sp[:]    = traj.sDes[6:9]
+        self.thrust_sp[:] = traj.sDes[9:12]
+        self.eul_sp[:]    = traj.sDes[12:15]
+        self.pqr_sp[:]    = traj.sDes[15:18]
+        self.yawFF[:]     = traj.sDes[18]
         
         # Select Controller
         # ---------------------------
