@@ -59,6 +59,9 @@ In `quad.py`, I've defined a Quadcopter Class and its methods are relatively sim
 
 The current parameters are set to roughly match the characteristics of a DJI F450 that I have in my lab, and the rotor thrust and torque coefficients have been measured.
 
+### Trajectory Generation
+Different trajectories can be selected, for both position and heading. In `waypoints.py`, you can set the desired position and heading waypoints, and the time for each waypoint. You can select to use each waypoint as a step, or to interpolate between waypoints, or to generate a minimum velocity, acceleration, jerk or snap trajectory. Code from [Peter Huang](https://github.com/hbd730/quadcopter-simulation) was modified to allow for these 4 types of trajectories and to allow for segments between waypoints of different durations. There is also the possibility to have the desired heading follow the direction of the desired velocity.
+
 ### Control
 There are currently 3 controllers coded in this project. One to control XYZ positions, one to control XY velocities and Z position, and one to control XYZ velocities. In all 3 current controllers, it is also possible to set a Yaw angle (heading) setpoint. There are plans to add more ways of controlling the quadcopter.
 
@@ -74,9 +77,9 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 * [PX4 "Desired Thrust to Desired Attitude" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_pos_control/Utility/ControlMath.cpp)
 * [PX4 "Attitude Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp) --- [Article](https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/154099/eth-7387-01.pdf)
 * [PX4 "Rate Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/mc_att_control_main.cpp)
+* [Minimum Snap Trajectory](https://github.com/hbd730/quadcopter-simulation) --- [Article](http://www-personal.acfr.usyd.edu.au/spns/cdm/papers/Mellinger.pdf)
 
 ## To-Do
-* Implement trajectory generation
 * Develop method to find gains for best response
 * Add the possibility for more controllers (Attitude/Stabilize and Rate/Acro)
 * Add scheduler to simulate and display animation in realtime simultaneously

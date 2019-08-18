@@ -44,6 +44,7 @@ class Quadcopter:
         self.wMotor = np.array([self.state[13], self.state[15], self.state[17], self.state[19]])
         self.vel_dot = np.zeros(3)
         self.omega_dot = np.zeros(3)
+        self.acc = np.zeros(3)
 
         self.extended_state()
         self.forces()
@@ -212,6 +213,8 @@ class Quadcopter:
         sdot[18] = wddotM3
         sdot[19] = wdotM4
         sdot[20] = wddotM4
+
+        self.acc = sdot[7:10]
 
         return sdot
 
