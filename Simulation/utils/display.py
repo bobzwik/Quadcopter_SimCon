@@ -74,6 +74,7 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     Ax_tr = sDes_traj[:,6]
     Ay_tr = sDes_traj[:,7]
     Az_tr = sDes_traj[:,8]
+    yaw_tr = sDes_traj[:,14]*rad2deg
 
     uM1 = commands[:,0]*rads2rpm
     uM2 = commands[:,1]*rads2rpm
@@ -118,6 +119,7 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.figure()
     plt.plot(time, phi, time, theta, time, psi)
     plt.plot(time, phiDes, '--', time, thetaDes, '--', time, psiDes, '--')
+    plt.plot(time, yaw_tr, '-.')
     plt.grid(True)
     plt.legend(['roll','pitch','yaw'])
     plt.xlabel('Time (s)')
@@ -130,7 +132,8 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.legend(['p','q','r'])
     plt.xlabel('Time (s)')
     plt.ylabel('Angular Velocity (°/s)')
-    
+    # plt.ylim((-200,200))
+
     plt.figure()
     plt.plot(time, wM1, time, wM2, time, wM3, time, wM4)
     plt.plot(time, uM1, '--', time, uM2, '--', time, uM3, '--', time, uM4, '--')

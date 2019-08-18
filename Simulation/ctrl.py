@@ -53,6 +53,7 @@ vel_I_gain = np.array([Ixdot, Iydot, Izdot])
 Pphi = 8.0
 Ptheta = Pphi
 Ppsi = 1.5
+PpsiStrong = 8
 
 att_P_gain = np.array([Pphi, Ptheta, Ppsi])
 
@@ -82,21 +83,19 @@ tiltMax = 50.0*deg2rad
 # Max Rate
 pMax = 200.0*deg2rad
 qMax = 200.0*deg2rad
-rMax = 100.0*deg2rad
+rMax = 150.0*deg2rad
 
 rateMax = np.array([pMax, qMax, rMax])
 
 
 class Control:
     
-    def __init__(self, quad, yawType):
+    def __init__(self, quad, xyzType, yawType):
         self.sDesCalc = np.zeros(16)
         self.w_cmd = np.ones(4)*quad.params["w_hover"]
         self.thr_int = np.zeros(3)
         if (yawType == 0):
             att_P_gain[2] = 0
-        if (yawType == 2):
-            att_P_gain[2] = att_P_gain[0]
         self.setYawWeight()
         self.pos_sp    = np.zeros(3)
         self.vel_sp    = np.zeros(3)
@@ -293,10 +292,15 @@ class Control:
 
         # Create rate setpoint from quaternion error
         self.rate_sp = (2.0*np.sign(self.qe[0])*self.qe[1:4])*att_P_gain
-        self.rate_sp = np.clip(self.rate_sp, -rateMax, rateMax)
         
+        # Limit yawFF
+        self.yawFF = np.clip(self.yawFF, -rateMax[2], rateMax[2])
+
         # Add Yaw rate feed-forward
         self.rate_sp += utils.quat2Dcm(utils.inverse(quad.quat))[:,2]*self.yawFF
+
+        # Limit rate setpoint
+        self.rate_sp = np.clip(self.rate_sp, -rateMax, rateMax)
 
 
     def rate_control(self, quad, Ts):

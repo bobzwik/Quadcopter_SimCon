@@ -54,9 +54,9 @@ def main():
     ctrlType = ctrlOptions[0]   
     # Select Position Trajectory Type (0: hover,           1: pos_waypoint_timed,    2: pos_waypoint_interp,    3: minimum velocity
     #                                  4: minimum accel,   5: minimum jerk,          6: minimum snap
-    trajSelect[0] = 3           
+    trajSelect[0] = 6          
     # Select Yaw Trajectory Type      (0: none             1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
-    trajSelect[1] = 0           
+    trajSelect[1] = 3           
     # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)
     trajSelect[2] = 0           
     print("Control type: {}".format(ctrlType))
@@ -64,8 +64,8 @@ def main():
     # Initialize Quadcopter, Controller, Wind, Result Matrixes
     # ---------------------------
     quad = Quadcopter(Ti)
-    traj = Trajectory(ctrlType, trajSelect)
-    ctrl = Control(quad, traj.yawType)
+    traj = Trajectory(quad, ctrlType, trajSelect)
+    ctrl = Control(quad, traj.xyzType, traj.yawType)
     wind = Wind('None', 2.0, 90, -15)
 
     # Trajectory for First Desired States

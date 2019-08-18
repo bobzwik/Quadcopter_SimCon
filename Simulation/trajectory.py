@@ -22,7 +22,7 @@ import config
 
 class Trajectory:
 
-    def __init__(self, ctrlType, trajSelect):
+    def __init__(self, quad, ctrlType, trajSelect):
 
         self.ctrlType = ctrlType
         self.xyzType = trajSelect[0]
@@ -52,7 +52,7 @@ class Trajectory:
                 self.coeff_y = minSomethingTraj(self.wps[:,1], self.T_segment, self.deriv_order)
                 self.coeff_z = minSomethingTraj(self.wps[:,2], self.T_segment, self.deriv_order)
 
-            self.current_heading = np.zeros(2)
+            self.current_heading = quad.psi#np.array([np.cos(quad.psi), np.sin(quad.psi)])
         
         # Initialize trajectory setpoint
         self.desPos = np.zeros(3)    # Desired position (x, y, z)
@@ -125,10 +125,6 @@ class Trajectory:
             if t == 0:
                 self.t_idx = 0
                 self.desPos = self.wps[0,:]
-                t1 = get_poly_cc(nb_coeff, 1, 0)
-                # self.desVel = np.array([self.coeff_x[0:nb_coeff].dot(t1), self.coeff_y[0:nb_coeff].dot(t1), self.coeff_z[0:nb_coeff].dot(t1)]) * (1.0 / self.T_segment[0])
-                self.current_heading = np.array([self.desVel[0], self.desVel[1]])
-
             # stay hover at the last waypoint position
             elif (t >= self.t_wps[-1]):
                 self.t_idx = -1
@@ -148,29 +144,7 @@ class Trajectory:
 
                 t2 = get_poly_cc(nb_coeff, 2, scale)
                 self.desAcc = np.array([self.coeff_x[start:end].dot(t2), self.coeff_y[start:end].dot(t2), self.coeff_z[start:end].dot(t2)])
-
-                # # calculate desired yaw and yaw rate
-                # next_heading = np.array([self.desVel[0], self.desVel[1]])
-                # # angle between current vector with the next heading vector
-                # print(self.current_heading)
-                # print(next_heading)
-                # delta_psi = np.arccos(np.dot(self.current_heading, next_heading) / (norm(self.current_heading)*norm(next_heading)))
-                # # cross product allow us to determine rotating direction
-                # norm_v = np.cross(self.current_heading,next_heading)
-
-                # if norm_v > 0:
-                #     self.desEul[2] += delta_psi
-                # else:
-                #     self.desEul[2] -= delta_psi
-
-                # # dirty hack, quadcopter's yaw range represented by quaternion is [-pi, pi]
-                # if self.desEul[2] > np.pi:
-                #     self.desEul[2] = self.desEul[2] - 2*pi
-
-                # # print next_heading, current_heading, "yaw", yaw*180/np.pi, 'pos', pos
-                # self.current_heading = next_heading
-                # self.desYawRate = delta_psi / Ts # dt is control period
-                    
+  
 
         def yaw_waypoint_timed():
             
@@ -190,6 +164,37 @@ class Trajectory:
             else:
                 scale = (t - self.t_wps[self.t_idx])/self.T_segment[self.t_idx]
                 self.desEul[2] = (1 - scale)*self.y_wps[self.t_idx] + scale*self.y_wps[self.t_idx + 1]
+                
+                # Angle between current vector with the next heading vector
+                delta_psi = self.desEul[2] - self.current_heading
+                
+                # Set Yaw rate
+                self.desYawRate = delta_psi / Ts 
+
+                # Prepare next iteration
+                self.current_heading = self.desEul[2]
+        
+
+        def yaw_follow():
+            if (t == 0) or (t >= self.t_wps[-1]):
+                self.desEul[2] = self.y_wps[self.t_idx]
+                self.desYawRate = 0
+            else:
+                # Calculate desired Yaw
+                self.desEul[2] = np.arctan2(self.desVel[1], self.desVel[0])
+                
+                # Dirty hack, detect when desEul[2] switches from -pi to pi (or vice-versa) and switch manualy current_heading 
+                if (np.sign(self.desEul[2]) - np.sign(self.current_heading) and abs(self.desEul[2]-self.current_heading) >= 2*pi-0.1):
+                    self.current_heading = self.current_heading + np.sign(self.desEul[2])*2*pi
+                
+                # Angle between current vector with the next heading vector
+                delta_psi = self.desEul[2] - self.current_heading
+                
+                # Set Yaw rate
+                self.desYawRate = delta_psi / Ts 
+
+                # Prepare next iteration
+                self.current_heading = self.desEul[2]
 
 
         if self.ctrlType == "xyz_vel":
@@ -230,6 +235,8 @@ class Trajectory:
                 # Interpolate yaw between every waypoint, to arrive at desired yaw every t_wps[i]
                 elif self.yawType == 2:
                     yaw_waypoint_interp()
+                elif self.yawType == 3:
+                    yaw_follow()
 
                 self.sDes = np.hstack((self.desPos, self.desVel, self.desAcc, self.desThr, self.desEul, self.desPQR, self.desYawRate)).astype(float)
         
