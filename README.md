@@ -6,8 +6,8 @@ The second purpose is to provide a simple working simulation of the quadcopter's
 
 (The third was to help me learn Python and Git by starting a project and continuously adding to it.)
 
-<p float="left">
-  <img src="/animation_01_minSnap.gif" width="45%" />
+<p align="center">
+  <img src="/animation_01_minSnap.gif" width="75%" />
 </p>
 
 ## PyDy Quadcopter
@@ -82,6 +82,14 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 * [PX4 "Attitude Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp) --- [Article](https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/154099/eth-7387-01.pdf)
 * [PX4 "Rate Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/mc_att_control_main.cpp)
 * [Minimum Snap Trajectory](https://github.com/hbd730/quadcopter-simulation) --- [Article](http://www-personal.acfr.usyd.edu.au/spns/cdm/papers/Mellinger.pdf)
+
+## Gif Gallery
+
+<p align="center">
+  <img src="/animation_01_minSnap.gif" width="55%" />
+  <img src="/animation_01_minJerk.gif" width="55%" />
+</p>
+
 
 ## To-Do
 * Develop method to find gains for best response
