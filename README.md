@@ -7,7 +7,7 @@ The second purpose is to provide a simple working simulation of the quadcopter's
 (The third was to help me learn Python and Git by starting a project and continuously adding to it.)
 
 <p align="center">
-  <img src="/animation_01_minSnap.gif" width="70%" />
+  <img src="/animation_06_minSnap.gif" width="70%" />
 </p>
 
 ## PyDy Quadcopter
