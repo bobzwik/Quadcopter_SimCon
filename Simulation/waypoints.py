@@ -26,7 +26,7 @@ def makeWaypoints():
                    [3, -2, 1],
                    [0, 0, 0]])
         
-    yaw = np.array([20, -90, 120, 0])
+    yaw = np.array([20, -90, 120, 45, 0])
 
     t = np.hstack((t_ini, t)).astype(float)
     wp = np.vstack((wp_ini, wp)).astype(float)
