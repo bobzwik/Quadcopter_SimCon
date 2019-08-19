@@ -6,6 +6,10 @@ The second purpose is to provide a simple working simulation of the quadcopter's
 
 (The third was to help me learn Python and Git by starting a project and continuously adding to it.)
 
+<p float="left">
+  <img src="/animation_01_minSnap.gif" width="45" />
+</p>
+
 ## PyDy Quadcopter
 
 [PyDy](https://pypi.org/project/pydy/), short for Python Dynamics, is a tool kit made to enable the study of multibody dynamics. At it's core is the SymPy [mechanics package](https://docs.sympy.org/latest/modules/physics/mechanics/index.html#vector), which provides an API for building models and generating the symbolic equations of motion for complex multibody systems. 

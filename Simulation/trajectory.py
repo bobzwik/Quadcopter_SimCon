@@ -116,7 +116,9 @@ class Trajectory:
             minimum velocity, acceleration, jerk or snap trajectory which goes through each waypoint. 
             The output is the desired state associated with the next waypoint for the time t.
             """
-
+            if not (len(self.t_wps) == self.wps.shape[0]):
+                raise Exception("Time array and waypoint array not the same size.")
+                
             nb_coeff = self.deriv_order*2
 
             # Hover at t=0
