@@ -6,6 +6,10 @@ The second purpose is to provide a simple working simulation of the quadcopter's
 
 (The third was to help me learn Python and Git by starting a project and continuously adding to it.)
 
+<p align="center">
+  <img src="/Gifs/animation_06_minSnap.gif" width="70%" />
+</p>
+
 ## PyDy Quadcopter
 
 [PyDy](https://pypi.org/project/pydy/), short for Python Dynamics, is a tool kit made to enable the study of multibody dynamics. At it's core is the SymPy [mechanics package](https://docs.sympy.org/latest/modules/physics/mechanics/index.html#vector), which provides an API for building models and generating the symbolic equations of motion for complex multibody systems. 
@@ -78,6 +82,17 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 * [PX4 "Attitude Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/AttitudeControl/AttitudeControl.cpp) --- [Article](https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/154099/eth-7387-01.pdf)
 * [PX4 "Rate Control" Source Code](https://github.com/PX4/Firmware/blob/master/src/modules/mc_att_control/mc_att_control_main.cpp)
 * [Minimum Snap Trajectory](https://github.com/hbd730/quadcopter-simulation) --- [Article](http://www-personal.acfr.usyd.edu.au/spns/cdm/papers/Mellinger.pdf)
+
+## Gif Gallery
+
+<p align="center">
+  <img src="/Gifs/animation_01_waypoints.gif" width="49%" />
+  <img src="/Gifs/animation_02_interp.gif" width="49%" />
+  <img src="/Gifs/animation_03_minVel.gif" width="49%" />
+  <img src="/Gifs/animation_04_minAccel.gif" width="49%" />
+  <img src="/Gifs/animation_05_minJerk.gif" width="49%" />
+  <img src="/Gifs/animation_06_minSnap.gif" width="49%" />
+</p>
 
 ## To-Do
 * Develop method to find gains for best response
