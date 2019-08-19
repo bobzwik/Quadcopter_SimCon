@@ -17,7 +17,7 @@ import config
 
 numFrames = 8
 
-def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, params, ifsave):
+def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, params, xyzType, yawType, ifsave):
 
     x = pos_all[:,0]
     y = pos_all[:,1]
@@ -59,11 +59,40 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
     ax.set_zlim3d([mid_z-maxRange, mid_z+maxRange])
     ax.set_zlabel('Altitude')
 
-    ax.plot(xDes, yDes, zDes, ':', lw=1.3, color='green')
-    ax.scatter(x_wp, y_wp, z_wp, color='green', alpha=1, marker = 'o', s = 25)
+    titleTime = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
 
-    title = ax.text2D(0.05, 0.95, "2D Text", transform=ax.transAxes)
-        
+    if (xyzType == 0):
+        trajType = 'Hover'
+    else:
+        ax.scatter(x_wp, y_wp, z_wp, color='green', alpha=1, marker = 'o', s = 25)
+        if (xyzType == 1):
+            trajType = 'Simple Waypoints'
+        else:
+            ax.plot(xDes, yDes, zDes, ':', lw=1.3, color='green')
+            if (xyzType == 2):
+                trajType = 'Simple Waypoint Interpolation'
+            elif (xyzType == 3):
+                trajType = 'Minimum Velocity Trajectory'
+            elif (xyzType == 4):
+                trajType = 'Minimum Acceleration Trajectory'
+            elif (xyzType == 5):
+                trajType = 'Minimum Jerk Trajectory'
+            elif (xyzType == 6):
+                trajType = 'Minimum Snap Trajectory'
+
+    if (yawType == 0):
+        yawTrajType = 'None'
+    elif (yawType == 1):
+        yawTrajType = 'Waypoints'
+    elif (yawType == 2):
+        yawTrajType = 'Interpolation'
+    elif (yawType == 3):
+        yawTrajType = 'Follow'
+
+
+
+    titleType = ax.text2D(0.95, 0.95, trajType, transform=ax.transAxes, horizontalalignment='right')
+    titleType = ax.text2D(0.95, 0.91, 'Yaw: '+ yawTrajType, transform=ax.transAxes, horizontalalignment='right')   
     
     def updateLines(i):
     
@@ -101,7 +130,7 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
         line2.set_3d_properties(motorPoints[2,3:6])
         line3.set_data(x_from0, y_from0)
         line3.set_3d_properties(z_from0)
-        title.set_text(u"Time = {:.2f} s".format(time[0]))
+        titleTime.set_text(u"Time = {:.2f} s".format(time[0]))
         
         return line1, line2
 
