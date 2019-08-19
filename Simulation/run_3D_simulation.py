@@ -44,7 +44,7 @@ def main():
     Ti = 0
     Ts = 0.005
     Tf = 18
-    ifsave = 0
+    ifsave = 1
 
     # Choose trajectory settings
     # --------------------------- 
