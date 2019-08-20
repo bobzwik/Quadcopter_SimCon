@@ -106,7 +106,7 @@ class Control:
         self.yawFF     = np.zeros(3)
 
     
-    def controller(self, traj, quad, Ts):
+    def controller(self, traj, quad, sDes, Ts):
 
         # Desired State (Create a copy, hence the [:])
         # ---------------------------

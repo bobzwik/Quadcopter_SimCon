@@ -61,6 +61,9 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
 
     titleTime = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
 
+    trajType = ''
+    yawTrajType = ''
+
     if (xyzType == 0):
         trajType = 'Hover'
     else:
