@@ -82,6 +82,16 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
                 trajType = 'Minimum Jerk Trajectory'
             elif (xyzType == 6):
                 trajType = 'Minimum Snap Trajectory'
+            elif (xyzType == 7):
+                trajType = 'Minimum Acceleration Trajectory - Stop'
+            elif (xyzType == 8):
+                trajType = 'Minimum Jerk Trajectory - Stop'
+            elif (xyzType == 9):
+                trajType = 'Minimum Snap Trajectory - Stop'
+            elif (xyzType == 10):
+                trajType = 'Minimum Jerk Trajectory - Fast Stop'
+            elif (xyzType == 1):
+                trajType = 'Minimum Snap Trajectory - Fast Stop'
 
     if (yawType == 0):
         yawTrajType = 'None'
