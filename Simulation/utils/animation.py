@@ -101,6 +101,8 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
         yawTrajType = 'Interpolation'
     elif (yawType == 3):
         yawTrajType = 'Follow'
+    elif (yawType == 4):
+        yawTrajType = 'Zero'
 
 
 
