@@ -56,7 +56,7 @@ def main():
     # Select Position Trajectory Type (0: hover,               1: pos_waypoint_timed,    2: pos_waypoint_interp,    
     #                                  3: minimum velocity     4: minimum accel,         5: minimum jerk,          6: minimum snap
     #                                  7: minimum accel_stop   8: minimum jerk_stop      9: minimum snap_stop
-    trajSelect[0] = 7          
+    trajSelect[0] = 10          
     # Select Yaw Trajectory Type      (0: none                 1: yaw_waypoint_timed,    2: yaw_waypoint_interp)
     trajSelect[1] = 0           
     # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)
