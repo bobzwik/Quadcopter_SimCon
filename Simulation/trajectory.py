@@ -59,6 +59,14 @@ class Trajectory:
                 self.coeff_x = minSomethingTraj_stop(self.wps[:,0], self.T_segment, self.deriv_order)
                 self.coeff_y = minSomethingTraj_stop(self.wps[:,1], self.T_segment, self.deriv_order)
                 self.coeff_z = minSomethingTraj_stop(self.wps[:,2], self.T_segment, self.deriv_order)
+            
+            elif (self.xyzType >= 10 and self.xyzType <= 11):
+                self.deriv_order = int(self.xyzType-7)       # Looking to minimize which derivative order (eg: Minimum jerk -> third order)
+
+                # Calculate coefficients
+                self.coeff_x = minSomethingTraj_faststop(self.wps[:,0], self.T_segment, self.deriv_order)
+                self.coeff_y = minSomethingTraj_faststop(self.wps[:,1], self.T_segment, self.deriv_order)
+                self.coeff_z = minSomethingTraj_faststop(self.wps[:,2], self.T_segment, self.deriv_order)
         
         # Get initial heading
         self.current_heading = quad.psi
@@ -238,7 +246,7 @@ class Trajectory:
                 elif (self.xyzType == 2):
                     pos_waypoint_interp()
                 # Calculate a minimum velocity, acceleration, jerk or snap trajectory
-                elif (self.xyzType >= 3 and self.xyzType <= 9):
+                elif (self.xyzType >= 3 and self.xyzType <= 11):
                     pos_waypoint_min()
                 
                 # List of possible yaw trajectories
@@ -358,23 +366,23 @@ def minSomethingTraj(waypoints, times, order):
     # Constraint 4
     for k in range(1, order):
         A[2*n+(order-1)+k-1][-nb_coeff:] = get_poly_cc(nb_coeff, k, times[i])
-
+    
     # Constraint 5
     for i in range(n-1):
         for k in range(1, nb_coeff-1):
             A[2*n+2*(order-1) + i*2*(order-1)+k-1][i*nb_coeff : (i*nb_coeff+nb_coeff*2)] = np.concatenate((get_poly_cc(nb_coeff, k, times[i]), -get_poly_cc(nb_coeff, k, 0)))
-
+    
     # solve for the coefficients
     Coeff = np.linalg.solve(A, B)
     return Coeff
 
 
-# Minimum velocity/acceleration/jerk/snap Trajectory, but with null velocity, accel and jerk at each waypoint
+# Minimum acceleration/jerk/snap Trajectory, but with null velocity, accel and jerk at each waypoint
 def minSomethingTraj_stop(waypoints, times, order):
     """ This function takes a list of desired waypoint i.e. [x0, x1, x2...xN] and
     time, returns a [M*N,1] coeffitients matrix for the N+1 waypoints (N segments), 
     where M is the number of coefficients per segment and is equal to (order)*2. If one 
-    desires to create a minimum velocity, order = 1. Minimum snap would be order = 4. 
+    desires to create a minimum acceleration, order = 2. Minimum snap would be order = 4. 
 
     1.The Problem
     Generate a full trajectory across N+1 waypoint is made of N polynomial line segment.
@@ -422,6 +430,83 @@ def minSomethingTraj_stop(waypoints, times, order):
         for k in range(1, order):
             A[2*n+(order-1)*n + k-1 + i*(order-1)][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, k, times[i])
     
+    # solve for the coefficients
+    Coeff = np.linalg.solve(A, B)
+    return Coeff
+
+# Minimum acceleration/jerk/snap Trajectory, but with null velocity only at each waypoint
+def minSomethingTraj_faststop(waypoints, times, order):
+    """ This function takes a list of desired waypoint i.e. [x0, x1, x2...xN] and
+    time, returns a [M*N,1] coeffitients matrix for the N+1 waypoints (N segments), 
+    where M is the number of coefficients per segment and is equal to (order)*2. If one 
+    desires to create a minimum acceleration, order = 2. Minimum snap would be order = 4. 
+
+    1.The Problem
+    Generate a full trajectory across N+1 waypoint is made of N polynomial line segment.
+    Each segment is defined as a (2*order-1)-th order polynomial defined as follow:
+    Minimum velocity:     Pi = ai_0 + ai1*t
+    Minimum acceleration: Pi = ai_0 + ai1*t + ai2*t^2 + ai3*t^3
+    Minimum jerk:         Pi = ai_0 + ai1*t + ai2*t^2 + ai3*t^3 + ai4*t^4 + ai5*t^5
+    Minimum snap:         Pi = ai_0 + ai1*t + ai2*t^2 + ai3*t^3 + ai4*t^4 + ai5*t^5 + ai6*t^6 + ai7*t^7
+
+    Each polynomial has M unknown coefficients, thus we will have M*N unknown to
+    solve in total, so we need to come up with M*N constraints.
+
+    Unlike the function minSomethingTraj, where continuous equations for velocity, jerk and snap are generated, 
+    and unlike the function minSomethingTraj_stop, where velocities, accelerations and jerks are equal to 0 at each waypoint,
+    this function generates trajectories with only null velocities. Accelerations and above derivatives are continuous. 
+    This will make the drone stop for an instant at each waypoint, and then leave in the same direction it came from.
+    """
+
+    n = len(waypoints) - 1
+    nb_coeff = order*2
+
+    # initialize A, and B matrix
+    A = np.zeros([nb_coeff*n, nb_coeff*n])
+    B = np.zeros(nb_coeff*n)
+
+    # populate B matrix.
+    for i in range(n):
+        B[i] = waypoints[i]
+        B[i + n] = waypoints[i+1]
+
+    # Constraint 1
+    for i in range(n):
+        # print(i)
+        A[i][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 0, 0)
+
+    # Constraint 2
+    for i in range(n):
+        # print(i+n)
+        A[i+n][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 0, times[i])
+
+    # Constraint 3
+    for i in range(n):
+        # print(i+2*n)
+        A[i+2*n][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 1, 0)
+
+    # Constraint 4
+    for i in range(n):
+        # print(i+3*n)
+        A[i+3*n][nb_coeff*i:nb_coeff*(i+1)] = get_poly_cc(nb_coeff, 1, times[i])
+
+    # Constraint 5
+    for k in range(2, order):
+        # print(4*n + k-2)
+        A[4*n+k-2][:nb_coeff] = get_poly_cc(nb_coeff, k, 0)
+
+    # Constraint 6
+    for k in range(2, order):
+        # print(4*n+(order-2) + k-2)
+        A[4*n+k-2+(order-2)][-nb_coeff:] = get_poly_cc(nb_coeff, k, times[i])
+
+    # Constraint 7
+    for i in range(n-1):
+        for k in range(2, nb_coeff-2):
+            # print(4*n+2*(order-2)+k-2+i*(nb_coeff-4))
+            A[4*n+2*(order-2)+k-2+i*(nb_coeff-4)][i*nb_coeff : (i*nb_coeff+nb_coeff*2)] = np.concatenate((get_poly_cc(nb_coeff, k, times[i]), -get_poly_cc(nb_coeff, k, 0)))
+            
+
     # solve for the coefficients
     Coeff = np.linalg.solve(A, B)
     return Coeff
