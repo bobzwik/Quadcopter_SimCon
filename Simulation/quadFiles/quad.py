@@ -93,6 +93,8 @@ class Quadcopter:
         tau  = self.params["tau"]
         kp   = self.params["kp"]
         damp = self.params["damp"]
+        minWmotor = self.params["minWmotor"]
+        maxWmotor = self.params["maxWmotor"]
 
         IRzz = self.params["IRzz"]
         if (config.usePrecession):
@@ -134,6 +136,7 @@ class Quadcopter:
         wddotM4 = (-2.0*damp*tau*wdotM4 - wM4 + kp*uMotor[3])/(tau**2)
     
         wMotor = np.array([wM1, wM2, wM3, wM4])
+        wMotor = np.clip(wMotor, minWmotor, maxWmotor)
         thrust = kTh*wMotor*wMotor
         torque = kTo*wMotor*wMotor
     
