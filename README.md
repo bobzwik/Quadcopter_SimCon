@@ -4,8 +4,6 @@ This project serves 2 purposes. The first is to provide a PyDy template for crea
 
 The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control, and eventually trajectory generation.
 
-(The third was to help me learn Python and Git by starting a project and continuously adding to it.)
-
 <p align="center">
   <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/gh-pages/Gifs/animation_06_minSnap_top.gif" width="65%" />
 </p>
