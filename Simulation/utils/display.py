@@ -81,7 +81,9 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     uM3 = commands[:,2]*rads2rpm
     uM4 = commands[:,3]*rads2rpm
 
-    
+    x_err = x_sp - x
+    y_err = y_sp - y
+    z_err = z_sp - z
 
     psiDes   = np.zeros(q0Des.shape[0])
     thetaDes = np.zeros(q0Des.shape[0])
@@ -102,6 +104,8 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.xlabel('Time (s)')
     plt.ylabel('Position (m)')
     plt.draw()
+
+
 
     plt.figure()
     plt.plot(time, xdot, time, ydot, time, zdot)
@@ -187,4 +191,12 @@ def makeFigures(params, time, pos_all, vel_all, quat_all, omega_all, euler_all, 
     plt.legend(['Ax','Ay','Az'], loc='upper right')
     plt.xlabel('Time (s)')
     plt.ylabel('Acceleration (m/s^2)')
+    plt.draw()
+
+    plt.figure()
+    plt.plot(time, x_err, time, y_err, time, z_err)
+    plt.grid(True)
+    plt.legend(['Pos x error','Pos y error','Pos z error'])
+    plt.xlabel('Time (s)')
+    plt.ylabel('Position Error (m)')
     plt.draw()
