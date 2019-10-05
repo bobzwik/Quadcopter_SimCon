@@ -5,7 +5,7 @@ This project serves 2 purposes. The first is to provide a PyDy template for crea
 The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control and supports minimum snap (but also minimum velocity, acceleration and jerk) trajectory generation.
 
 <p align="center">
-  <img src="https://media.giphy.com/media/fVtclRN1uJhSRagyey/giphy.gif" width="65%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_6_3_Large.gif" width="65%" />
 </p>
 
 ## PyDy Quadcopter
@@ -84,15 +84,16 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 ## Gif Gallery
 
 <p align="center">
-  <img src="https://media.giphy.com/media/j382qGgHWJ4EpZINxk/giphy.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_1_1.gif" width="49%" />
 </p>
 <p align="center">
-  <img src="https://media.giphy.com/media/W1TDxLAnsNRrfWjKjp/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/Qw1AeqJJOt1PxRve8B/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/mBXxXUFcdGTUYdfkCl/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/jRw4yeaglqVfyCauar/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/Y3A4ZLHDm23jsMihdu/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/lrDBzQAovLDk8O02k4/giphy.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_2_2.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_3_3.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_4_3.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_5_3.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_6_3.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_7_4.gif" width="49%" />
+  <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_10_4.gif" width="49%" />
 </p>
 
 ## To-Do
