@@ -95,6 +95,9 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
   <img src="https://media.giphy.com/media/lrDBzQAovLDk8O02k4/giphy.gif" width="49%" />
 </p>
 
+
+<iframe src="https://giphy.com/embed/W1TDxLAnsNRrfWjKjp" width="480" height="360" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/W1TDxLAnsNRrfWjKjp">via GIPHY</a></p>
+
 ## To-Do
 * Develop method to find gains for best response
 * Add the possibility for more controllers (Attitude/Stabilize and Rate/Acro)
