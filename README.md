@@ -95,9 +95,9 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
   <img src="https://media.giphy.com/media/lrDBzQAovLDk8O02k4/giphy.gif" width="49%" />
 </p>
 
-<p align="center">
-<iframe src="https://giphy.com/embed/W1TDxLAnsNRrfWjKjp" width="480" height="360" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
-</p>
+<figure class="video_container">
+  <iframe src="https://giphy.com/embed/W1TDxLAnsNRrfWjKjp" width="480" height="360" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+</figure>
 
 ## To-Do
 * Develop method to find gains for best response
