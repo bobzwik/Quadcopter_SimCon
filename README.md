@@ -5,7 +5,7 @@ This project serves 2 purposes. The first is to provide a PyDy template for crea
 The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control and supports minimum snap (but also minimum velocity, acceleration and jerk) trajectory generation.
 
 <p align="center">
-  <iframe src='https://gfycat.com/ifr/LeftWatchfulDegu' frameborder='0' scrolling='no' allowfullscreen width='640' height='524'></iframe>
+  <img src="https://gfycat.com/leftwatchfuldegu.gif" width="65%" />
 </p>
 
 ## PyDy Quadcopter
