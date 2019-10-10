@@ -6,7 +6,7 @@ The second purpose is to provide a simple working simulation of the quadcopter's
 
 <p align="center">
   <!-- <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_6_3_Large.gif" width="65%" /> -->
-  <img src="https://media.giphy.com/media/UVeEECOLw0Umi6ic0P/giphy.gif" />
+  <img src="https://giphy.com/gifs/lRvDorB2UjCTmUfZy0/html5" />
 </p>
 
 ## PyDy Quadcopter
