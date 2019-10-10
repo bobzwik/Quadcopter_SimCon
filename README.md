@@ -5,8 +5,7 @@ This project serves 2 purposes. The first is to provide a PyDy template for crea
 The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control and supports minimum snap (but also minimum velocity, acceleration and jerk) trajectory generation.
 
 <p align="center">
-  <!-- <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_6_3_Large.gif" width="65%" /> -->
-  <img src="https://media.giphy.com/media/UVeEECOLw0Umi6ic0P/giphy.gif" />
+  <img src="https://media.giphy.com/media/jRw4yeaglqVfyCauar/giphy.gif" width="65%" />
 </p>
 
 ## PyDy Quadcopter
@@ -90,7 +89,11 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
   <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_7_4.gif" width="49%" />
   <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_10_4.gif" width="49%" /> -->
 
-  <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%"
+  <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%" />
+  <img src="https://media.giphy.com/media/JsVVYy9LoYzeOrYnbW/giphy.gif" width="49%" />
+  <img src="https://media.giphy.com/media/f8tiLmw1dHiLxlDNFz/giphy.gif" width="49%" />
+  <img src="https://media.giphy.com/media/J06bOoqaHQEj5ihpzw/giphy.gif" width="49%" />
+ 
 </p>
 
 ## To-Do
