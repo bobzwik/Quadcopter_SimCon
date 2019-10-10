@@ -31,6 +31,7 @@
 .vscode/
 .idea/
 __pycache__/
+Gifs/
 Gifs/Raw/
 
 # OS generated files #
