@@ -89,7 +89,7 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
   <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_7_4.gif" width="49%" />
   <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_10_4.gif" width="49%" /> -->
 
-  <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%"
+  <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%" />
 </p>
 
 ## To-Do
