@@ -4,10 +4,9 @@ This project serves 2 purposes. The first is to provide a PyDy template for crea
 
 The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control and supports minimum snap (but also minimum velocity, acceleration and jerk) trajectory generation.
 
-
-  <!-- <img src="https://github.com/bobzwik/Quadcopter_SimCon/blob/dev/Gifs/animation_6_3_Large.gif" width="65%" /> -->
-  <a href="https://github.com/bobzwik/Quadcopter_SimCon/tree/dev" ><img src="https://giphy.com/gifs/lRvDorB2UjCTmUfZy0/html5" /></a>
-
+<p align="center">
+  <img src="https://media.giphy.com/media/UVeEECOLw0Umi6ic0P/giphy.gif" width="49%" />
+</p>
 ## PyDy Quadcopter
 
 [PyDy](https://pypi.org/project/pydy/), short for Python Dynamics, is a tool kit made to enable the study of multibody dynamics. At it's core is the SymPy [mechanics package](https://docs.sympy.org/latest/modules/physics/mechanics/index.html#vector), which provides an API for building models and generating the symbolic equations of motion for complex multibody systems. 
