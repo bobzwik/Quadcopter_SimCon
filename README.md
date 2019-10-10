@@ -91,8 +91,8 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 
   <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%" />
   <img src="https://media.giphy.com/media/JsVVYy9LoYzeOrYnbW/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%" />
-  <img src="https://media.giphy.com/media/lRvDorB2UjCTmUfZy0/giphy.gif" width="49%" />
+  <img src="https://media.giphy.com/media/f8tiLmw1dHiLxlDNFz/giphy.gif" width="49%" />
+  <img src="https://media.giphy.com/media/J06bOoqaHQEj5ihpzw/giphy.gif" width="49%" />
  
 </p>
 
