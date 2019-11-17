@@ -97,6 +97,7 @@ The mixer (not based from PX4) allows to find the exact RPM of each motor given 
 </p>
 
 ## To-Do
+* Add Perlin noise wind model
 * Develop method to find gains for best response
 * Add the possibility for more controllers (Attitude/Stabilize and Rate/Acro)
 * Add scheduler to simulate and display animation in realtime simultaneously
