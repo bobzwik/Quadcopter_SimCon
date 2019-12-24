@@ -35,6 +35,8 @@ class Trajectory:
         self.y_wps = y_wps
         self.v_wp  = v_wp
 
+        self.end_reached = 0
+
         if (self.ctrlType == "xyz_pos"):
             self.T_segment = np.diff(self.t_wps)
 
@@ -167,7 +169,20 @@ class Trajectory:
 
                 t2 = get_poly_cc(nb_coeff, 2, scale)
                 self.desAcc = np.array([self.coeff_x[start:end].dot(t2), self.coeff_y[start:end].dot(t2), self.coeff_z[start:end].dot(t2)])
-  
+        
+        def pos_waypoint_arrived():
+            if (t == 0):
+                self.t_idx = 0
+                self.end_reached = 0
+            elif not(self.end_reached):
+                distance_to_next_wp = np.sqrt((self.wps[self.t_idx,0]-quad.pos[0])**2 + (self.wps[self.t_idx,1]-quad.pos[1])**2 + (self.wps[self.t_idx,2]-quad.pos[2])**2)
+                if (distance_to_next_wp < 0.2):
+                    self.t_idx += 1
+                    if (self.t_idx >= len(self.wps[:,0])):    # if t_idx has reached the end of planned waypoints
+                        self.end_reached = 1
+                        self.t_idx = -1
+                    
+            self.desPos = self.wps[self.t_idx,:]
 
         def yaw_waypoint_timed():
             
@@ -251,6 +266,8 @@ class Trajectory:
                 # Calculate a minimum velocity, acceleration, jerk or snap trajectory
                 elif (self.xyzType >= 3 and self.xyzType <= 11):
                     pos_waypoint_min()
+                elif (self.xyzType == 12):
+                    pos_waypoint_arrived()
                 
                 # List of possible yaw trajectories
                 # ---------------------------
@@ -262,7 +279,7 @@ class Trajectory:
                 # Interpolate yaw between every waypoint, to arrive at desired yaw every t_wps[i]
                 elif (self.yawType == 2):
                     yaw_waypoint_interp()
-                # Have the drone's heading match its velocity direction
+                # Have the drone's heading match its desired velocity direction
                 elif (self.yawType == 3):
                     yaw_follow()
 
