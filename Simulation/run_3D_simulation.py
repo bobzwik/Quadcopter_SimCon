@@ -82,42 +82,59 @@ def main():
     
     # Initialize Result Matrixes
     # ---------------------------
-    t_all         = Ti
-    s_all         = quad.state.T
-    pos_all       = quad.pos.T
-    vel_all       = quad.vel.T
-    quat_all      = quad.quat.T
-    omega_all     = quad.omega.T
-    euler_all     = quad.euler.T
-    sDes_traj_all = traj.sDes.T
-    sDes_calc_all = ctrl.sDesCalc.T
-    w_cmd_all     = ctrl.w_cmd.T
-    wMotor_all    = quad.wMotor.T
-    thr_all       = quad.thr.T
-    tor_all       = quad.tor.T
+    numTimeStep = int(Tf/Ts+1)
+
+    t_all          = np.zeros(numTimeStep)
+    s_all          = np.zeros([numTimeStep, len(quad.state)])
+    pos_all        = np.zeros([numTimeStep, len(quad.pos)])
+    vel_all        = np.zeros([numTimeStep, len(quad.vel)])
+    quat_all       = np.zeros([numTimeStep, len(quad.quat)])
+    omega_all      = np.zeros([numTimeStep, len(quad.omega)])
+    euler_all      = np.zeros([numTimeStep, len(quad.euler)])
+    sDes_traj_all  = np.zeros([numTimeStep, len(traj.sDes)])
+    sDes_calc_all  = np.zeros([numTimeStep, len(ctrl.sDesCalc)])
+    w_cmd_all      = np.zeros([numTimeStep, len(ctrl.w_cmd)])
+    wMotor_all     = np.zeros([numTimeStep, len(quad.wMotor)])
+    thr_all        = np.zeros([numTimeStep, len(quad.thr)])
+    tor_all        = np.zeros([numTimeStep, len(quad.tor)])
+
+    t_all[0]            = Ti
+    s_all[0,:]          = quad.state
+    pos_all[0,:]        = quad.pos
+    vel_all[0,:]        = quad.vel
+    quat_all[0,:]       = quad.quat
+    omega_all[0,:]      = quad.omega
+    euler_all[0,:]      = quad.euler
+    sDes_traj_all[0,:]  = traj.sDes
+    sDes_calc_all[0,:]  = ctrl.sDesCalc
+    w_cmd_all[0,:]      = ctrl.w_cmd
+    wMotor_all[0,:]     = quad.wMotor
+    thr_all[0,:]        = quad.thr
+    tor_all[0,:]        = quad.tor
 
     # Run Simulation
     # ---------------------------
     t = Ti
-    i = 0
+    i = 1
     while round(t,3) < Tf:
         
         t = quad_sim(t, Ts, quad, ctrl, wind, traj)
         
         # print("{:.3f}".format(t))
-        t_all           = np.vstack((t_all, t))
-        s_all           = np.vstack((s_all, quad.state.T))
-        pos_all         = np.vstack((pos_all, quad.pos.T))
-        vel_all         = np.vstack((vel_all, quad.vel.T))
-        quat_all        = np.vstack((quat_all, quad.quat.T))
-        omega_all       = np.vstack((omega_all, quad.omega.T))
-        euler_all       = np.vstack((euler_all, quad.euler.T))
-        sDes_traj_all   = np.vstack((sDes_traj_all, traj.sDes.T))
-        sDes_calc_all   = np.vstack((sDes_calc_all, ctrl.sDesCalc.T))
-        w_cmd_all       = np.vstack((w_cmd_all, ctrl.w_cmd.T))
-        wMotor_all      = np.vstack((wMotor_all, quad.wMotor.T))
-        thr_all         = np.vstack((thr_all, quad.thr.T))
-        tor_all         = np.vstack((tor_all, quad.tor.T))
+        t_all[i]             = t
+        s_all[i,:]           = quad.state
+        pos_all[i,:]         = quad.pos
+        vel_all[i,:]         = quad.vel
+        quat_all[i,:]        = quad.quat
+        omega_all[i,:]       = quad.omega
+        euler_all[i,:]       = quad.euler
+        sDes_traj_all[i,:]   = traj.sDes
+        sDes_calc_all[i,:]   = ctrl.sDesCalc
+        w_cmd_all[i,:]       = ctrl.w_cmd
+        wMotor_all[i,:]      = quad.wMotor
+        thr_all[i,:]         = quad.thr
+        tor_all[i,:]         = quad.tor
+        
         i += 1
     
     end_time = time.time()
