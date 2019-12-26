@@ -110,7 +110,7 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
     titleType2 = ax.text2D(0.95, 0.91, 'Yaw: '+ yawTrajType, transform=ax.transAxes, horizontalalignment='right')   
     
     def updateLines(i):
-    
+
         time = t_all[i*numFrames]
         pos = pos_all[i*numFrames]
         x = pos[0]
@@ -145,7 +145,7 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
         line2.set_3d_properties(motorPoints[2,3:6])
         line3.set_data(x_from0, y_from0)
         line3.set_3d_properties(z_from0)
-        titleTime.set_text(u"Time = {:.2f} s".format(time[0]))
+        titleTime.set_text(u"Time = {:.2f} s".format(time))
         
         return line1, line2
 

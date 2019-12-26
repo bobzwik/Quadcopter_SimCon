@@ -175,7 +175,7 @@ class Trajectory:
                 self.t_idx = 0
                 self.end_reached = 0
             elif not(self.end_reached):
-                distance_to_next_wp = np.sqrt((self.wps[self.t_idx,0]-quad.pos[0])**2 + (self.wps[self.t_idx,1]-quad.pos[1])**2 + (self.wps[self.t_idx,2]-quad.pos[2])**2)
+                distance_to_next_wp = ((self.wps[self.t_idx,0]-quad.pos[0])**2 + (self.wps[self.t_idx,1]-quad.pos[1])**2 + (self.wps[self.t_idx,2]-quad.pos[2])**2)**(0.5)
                 if (distance_to_next_wp < 0.2):
                     self.t_idx += 1
                     if (self.t_idx >= len(self.wps[:,0])):    # if t_idx has reached the end of planned waypoints
