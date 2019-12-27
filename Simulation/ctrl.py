@@ -76,6 +76,9 @@ vMax = 5.0
 wMax = 5.0
 
 velMax = np.array([uMax, vMax, wMax])
+velMaxAll = 5.0
+
+saturateVel_separetely = False
 
 # Max tilt
 tiltMax = 50.0*deg2rad
@@ -121,6 +124,7 @@ class Control:
         # Select Controller
         # ---------------------------
         if (traj.ctrlType == "xyz_vel"):
+            self.saturateVel()
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
@@ -128,6 +132,7 @@ class Control:
             self.rate_control(quad, Ts)
         elif (traj.ctrlType == "xy_vel_z_pos"):
             self.z_pos_control(quad, Ts)
+            self.saturateVel()
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
@@ -136,6 +141,7 @@ class Control:
         elif (traj.ctrlType == "xyz_pos"):
             self.z_pos_control(quad, Ts)
             self.xy_pos_control(quad, Ts)
+            self.saturateVel()
             self.z_vel_control(quad, Ts)
             self.xy_vel_control(quad, Ts)
             self.thrustToAttitude(quad, Ts)
@@ -162,9 +168,6 @@ class Control:
         pos_z_error = self.pos_sp[2] - quad.pos[2]
         self.vel_sp[2] += pos_P_gain[2]*pos_z_error
         
-        # Saturate velocity setpoint
-        self.vel_sp[2] = np.clip(self.vel_sp[2], -velMax[2], velMax[2])
-
     
     def xy_pos_control(self, quad, Ts):
 
@@ -173,9 +176,19 @@ class Control:
         pos_xy_error = (self.pos_sp[0:2] - quad.pos[0:2])
         self.vel_sp[0:2] += pos_P_gain[0:2]*pos_xy_error
         
-        # Saturate velocity setpoint
-        self.vel_sp[0:2] = np.clip(self.vel_sp[0:2], -velMax[0:2], velMax[0:2])
         
+    def saturateVel(self):
+
+        # Saturate Velocity Setpoint
+        # --------------------------- 
+        # Either saturate each velocity axis separately, or total velocity (prefered)
+        if (saturateVel_separetely):
+            self.vel_sp = np.clip(self.vel_sp, -velMax, velMax)
+        else:
+            totalVel_sp = norm(self.vel_sp)
+            if (totalVel_sp > velMaxAll):
+                self.vel_sp = self.vel_sp/totalVel_sp*velMaxAll
+
 
     def z_vel_control(self, quad, Ts):
         
