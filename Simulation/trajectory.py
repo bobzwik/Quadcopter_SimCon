@@ -171,12 +171,14 @@ class Trajectory:
                 self.desAcc = np.array([self.coeff_x[start:end].dot(t2), self.coeff_y[start:end].dot(t2), self.coeff_z[start:end].dot(t2)])
         
         def pos_waypoint_arrived():
+
+            dist_consider_arrived = 0.2 # Distance to waypoint that is considered as "arrived"
             if (t == 0):
                 self.t_idx = 0
                 self.end_reached = 0
             elif not(self.end_reached):
                 distance_to_next_wp = ((self.wps[self.t_idx,0]-quad.pos[0])**2 + (self.wps[self.t_idx,1]-quad.pos[1])**2 + (self.wps[self.t_idx,2]-quad.pos[2])**2)**(0.5)
-                if (distance_to_next_wp < 0.2):
+                if (distance_to_next_wp < dist_consider_arrived):
                     self.t_idx += 1
                     if (self.t_idx >= len(self.wps[:,0])):    # if t_idx has reached the end of planned waypoints
                         self.end_reached = 1
@@ -266,6 +268,7 @@ class Trajectory:
                 # Calculate a minimum velocity, acceleration, jerk or snap trajectory
                 elif (self.xyzType >= 3 and self.xyzType <= 11):
                     pos_waypoint_min()
+                # Go to next waypoint when arrived at waypoint
                 elif (self.xyzType == 12):
                     pos_waypoint_arrived()
                 
