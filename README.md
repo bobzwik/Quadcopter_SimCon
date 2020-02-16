@@ -1,5 +1,7 @@
 # Quadcopter Simulation and Control (Quad_SimCon)
 
+[Artificial Potential Field Branch](https://github.com/bobzwik/Quadcopter_SimCon/tree/potentialField)
+
 This project serves 2 purposes. The first is to provide a PyDy template for creating quadcopter dynamics and outputing the relevant equations of motion.
 
 The second purpose is to provide a simple working simulation of the quadcopter's dynamics and a simple controller that can handle position control and supports minimum snap (but also minimum velocity, acceleration and jerk) trajectory generation.
