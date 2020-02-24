@@ -1,6 +1,6 @@
 # Quadcopter Simulation and Control (Quad_SimCon)
 
-[Artificial Potential Field Branch](https://github.com/bobzwik/Quadcopter_SimCon/tree/potentialField)
+[Quadcopter Exploration Project](https://github.com/bobzwik/Quad_Exploration)
 
 This project serves 2 purposes. The first is to provide a PyDy template for creating quadcopter dynamics and outputing the relevant equations of motion.
 
