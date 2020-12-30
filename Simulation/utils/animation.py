@@ -152,12 +152,12 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
 
     def ini_plot():
 
-        line1.set_data([], [])
-        line1.set_3d_properties([])
-        line2.set_data([], [])
-        line2.set_3d_properties([])
-        line3.set_data([], [])
-        line3.set_3d_properties([])
+        line1.set_data(np.empty([1]), np.empty([1]))
+        line1.set_3d_properties(np.empty([1]))
+        line2.set_data(np.empty([1]), np.empty([1]))
+        line2.set_3d_properties(np.empty([1]))
+        line3.set_data(np.empty([1]), np.empty([1]))
+        line3.set_3d_properties(np.empty([1]))
 
         return line1, line2, line3
 
