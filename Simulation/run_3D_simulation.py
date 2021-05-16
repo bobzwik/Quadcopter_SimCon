@@ -60,7 +60,7 @@ def main():
     #                                 12: pos_waypoint_arrived     13: pos_waypoint_arrived_wait
     trajSelect[0] = 13         
     # Select Yaw Trajectory Type      (0: none                      1: yaw_waypoint_timed,      2: yaw_waypoint_interp     3: follow          4: zero)
-    trajSelect[1] = 4           
+    trajSelect[1] = 3           
     # Select if waypoint time is used, or if average speed is used to calculate waypoint time   (0: waypoint time,   1: average speed)
     trajSelect[2] = 0           
     print("Control type: {}".format(ctrlType))
