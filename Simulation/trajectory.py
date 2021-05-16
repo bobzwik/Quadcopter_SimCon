@@ -186,6 +186,31 @@ class Trajectory:
                     
             self.desPos = self.wps[self.t_idx,:]
 
+        def pos_waypoint_arrived_wait():
+
+            dist_consider_arrived = 0.2     # Distance to waypoint that is considered as "arrived"
+            if (t == 0):
+                self.t_idx = 0              # Index of waypoint to go to
+                self.t_arrived = 0          # Time when arrived at first waypoint ([0, 0, 0])
+                self.arrived = True         # Bool to confirm arrived at first waypoint
+                self.end_reached = 0        # End is not reached yet
+            
+            elif not(self.end_reached):     # If end is not reached, calculate distance to next waypoint
+                distance_to_next_wp = ((self.wps[self.t_idx,0]-quad.pos[0])**2 + (self.wps[self.t_idx,1]-quad.pos[1])**2 + (self.wps[self.t_idx,2]-quad.pos[2])**2)**(0.5)
+                
+                if (distance_to_next_wp < dist_consider_arrived) and not self.arrived:      # If waypoint distance is below a threshold, specify the arrival time and confirm arrival
+                    self.t_arrived = t
+                    self.arrived = True
+                
+                elif self.arrived and (t-self.t_arrived > self.t_wps[self.t_idx]):   # If arrived for more than xx seconds, increment waypoint index (t_idx)
+                    self.t_idx += 1
+                    self.arrived = False
+                    if (self.t_idx >= len(self.wps[:,0])):    # if t_idx has reached the end of planned waypoints
+                        self.end_reached = 0                  # set to -1 to stop looping
+                        self.t_idx = 0                        # set to -1 to stop looping  
+                    
+            self.desPos = self.wps[self.t_idx,:]
+
         def yaw_waypoint_timed():
             
             if not (len(self.t_wps) == len(self.y_wps)):
@@ -271,6 +296,9 @@ class Trajectory:
                 # Go to next waypoint when arrived at waypoint
                 elif (self.xyzType == 12):
                     pos_waypoint_arrived()
+                # Go to next waypoint when arrived at waypoint after waiting x seconds
+                elif (self.xyzType == 13):
+                    pos_waypoint_arrived_wait()
                 
                 # List of possible yaw trajectories
                 # ---------------------------
