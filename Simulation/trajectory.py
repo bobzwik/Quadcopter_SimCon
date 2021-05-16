@@ -186,6 +186,37 @@ class Trajectory:
                     
             self.desPos = self.wps[self.t_idx,:]
 
+        def pos_waypoint_arrived_wait():
+
+            dist_consider_arrived = 0.2     # Distance to waypoint that is considered as "arrived"
+            if (t == 0):
+                self.t_idx = 0              # Index of waypoint to go to
+                self.t_arrived = 0          # Time when arrived at first waypoint ([0, 0, 0])
+                self.arrived = True         # Bool to confirm arrived at first waypoint
+                self.end_reached = 0        # End is not reached yet
+            
+            # If end is not reached, calculate distance to next waypoint
+            elif not(self.end_reached):     
+                distance_to_next_wp = ((self.wps[self.t_idx,0]-quad.pos[0])**2 + (self.wps[self.t_idx,1]-quad.pos[1])**2 + (self.wps[self.t_idx,2]-quad.pos[2])**2)**(0.5)
+                
+                # If waypoint distance is below a threshold, specify the arrival time and confirm arrival
+                if (distance_to_next_wp < dist_consider_arrived) and not self.arrived:
+                    self.t_arrived = t
+                    self.arrived = True
+
+                # If arrived for more than xx seconds, increment waypoint index (t_idx)
+                # Replace 'self.t_wps[self.t_idx]' by any number to have a fixed waiting time for all waypoints
+                elif self.arrived and (t-self.t_arrived > self.t_wps[self.t_idx]):   
+                    self.t_idx += 1
+                    self.arrived = False
+
+                    # If t_idx has reached the end of planned waypoints
+                    if (self.t_idx >= len(self.wps[:,0])):    
+                        self.end_reached = 0                  # set to  1 to stop looping
+                        self.t_idx = 0                        # set to -1 to stop looping  
+                    
+            self.desPos = self.wps[self.t_idx,:]
+
         def yaw_waypoint_timed():
             
             if not (len(self.t_wps) == len(self.y_wps)):
@@ -217,28 +248,44 @@ class Trajectory:
 
         def yaw_follow():
 
-            if (self.xyzType == 1 or self.xyzType == 2):
-                raise Exception("Function yaw_follow isn't compatible with selected xyzType trajectory")
+            if (self.xyzType == 1 or self.xyzType == 2 or self.xyzType == 12):
+                if (t == 0):
+                    self.desEul[2] = 0
+                else:
+                    # Calculate desired Yaw
+                    self.desEul[2] = np.arctan2(self.desPos[1]-quad.pos[1], self.desPos[0]-quad.pos[0])
+            
+            elif (self.xyzType == 13):
+                if (t == 0):
+                    self.desEul[2] = 0
+                    self.prevDesYaw = self.desEul[2]
+                else:
+                    if not (self.arrived):
+                        # Calculate desired Yaw
+                        self.desEul[2] = np.arctan2(self.desPos[1]-quad.pos[1], self.desPos[0]-quad.pos[0])
+                        self.prevDesYaw = self.desEul[2]
+                    else:
+                        self.desEul[2] = self.prevDesYaw
 
-            if (t == 0) or (t >= self.t_wps[-1]):
-                self.desEul[2] = self.y_wps[self.t_idx]
-                self.desYawRate = 0
             else:
-                # Calculate desired Yaw
-                self.desEul[2] = np.arctan2(self.desVel[1], self.desVel[0])
-                
-                # Dirty hack, detect when desEul[2] switches from -pi to pi (or vice-versa) and switch manualy current_heading 
-                if (np.sign(self.desEul[2]) - np.sign(self.current_heading) and abs(self.desEul[2]-self.current_heading) >= 2*pi-0.1):
-                    self.current_heading = self.current_heading + np.sign(self.desEul[2])*2*pi
-                
-                # Angle between current vector with the next heading vector
-                delta_psi = self.desEul[2] - self.current_heading
-                
-                # Set Yaw rate
-                self.desYawRate = delta_psi / Ts 
+                if (t == 0) or (t >= self.t_wps[-1]):
+                    self.desEul[2] = self.y_wps[self.t_idx]
+                else:
+                    # Calculate desired Yaw
+                    self.desEul[2] = np.arctan2(self.desVel[1], self.desVel[0])
+                    
+            # Dirty hack, detect when desEul[2] switches from -pi to pi (or vice-versa) and switch manualy current_heading 
+            if (np.sign(self.desEul[2]) - np.sign(self.current_heading) and abs(self.desEul[2]-self.current_heading) >= 2*pi-0.1):
+                self.current_heading = self.current_heading + np.sign(self.desEul[2])*2*pi
+            
+            # Angle between current vector with the next heading vector
+            delta_psi = self.desEul[2] - self.current_heading
+            
+            # Set Yaw rate
+            self.desYawRate = delta_psi / Ts 
 
-                # Prepare next iteration
-                self.current_heading = self.desEul[2]
+            # Prepare next iteration
+            self.current_heading = self.desEul[2]
 
 
         if (self.ctrlType == "xyz_vel"):
@@ -271,6 +318,9 @@ class Trajectory:
                 # Go to next waypoint when arrived at waypoint
                 elif (self.xyzType == 12):
                     pos_waypoint_arrived()
+                # Go to next waypoint when arrived at waypoint after waiting x seconds
+                elif (self.xyzType == 13):
+                    pos_waypoint_arrived_wait()
                 
                 # List of possible yaw trajectories
                 # ---------------------------

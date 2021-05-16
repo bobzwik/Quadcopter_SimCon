@@ -28,7 +28,7 @@ deg2rad = pi/180.0
 # Position P gains
 Py    = 1.0
 Px    = Py
-Pz    = 2.0
+Pz    = 1.0
 
 pos_P_gain = np.array([Px, Py, Pz])
 
@@ -41,9 +41,9 @@ Pydot = Pxdot
 Dydot = Dxdot
 Iydot = Ixdot
 
-Pzdot = 6.0
-Dzdot = 0.2
-Izdot = 8.0
+Pzdot = 4.0
+Dzdot = 0.5
+Izdot = 5.0
 
 vel_P_gain = np.array([Pxdot, Pydot, Pzdot])
 vel_D_gain = np.array([Dxdot, Dydot, Dzdot])
