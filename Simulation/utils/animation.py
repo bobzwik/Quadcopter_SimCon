@@ -37,7 +37,8 @@ def sameAxisAnimation(t_all, waypoints, pos_all, quat_all, sDes_tr_all, Ts, para
         z_wp = -z_wp
 
     fig = plt.figure()
-    ax = p3.Axes3D(fig)
+    ax = p3.Axes3D(fig,auto_add_to_figure=False)
+    fig.add_axes(ax)
     line1, = ax.plot([], [], [], lw=2, color='red')
     line2, = ax.plot([], [], [], lw=2, color='blue')
     line3, = ax.plot([], [], [], '--', lw=1, color='blue')

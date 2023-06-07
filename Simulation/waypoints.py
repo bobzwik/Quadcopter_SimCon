@@ -23,7 +23,8 @@ def makeWaypoints():
     wp = np.array([[2, 2, 1],
                    [-2, 3, -3],
                    [-2, -1, -3],
-                   [3, -2, 1]])
+                   [3, -2, 1],
+                   wp_ini])
 
     yaw_ini = 0    
     yaw = np.array([20, -90, 120, 45])
